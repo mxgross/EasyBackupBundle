@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
+    <file date="2019-12-13T20:00:00Z" source-language="en" target-language="en" datatype="plaintext" original="none">
+        <body>
+            <trans-unit id="Easy Backup">
+                <source>Easy Backup</source>
+                <target>Easy Backup</target>
+            </trans-unit>
+            <trans-unit id="easy_backup.subtitle">
+                <source>easy_backup.subtitle</source>
+                <target>Easily backup your Kimai environment</target>
+            </trans-unit>
+            <trans-unit id="Create Backup">
+                <source>Create Backup</source>
+                <target>Create Backup</target>
+            </trans-unit>
+            <trans-unit id="Name">
+                <source>Name</source>
+                <target>Name</target>
+            </trans-unit>
+            <trans-unit id="Delete">
+                <source>Delete</source>
+                <target>Delete</target>
+            </trans-unit>
+            <trans-unit id="Download">
+                <source>Download</source>
+                <target>Download</target>
+            </trans-unit>
+        </body>
+    </file>
+</xliff>

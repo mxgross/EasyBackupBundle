@@ -1,0 +1,53 @@
+{% extends 'base.html.twig' %}
+
+{% block page_title %}{{ 'Easy Backup'|trans }}{% endblock %}
+{% block page_subtitle %}{{ 'easy_backup.subtitle'|trans }}{% endblock %}
+
+
+{% block main %}
+
+
+<a href="{{ path('create_backup') }}">
+    <button class="btn btn-success"><i class="fas fa-hdd"></i> {{ 'Create Backup'|trans }}</button>
+</a>
+
+<div class="box box-secondary data_table">
+<table class="table">
+  <thead>
+    <tr>
+      <th scope="col">#</th>
+      <th scope="col">{{ 'Name'|trans }}</th>
+      <th scope="col">{{ 'Size'|trans }}</th>
+      <th scope="col">{{ 'Delete'|trans }}</th>
+      <th scope="col">{{ 'Download'|trans }}</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for item,size in existingBackups %}
+    <tr>
+    <td>{{ loop.index }}</td>
+        <td>{{ item }}</td>
+
+        <td>{{ size }}MB</td>
+
+        <td><a href="{{ path('delete', {'dirname': item}) }}">
+               <button class="btn btn-danger">
+                   <i class="fas fa-trash"></i> {{ 'Delete'|trans }}
+               </button>
+            </a>
+        </td>
+
+        <td>
+            <a href="{{ path('download', {'dirname': item}) }}">
+               <button class="btn btn-info">
+                   <i class="fas fa-download"></i> {{ 'Download'|trans }}
+               </button>
+            </a>
+        </td>
+        </tr>
+    {% endfor %}
+  </tbody>
+</table>
+</div>
+
+{% endblock %}

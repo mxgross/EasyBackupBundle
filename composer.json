@@ -1,0 +1,29 @@
+{
+    "name": "foo/easy-backup-plugin",
+    "description": "A Kimai 2 plugin to help backing up your data",
+    "homepage": "https://maximiliangross.de/",
+    "type": "kimai-plugin",
+    "version": "0.1",
+    "require": {
+        "kimai/kimai2-composer": "*"
+    },
+    "keywords": [
+        "kimai",
+        "kimai-plugin"
+    ],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Maximilian Gross",
+            "email": "info@maximiliangross.de",
+            "homepage": "https://maximiliangross.de"
+        }
+    ],
+    "extra": {
+        "kimai": {
+            "require": "1.6",
+            "version": "0.1",
+            "name": "EasyBackup"
+        }
+    }
+}
