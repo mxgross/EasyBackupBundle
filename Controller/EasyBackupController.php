@@ -140,10 +140,10 @@ class EasyBackupController extends AbstractController
         $backupName = $request->query->get('dirname');
         $zipNameAbsolute = $this->backupDirectory . $backupName;
 
-        if ($filesystem->exists($backupNameAbsolute)) {
+        if ($filesystem->exists($zipNameAbsolute)) {
 
             $response = new Response(file_get_contents($zipNameAbsolute));
-            $d = $response->headers->makeDisposition(ResponseHeaderBag::DISPOSITION_ATTACHMENT, $zipName);
+            $d = $response->headers->makeDisposition(ResponseHeaderBag::DISPOSITION_ATTACHMENT, $backupName);
             $response->headers->set('Content-Disposition', $d);
 
             return $response;
