@@ -61,7 +61,7 @@ class EasyBackupController extends AbstractController
 
             foreach ($filesAndDirs as $fileOrDir) {
                 if (is_file($this->backupDirectory . $fileOrDir)) {
-                    $filesizeInMb = round(filesize($this->backupDirectory . $fileOrDir)/1048576, 2);
+                    $filesizeInMb = round(filesize($this->backupDirectory . $fileOrDir) / 1048576, 2);
                     //array_push($existingBackups, $fileOrDir . ' ('. $filesizeInMb . 'MB)');
 
                     $existingBackups[$fileOrDir] = $filesizeInMb;
@@ -106,11 +106,10 @@ class EasyBackupController extends AbstractController
             $targetFile = $pluginBackupDir . $filename;
 
             if ($filesystem->exists($sourceFile)) {
-                
+
                 if (is_dir($sourceFile)) {
                     $filesystem->mirror($sourceFile, $targetFile);
-    
-                } 
+                }
 
                 if (is_file($sourceFile)) {
                     $filesystem->copy($sourceFile, $targetFile);
@@ -120,7 +119,7 @@ class EasyBackupController extends AbstractController
 
         $this->backupDatabase();
 
-        $this->zipData($pluginBackupDir, $this->backupDirectory .$backupName . '.zip');
+        $this->zipData($pluginBackupDir, $this->backupDirectory . $backupName . '.zip');
 
         // Now the folder can be deleted
         $filesystem->remove($pluginBackupDir);
@@ -173,7 +172,8 @@ class EasyBackupController extends AbstractController
         return $this->redirectToRoute('easy_backup', $request->query->all());
     }
 
-    protected function backupDatabase() {
+    protected function backupDatabase()
+    {
 
         //$this->dbUrl = 'mysql://kimai:3oxlXhrFDjGbVDEJ@localhost:3306/kimai';
         $dbUrlExploded = explode(':', $this->dbUrl);
@@ -194,12 +194,12 @@ class EasyBackupController extends AbstractController
 
             if (!$process->isSuccessful()) {
                 throw new ProcessFailedException($process);
-           }
-            
+            }
         }
     }
 
-    protected function zipData($source, $destination) {
+    protected function zipData($source, $destination)
+    {
         if (extension_loaded('zip') === true) {
             if (file_exists($source) === true) {
                 $zip = new ZipArchive();
@@ -224,5 +224,4 @@ class EasyBackupController extends AbstractController
         }
         return false;
     }
-
 }
