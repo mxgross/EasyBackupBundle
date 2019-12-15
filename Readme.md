@@ -1,4 +1,5 @@
-###A Kimai 2 plugin, which allows you to backup your environment with a single click.
+### EasyBackup
+A Kimai 2 plugin, which allows you to backup your environment with a single click.
 
 After the installation a new menu entry `EasyBackup` is created. There you can create a new backup
 by clicking the `Create Backup` button. Afterwards all created backups will be listet at the page
