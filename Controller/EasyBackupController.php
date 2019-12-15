@@ -91,6 +91,25 @@ class EasyBackupController extends AbstractController
 
         $filesystem->mkdir($pluginBackupDir);
 
+        // Save the specific kimai version and git head
+
+        $readMeFile = $pluginBackupDir . 'Readme.txt';
+        $filesystem->touch($readMeFile);
+
+        $process = new Process("git rev-parse HEAD");
+        $process->run();
+        $filesystem->appendToFile($readMeFile, 'git rev-parse HEAD');
+        $filesystem->appendToFile($readMeFile, "\r\n");
+        $filesystem->appendToFile($readMeFile, $process->getOutput());
+        $filesystem->appendToFile($readMeFile, "\r\n");
+
+        $process = new Process($this->kimaiRootPath . "/bin/console kimai:version");
+        $process->run();
+        $filesystem->appendToFile($readMeFile, 'bin/console kimai:version');
+        $filesystem->appendToFile($readMeFile, "\r\n");
+        $filesystem->appendToFile($readMeFile, $process->getOutput());
+        $filesystem->appendToFile($readMeFile, "\r\n");
+
         // Backing up files and directories
 
         $arrayOfPathsToBackup = array(

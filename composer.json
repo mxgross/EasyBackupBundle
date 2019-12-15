@@ -1,6 +1,6 @@
 {
     "name": "foo/easy-backup-plugin",
-    "description": "A Kimai 2 plugin to help backing up your data",
+    "description": "A Kimai 2 plugin, which allows you to backup your environment with a single click.",
     "homepage": "https://maximiliangross.de/",
     "type": "kimai-plugin",
     "version": "0.1",
