@@ -1,53 +1,109 @@
 {% extends 'base.html.twig' %}
 
-{% block page_title %}{{ 'Easy Backup'|trans }}{% endblock %}
-{% block page_subtitle %}{{ 'easy_backup.subtitle'|trans }}{% endblock %}
+{% block page_title %}
+	{{ 'Easy Backup'|trans }}
+{% endblock %}
+{% block page_subtitle %}
+	{{ 'easy_backup.subtitle'|trans }}
+{% endblock %}
 
 
 {% block main %}
 
+	<div class="box box-success collapsed-box">
+		<div class="box-header with-border">
+			<h3 class="box-title">{{ 'View status checks'|trans }}
+      {% if '0' in status %}
+          <i class="fas fa-exclamation-triangle text-red"></i>
+      {% endif %}
+      </h3>
+			<div class="box-tools pull-right">
+				<button class="btn btn-box-tool" data-widget="collapse" data-toggle="tooltip" title="" data-original-title="Collapse">
+					<i class="fas fa-plus"></i>
+				</button>
+			</div>
+		</div>
+		<div class="box-body">
+			<p>
+				If you see a warning icon
+				<i class="fas fa-exclamation-triangle text-red"></i>
+				in the list below, you should talk to your administrator.
+																																                The path is either not readable or not writable and EasyBackup might not work as expected.
+			</p>
+			<table class="table">
+				<tbody>
+					{% if status is defined %}
+						{% for status_name,status_value in status %}
+							<tr>
+								<th style="width:50%">{{ status_name }}</th>
+								<td>
+									{% if status_value == '1' %}
+										<i class="fas fa-check text-green"></i>
+									{% elseif status_value == '0' %}
+										<i class="fas fa-exclamation-triangle text-red"></i>
+									{% else %}
+										<i class="fas fa-check text-green"></i>
+										{{ status_value }}
+									{% endif %}
+								</td>
+							</tr>
+						{% endfor %}
+					{% endif %}
+				</tbody>
+			</table>
+		</div>
+	</div>
 
-<a href="{{ path('create_backup') }}">
-    <button class="btn btn-success"><i class="fas fa-hdd"></i> {{ 'Create Backup'|trans }}</button>
-</a>
+	<div>
+		<a href="{{ path('create_backup') }}">
+			<button class="btn btn-success">
+				<i class="fas fa-hdd"></i>
+				{{ 'Create Backup'|trans }}</button>
+		</a>
+	</div>
 
-<div class="box box-secondary data_table">
-<table class="table">
-  <thead>
-    <tr>
-      <th scope="col">#</th>
-      <th scope="col">{{ 'Name'|trans }}</th>
-      <th scope="col">{{ 'Size'|trans }}</th>
-      <th scope="col">{{ 'Delete'|trans }}</th>
-      <th scope="col">{{ 'Download'|trans }}</th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for item,size in existingBackups %}
-    <tr>
-    <td>{{ loop.index }}</td>
-        <td>{{ item }}</td>
+	<div class="box box-secondary data_table">
+		<table class="table">
+			<thead>
+				<tr>
+					<th scope="col">#</th>
+					<th scope="col">{{ 'Name'|trans }}</th>
+					<th scope="col">{{ 'Size'|trans }}</th>
+					<th scope="col">{{ 'Delete'|trans }}</th>
+					<th scope="col">{{ 'Download'|trans }}</th>
+				</tr>
+			</thead>
+			<tbody>
+				{% if existingBackups is defined %}
+					{% for item,size in existingBackups %}
+						<tr>
+							<td>{{ loop.index }}</td>
+							<td>{{ item }}</td>
 
-        <td>{{ size }}MB</td>
+							<td>{{ size }}MB</td>
 
-        <td><a href="{{ path('delete', {'dirname': item}) }}">
-               <button class="btn btn-danger">
-                   <i class="fas fa-trash"></i> {{ 'Delete'|trans }}
-               </button>
-            </a>
-        </td>
+							<td>
+								<a href="{{ path('delete', {'dirname': item}) }}">
+									<button class="btn btn-danger">
+										<i class="fas fa-trash"></i>
+										{{ 'Delete'|trans }}
+									</button>
+								</a>
+							</td>
 
-        <td>
-            <a href="{{ path('download', {'dirname': item}) }}">
-               <button class="btn btn-info">
-                   <i class="fas fa-download"></i> {{ 'Download'|trans }}
-               </button>
-            </a>
-        </td>
-        </tr>
-    {% endfor %}
-  </tbody>
-</table>
-</div>
+							<td>
+								<a href="{{ path('download', {'dirname': item}) }}">
+									<button class="btn btn-info">
+										<i class="fas fa-download"></i>
+										{{ 'Download'|trans }}
+									</button>
+								</a>
+							</td>
+						</tr>
+					{% endfor %}
+				{% endif %}
+			</tbody>
+		</table>
+	</div>
 
 {% endblock %}

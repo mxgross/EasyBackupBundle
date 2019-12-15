@@ -18,6 +18,8 @@ use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 
 class EasyBackupController extends AbstractController
 {
+    const   CMD_GIT_HEAD = 'git rev-parse HEAD';
+
     /**
      * @var string
      */
@@ -55,6 +57,8 @@ class EasyBackupController extends AbstractController
         $existingBackups = array();
         $filesystem = new Filesystem();
 
+        $status = $this->checkStatus();
+
         if ($filesystem->exists($this->backupDirectory)) {
             $files = scandir($this->backupDirectory, SCANDIR_SORT_DESCENDING);
             $filesAndDirs = array_diff($files, array('.', '..'));
@@ -69,7 +73,10 @@ class EasyBackupController extends AbstractController
             }
         }
 
-        return $this->render('@EasyBackup/index.html.twig', ['existingBackups' => $existingBackups]);
+        return $this->render('@EasyBackup/index.html.twig', [
+            'existingBackups' => $existingBackups,
+            'status' => $status,
+        ]);
     }
 
     /**
@@ -98,7 +105,7 @@ class EasyBackupController extends AbstractController
 
         $process = new Process("git rev-parse HEAD");
         $process->run();
-        $filesystem->appendToFile($readMeFile, 'git rev-parse HEAD');
+        $filesystem->appendToFile($readMeFile, self::CMD_GIT_HEAD);
         $filesystem->appendToFile($readMeFile, "\r\n");
         $filesystem->appendToFile($readMeFile, $process->getOutput());
         $filesystem->appendToFile($readMeFile, "\r\n");
@@ -242,5 +249,50 @@ class EasyBackupController extends AbstractController
             }
         }
         return false;
+    }
+
+    protected function checkStatus()
+    {
+
+        $status = array();
+
+        // Check 
+        $path = $this->kimaiRootPath . 'var';
+        $status["is_readable $path"] = is_readable($path);
+        $status["is_writable $path"] = is_writable($path);
+
+        $cmd = $this->kimaiRootPath . "bin/console kimai:version";
+        $process = new Process($cmd);
+        $process->run();
+
+        if ($process->isSuccessful()) {
+            $status[$cmd] = $process->getOutput();
+        } else {
+            $status[$cmd] = $process->isSuccessful();
+        }
+
+
+        $cmd = self::CMD_GIT_HEAD;
+        $process = new Process(self::CMD_GIT_HEAD);
+        $process->run();
+
+        if ($process->isSuccessful()) {
+            $status[$cmd] = $process->getOutput();
+        } else {
+            $status[$cmd] = $process->isSuccessful();
+        }
+
+
+        $cmd = "/usr/bin/mysqldump --version";
+        $process = new Process($cmd );
+        $process->run();
+
+        if ($process->isSuccessful()) {
+            $status[$cmd] = $process->getOutput();
+        } else {
+            $status[$cmd] = $process->isSuccessful();
+        }
+
+        return $status;
     }
 }
