@@ -59,11 +59,10 @@ Therefor a Readme.txt file with the mentioned information is written and added t
 
 If you use sqlite, the database file is backuped because the `var/data` directory will be backuped by the plugin.
 
-If you use mysql/mariadb the plugin will regocnize it by readying the configured database connection url.
-Then it will execute a mysqldump command an create a sql dump file wich will be added to the backup zip.
+If you use mysql/mariadb the plugin will recognize it by reading the configured database connection url.
+Then it will execute a mysqldump command to create a sql dump file, wich is added to the backup zip.
 
-Notice: Currently the mysqldump command is used as `/usr/bin/mysqldump`. This will only work on systems where
-mysqldump is available at this location. I will change it later on, but this should work on most environments.
+Notice: Currently the mysqldump command is used with a hardcoded path `/usr/bin/mysqldump`. This will only work on systems where mysqldump is available at this location. It will be configurable in later version maybe, but this should work on most environments for now.
 
 ### This Plugin is in an early development phase
 
