@@ -5,6 +5,8 @@ After the installation a new menu entry `EasyBackup` is created. There you can c
 by clicking the `Create Backup` button. Afterwards all created backups will be listet at the page
 and you can delete or download the createt backup as zip file.
 
+![alt text](https://github.com/mxgross/EasyBackupBundle/blob/master/screesnhot.jpg?raw=true)
+
 ### Installation
 
 First clone it to your Kimai installation `plugins` directory:
