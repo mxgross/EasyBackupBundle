@@ -150,6 +150,8 @@ class EasyBackupController extends AbstractController
         // Now the folder can be deleted
         $filesystem->remove($pluginBackupDir);
 
+        $this->addFlash("success", "Backup created.");
+
         return $this->redirectToRoute('easy_backup', $request->query->all());
     }
 
@@ -194,6 +196,8 @@ class EasyBackupController extends AbstractController
         if ($filesystem->exists($path)) {
             $filesystem->remove($path);
         }
+
+        $this->addFlash("success", "Backup deleted.");
 
         return $this->redirectToRoute('easy_backup', $request->query->all());
     }
@@ -284,7 +288,7 @@ class EasyBackupController extends AbstractController
 
 
         $cmd = "/usr/bin/mysqldump --version";
-        $process = new Process($cmd );
+        $process = new Process($cmd);
         $process->run();
 
         if ($process->isSuccessful()) {
