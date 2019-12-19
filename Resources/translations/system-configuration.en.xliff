@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
+    <file source-language="en" target-language="de" datatype="plaintext" original="system-configuration.de.xliff">
+        <body>
+            <trans-unit id="easy_backup_config">
+                <source>easy_backup_config</source>
+                <target>EasyBackup configurations</target>
+            </trans-unit>
+            <trans-unit id="label.easy_backup.setting_mysqldump_path">
+                <source>label.easy_backup.setting_mysqldump_path</source>
+                <target>Path to the mysqldump command</target>
+            </trans-unit>
+            <trans-unit id="label.easy_backup.setting_backup_dir">
+                <source>label.easy_backup.setting_backup_dir</source>
+                <target>Backup directory</target>
+            </trans-unit>
+        </body>
+    </file>
+</xliff>

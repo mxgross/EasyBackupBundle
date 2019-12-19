@@ -15,10 +15,17 @@ use Symfony\Component\Process\Process;
 use PhpOffice\PhpWord\Shared\ZipArchive;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
+use KimaiPlugin\EasyBackupBundle\Configuration\EasyBackupConfiguration;
 
 class EasyBackupController extends AbstractController
 {
     const   CMD_GIT_HEAD = 'git rev-parse HEAD';
+
+    const   README_FILENAME = 'Readme.txt';
+
+    const   SQL_DUMP_FILENAME = 'database_dump.sql';
+
+    const   CMD_KIMAI_VERSION = '/bin/console kimai:version';
 
     /**
      * @var string
@@ -36,12 +43,16 @@ class EasyBackupController extends AbstractController
     protected $dbUrl;
 
     /**
-     * @param string $pluginDirectory
+     * @var EasyBackupConfiguration
      */
-    public function __construct(string $dataDirectory)
+    protected $configuration;
+
+    public function __construct(string $dataDirectory, EasyBackupConfiguration $configuration)
     {
+        $this->configuration = $configuration;
+
         $this->kimaiRootPath = dirname(dirname($dataDirectory)) . '/';
-        $this->backupDirectory = $this->kimaiRootPath . 'var/easy_backup/';
+        $this->backupDirectory = $this->kimaiRootPath . $this->configuration->getBackupDir(); //'var/easy_backup/';
 
         $this->dbUrl = $_ENV['DATABASE_URL'];
     }
@@ -54,6 +65,7 @@ class EasyBackupController extends AbstractController
      */
     public function indexAction(Request $request)
     {
+
         $existingBackups = array();
         $filesystem = new Filesystem();
 
@@ -100,19 +112,19 @@ class EasyBackupController extends AbstractController
 
         // Save the specific kimai version and git head
 
-        $readMeFile = $pluginBackupDir . 'Readme.txt';
+        $readMeFile = $pluginBackupDir . self::README_FILENAME;
         $filesystem->touch($readMeFile);
 
-        $process = new Process("git rev-parse HEAD");
+        $process = new Process(self::CMD_GIT_HEAD);
         $process->run();
         $filesystem->appendToFile($readMeFile, self::CMD_GIT_HEAD);
         $filesystem->appendToFile($readMeFile, "\r\n");
         $filesystem->appendToFile($readMeFile, $process->getOutput());
         $filesystem->appendToFile($readMeFile, "\r\n");
 
-        $process = new Process($this->kimaiRootPath . "/bin/console kimai:version");
+        $process = new Process($this->kimaiRootPath . self::CMD_KIMAI_VERSION);
         $process->run();
-        $filesystem->appendToFile($readMeFile, 'bin/console kimai:version');
+        $filesystem->appendToFile($readMeFile, self::CMD_KIMAI_VERSION);
         $filesystem->appendToFile($readMeFile, "\r\n");
         $filesystem->appendToFile($readMeFile, $process->getOutput());
         $filesystem->appendToFile($readMeFile, "\r\n");
@@ -217,9 +229,10 @@ class EasyBackupController extends AbstractController
             $dbPwd = explode('@', $dbUrlExploded[2])[0];
             $dbName = explode('/', $dbUrlExploded[3])[1];
 
-            $sqlDumpName = $pluginBackupDir . 'database_dump.sql';
+            $sqlDumpName = $pluginBackupDir . self::SQL_DUMP_FILENAME;
 
-            $process = new Process("(/usr/bin/mysqldump --user=$dbUser --password=$dbPwd $dbName > $sqlDumpName)");
+            $mysqlDumpCmd = $this->configuration->getMysqlDumpPath();
+            $process = new Process("($mysqlDumpCmd --user=$dbUser --password=$dbPwd $dbName > $sqlDumpName)");
             $process->run();
 
             if (!$process->isSuccessful()) {
@@ -257,7 +270,6 @@ class EasyBackupController extends AbstractController
 
     protected function checkStatus()
     {
-
         $status = array();
 
         // Check 
@@ -265,38 +277,26 @@ class EasyBackupController extends AbstractController
         $status["is_readable $path"] = is_readable($path);
         $status["is_writable $path"] = is_writable($path);
 
-        $cmd = $this->kimaiRootPath . "bin/console kimai:version";
-        $process = new Process($cmd);
-        $process->run();
-
-        if ($process->isSuccessful()) {
-            $status[$cmd] = $process->getOutput();
-        } else {
-            $status[$cmd] = $process->isSuccessful();
-        }
-
+        $cmd = $this->kimaiRootPath . self::CMD_KIMAI_VERSION;
+        $status[$cmd] = $this->processCmdAndGetResult($cmd);
 
         $cmd = self::CMD_GIT_HEAD;
-        $process = new Process(self::CMD_GIT_HEAD);
-        $process->run();
+        $status[$cmd] = $this->processCmdAndGetResult($cmd);
 
-        if ($process->isSuccessful()) {
-            $status[$cmd] = $process->getOutput();
-        } else {
-            $status[$cmd] = $process->isSuccessful();
-        }
+        $cmd = $this->configuration->getMysqlDumpPath() . ' --version';
+        $status[$cmd] = $this->processCmdAndGetResult($cmd);
 
+        return $status;
+    }
 
-        $cmd = "/usr/bin/mysqldump --version";
+    protected function processCmdAndGetResult($cmd) {
         $process = new Process($cmd);
         $process->run();
 
         if ($process->isSuccessful()) {
-            $status[$cmd] = $process->getOutput();
+            return $process->getOutput();
         } else {
-            $status[$cmd] = $process->isSuccessful();
+            return $process->isSuccessful();
         }
-
-        return $status;
     }
 }

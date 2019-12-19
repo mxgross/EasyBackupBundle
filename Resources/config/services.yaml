@@ -9,3 +9,7 @@ services:
     KimaiPlugin\EasyBackupBundle\:
         resource: '../../*'
         exclude: '../../{Resources}'
+
+    KimaiPlugin\EasyBackupBundle\Configuration\EasyBackupConfiguration:
+        arguments:
+            $settings: '%easy_settings%'
