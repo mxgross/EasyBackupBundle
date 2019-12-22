@@ -156,13 +156,12 @@ class EasyBackupController extends AbstractController
         }
 
         $this->backupDatabase();
+        $backupZipName = $this->backupDirectory . $backupName . '.zip';
 
-        $this->zipData($pluginBackupDir, $this->backupDirectory . $backupName . '.zip');
+        $this->zipData($pluginBackupDir, $backupZipName);
 
         // Now the folder can be deleted
         $filesystem->remove($pluginBackupDir);
-
-        $this->addFlash("success", "Backup created.");
 
         return $this->redirectToRoute('easy_backup', $request->query->all());
     }
@@ -261,9 +260,15 @@ class EasyBackupController extends AbstractController
                     } else if (is_file($source) === true) {
                         $zip->addFromString(basename($source), file_get_contents($source));
                     }
+                } else {
+                    $this->addFlash("error", "Error while creating zip file '$destination'.");
                 }
                 return $zip->close();
+            } else {
+                $this->addFlash("error", "Source'source' not existing.");
             }
+        } else {
+            $this->addFlash("error", "No php extension 'zip' found.");
         }
         return false;
     }
@@ -274,8 +279,9 @@ class EasyBackupController extends AbstractController
 
         // Check 
         $path = $this->kimaiRootPath . 'var';
-        $status["is_readable $path"] = is_readable($path);
-        $status["is_writable $path"] = is_writable($path);
+        $status["Path '$path' readable?"] = is_readable($path);
+        $status["Path '$path' writable"] = is_writable($path);
+        $status["PHP extionsion 'zip' loaded?"] = extension_loaded('zip');
 
         $cmd = $this->kimaiRootPath . self::CMD_KIMAI_VERSION;
         $status[$cmd] = $this->processCmdAndGetResult($cmd);
@@ -289,7 +295,8 @@ class EasyBackupController extends AbstractController
         return $status;
     }
 
-    protected function processCmdAndGetResult($cmd) {
+    protected function processCmdAndGetResult($cmd)
+    {
         $process = new Process($cmd);
         $process->run();
 
