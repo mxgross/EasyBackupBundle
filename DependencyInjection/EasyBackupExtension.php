@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the Kimai EasyBackupBundle.
+ * This file is part of the EasyBackupBundle for Kimai 2.
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -35,8 +35,6 @@ class EasyBackupExtension extends AbstractPluginExtension implements PrependExte
         $this->registerBundleConfiguration($container, $config);
         $container->setParameter('easy_settings', $config);
 
-
-        $loader = new Loader\YamlFileLoader($container, new FileLocator(__DIR__ . '/../Resources/config'));
         $loader->load('services.yaml');
     }
 

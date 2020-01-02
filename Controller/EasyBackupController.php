@@ -1,21 +1,25 @@
 <?php
 
+/*
+ * This file is part of the EasyBackupBundle for Kimai 2.
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace KimaiPlugin\EasyBackupBundle\Controller;
 
 use App\Controller\AbstractController;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Filesystem\Exception\IOExceptionInterface;
-use Symfony\Component\Filesystem\Filesystem;
-
-use Symfony\Component\Process\Exception\ProcessFailedException;
-use Symfony\Component\Process\Process;
-
+use KimaiPlugin\EasyBackupBundle\Configuration\EasyBackupConfiguration;
 use PhpOffice\PhpWord\Shared\ZipArchive;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
-use KimaiPlugin\EasyBackupBundle\Configuration\EasyBackupConfiguration;
+use Symfony\Component\Process\Exception\ProcessFailedException;
+use Symfony\Component\Process\Process;
+use Symfony\Component\Routing\Annotation\Route;
 
 /**
  * @Route(path="/admin/easy-backup")
@@ -23,15 +27,15 @@ use KimaiPlugin\EasyBackupBundle\Configuration\EasyBackupConfiguration;
  */
 class EasyBackupController extends AbstractController
 {
-    const   CMD_GIT_HEAD = 'git rev-parse HEAD';
+    public const   CMD_GIT_HEAD = 'git rev-parse HEAD';
 
-    const   README_FILENAME = 'Readme.txt';
+    public const   README_FILENAME = 'Readme.txt';
 
-    const   SQL_DUMP_FILENAME = 'database_dump.sql';
+    public const   SQL_DUMP_FILENAME = 'database_dump.sql';
 
-    const   CMD_KIMAI_VERSION = '/bin/console kimai:version';
+    public const   CMD_KIMAI_VERSION = '/bin/console kimai:version';
 
-    const   REGEX_BACKUP_ZIP_NAME = '/^\d{4}-\d{2}-\d{2}_\d{6}\.zip$/';
+    public const   REGEX_BACKUP_ZIP_NAME = '/^\d{4}-\d{2}-\d{2}_\d{6}\.zip$/';
 
     /**
      * @var string
@@ -71,15 +75,14 @@ class EasyBackupController extends AbstractController
      */
     public function indexAction(Request $request)
     {
-
-        $existingBackups = array();
+        $existingBackups = [];
         $filesystem = new Filesystem();
 
         $status = $this->checkStatus();
 
         if ($filesystem->exists($this->backupDirectory)) {
             $files = scandir($this->backupDirectory, SCANDIR_SORT_DESCENDING);
-            $filesAndDirs = array_diff($files, array('.', '..'));
+            $filesAndDirs = array_diff($files, ['.', '..']);
 
             foreach ($filesAndDirs as $fileOrDir) {
                 if (is_file($this->backupDirectory . $fileOrDir)) {
@@ -105,7 +108,6 @@ class EasyBackupController extends AbstractController
      */
     public function createBackupAction(Request $request)
     {
-
         // Don't use the /var/data folder, because we want to backup it too!
 
         $backupName = date('Y-m-d_His');
@@ -137,20 +139,18 @@ class EasyBackupController extends AbstractController
 
         // Backing up files and directories
 
-        $arrayOfPathsToBackup = array(
+        $arrayOfPathsToBackup = [
             '.env',
             'config/packages/local.yaml',
             'var/data/',
             'var/plugins/',
-        );
+        ];
 
         foreach ($arrayOfPathsToBackup as $filename) {
-
             $sourceFile = $this->kimaiRootPath . $filename;
             $targetFile = $pluginBackupDir . $filename;
 
             if ($filesystem->exists($sourceFile)) {
-
                 if (is_dir($sourceFile)) {
                     $filesystem->mirror($sourceFile, $targetFile);
                 }
@@ -168,6 +168,8 @@ class EasyBackupController extends AbstractController
 
         // Now the folder can be deleted
         $filesystem->remove($pluginBackupDir);
+
+        $this->addFlash('success', 'Backup created.');
 
         return $this->redirectToRoute('easy_backup', $request->query->all());
     }
@@ -190,15 +192,14 @@ class EasyBackupController extends AbstractController
             $zipNameAbsolute = $this->backupDirectory . $backupName;
 
             if ($filesystem->exists($zipNameAbsolute)) {
-    
                 $response = new Response(file_get_contents($zipNameAbsolute));
                 $d = $response->headers->makeDisposition(ResponseHeaderBag::DISPOSITION_ATTACHMENT, $backupName);
                 $response->headers->set('Content-Disposition', $d);
-    
+
                 return $response;
             }
         } else {
-            $this->addFlash("error", "Invalid file name given!");
+            $this->addFlash('error', 'Invalid file name given!');
         }
 
         return $this->redirectToRoute('easy_backup', $request->query->all());
@@ -224,10 +225,10 @@ class EasyBackupController extends AbstractController
             if ($filesystem->exists($path)) {
                 $filesystem->remove($path);
             }
-    
-            $this->addFlash("success", "Backup deleted.");
+
+            $this->addFlash('success', 'Backup deleted.');
         } else {
-            $this->addFlash("error", "Invalid file name given!");
+            $this->addFlash('error', 'Invalid file name given!');
         }
 
         return $this->redirectToRoute('easy_backup', $request->query->all());
@@ -235,15 +236,11 @@ class EasyBackupController extends AbstractController
 
     protected function backupDatabase()
     {
-
-        //$this->dbUrl = 'mysql://kimai:3oxlXhrFDjGbVDEJ@localhost:3306/kimai';
         $dbUrlExploded = explode(':', $this->dbUrl);
         $dbUsed = $dbUrlExploded[0];
 
         // This is only for mysql and mariadb. sqlite will be backuped via the file backups
-
-        if ($dbUsed == 'mysql') {
-
+        if ($dbUsed === 'mysql') {
             $dbUser = str_replace('/', '', $dbUrlExploded[1]);
             $dbPwd = explode('@', $dbUrlExploded[2])[0];
             $dbName = explode('/', $dbUrlExploded[3])[1];
@@ -273,29 +270,31 @@ class EasyBackupController extends AbstractController
                             $file = realpath($file);
                             if (is_dir($file) === true) {
                                 $zip->addEmptyDir(str_replace($source . '/', '', $file . '/'));
-                            } else if (is_file($file) === true) {
+                            } elseif (is_file($file) === true) {
                                 $zip->addFromString(str_replace($source . '/', '', $file), file_get_contents($file));
                             }
                         }
-                    } else if (is_file($source) === true) {
+                    } elseif (is_file($source) === true) {
                         $zip->addFromString(basename($source), file_get_contents($source));
                     }
                 } else {
-                    $this->addFlash("error", "Error while creating zip file '$destination'.");
+                    $this->addFlash('error', "Error while creating zip file '$destination'.");
                 }
+
                 return $zip->close();
             } else {
-                $this->addFlash("error", "Source'source' not existing.");
+                $this->addFlash('error', "Source'source' not existing.");
             }
         } else {
-            $this->addFlash("error", "No php extension 'zip' found.");
+            $this->addFlash('error', "No php extension 'zip' found.");
         }
+
         return false;
     }
 
     protected function checkStatus()
     {
-        $status = array();
+        $status = [];
 
         // Check
         $path = $this->kimaiRootPath . 'var';
