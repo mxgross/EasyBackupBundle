@@ -18,7 +18,7 @@ use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use KimaiPlugin\EasyBackupBundle\Configuration\EasyBackupConfiguration;
 
 /**
- * @Route(path="/easy-backup")
+ * @Route(path="/admin/easy-backup")
  * @Security("is_granted('easy_backup')")
  */
 class EasyBackupController extends AbstractController
