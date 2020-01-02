@@ -51,6 +51,10 @@ class MenuSubscriber implements EventSubscriberInterface
             return;
         }
 
+        if (!$auth->isGranted('easy_backup')) {
+            return;
+        }
+
         $menu = $event->getSystemMenu();
 
         //if ($auth->isGranted('easy_backup')) {
