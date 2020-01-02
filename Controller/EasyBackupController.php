@@ -229,7 +229,7 @@ class EasyBackupController extends AbstractController
             $dbPwd = explode('@', $dbUrlExploded[2])[0];
             $dbName = explode('/', $dbUrlExploded[3])[1];
 
-            $sqlDumpName = $pluginBackupDir . self::SQL_DUMP_FILENAME;
+            $sqlDumpName = $this->backupDirectory . self::SQL_DUMP_FILENAME;
 
             $mysqlDumpCmd = $this->configuration->getMysqlDumpPath();
             $process = new Process("($mysqlDumpCmd --user=$dbUser --password=$dbPwd $dbName > $sqlDumpName)");
@@ -272,7 +272,7 @@ class EasyBackupController extends AbstractController
     {
         $status = array();
 
-        // Check 
+        // Check
         $path = $this->kimaiRootPath . 'var';
         $status["is_readable $path"] = is_readable($path);
         $status["is_writable $path"] = is_writable($path);
