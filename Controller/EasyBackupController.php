@@ -33,9 +33,6 @@ final class EasyBackupController extends AbstractController
     public const SQL_DUMP_FILENAME = 'database_dump.sql';
     public const REGEX_BACKUP_ZIP_NAME = '/^\d{4}-\d{2}-\d{2}_\d{6}\.zip$/';
     public const BACKUP_NAME_DATE_FORMAT = 'Y-m-d_His';
-    public const FLASH_SUCCESS = 'success';
-    public const FLASH_WARNING = 'warning';
-    public const FLASH_ERROR = 'error';
 
     /**
      * @var string
@@ -168,7 +165,7 @@ final class EasyBackupController extends AbstractController
         $filesystem->remove($pluginBackupDir);
         $filesystem->remove($sqlDumpName);
 
-        $this->addFlashTranslated(self::FLASH_SUCCESS, 'backup.action.create.success');
+        $this->flashSuccess('backup.action.create.success');
 
         return $this->redirectToRoute('easy_backup');
     }
@@ -197,10 +194,10 @@ final class EasyBackupController extends AbstractController
 
                 return $response;
             } else {
-                $this->addFlashTranslated(self::FLASH_ERROR, 'backup.action.download.error');
+                $this->flashError('backup.action.download.error');
             }
         } else {
-            $this->addFlashTranslated(self::FLASH_ERROR, 'backup.action.download.error');
+            $this->flashError('backup.action.download.error');
         }
 
         return $this->redirectToRoute('easy_backup');
@@ -227,9 +224,9 @@ final class EasyBackupController extends AbstractController
                 $filesystem->remove($path);
             }
 
-            $this->addFlashTranslated(self::FLASH_SUCCESS, 'backup.action.delete.success');
+            $this->flashSuccess('backup.action.delete.success');
         } else {
-            $this->addFlashTranslated(self::FLASH_ERROR, 'backup.action.delete.error.filename');
+            $this->flashError('backup.action.delete.error.filename');
         }
 
         return $this->redirectToRoute('easy_backup', $request->query->all());
@@ -277,15 +274,15 @@ final class EasyBackupController extends AbstractController
                         $zip->addFromString(basename($source), file_get_contents($source));
                     }
                 } else {
-                    $this->addFlashTranslated(self::FLASH_ERROR, 'backup.action.zip.error.destination', $destination);
+                    $this->flashError('backup.action.zip.error.destination');
                 }
 
                 return $zip->close();
             } else {
-                $this->addFlashTranslated(self::FLASH_ERROR, 'backup.action.zip.error.source');
+                $this->flashError('backup.action.zip.error.source');
             }
         } else {
-            $this->addFlashTranslated(self::FLASH_ERROR, 'backup.action.zip.error.extension');
+            $this->flashError('backup.action.zip.error.extension');
         }
 
         return false;
