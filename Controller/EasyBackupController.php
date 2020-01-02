@@ -26,37 +26,32 @@ use Symfony\Component\Routing\Annotation\Route;
  * @Route(path="/admin/easy-backup")
  * @Security("is_granted('easy_backup')")
  */
-class EasyBackupController extends AbstractController
+final class EasyBackupController extends AbstractController
 {
-    public const   CMD_GIT_HEAD = 'git rev-parse HEAD';
-
-    public const   README_FILENAME = 'manifest.json';
-
-    public const   SQL_DUMP_FILENAME = 'database_dump.sql';
-
-    public const   CMD_KIMAI_VERSION = '/bin/console kimai:version';
-
-    public const   REGEX_BACKUP_ZIP_NAME = '/^\d{4}-\d{2}-\d{2}_\d{6}\.zip$/';
+    public const CMD_GIT_HEAD = 'git rev-parse HEAD';
+    public const README_FILENAME = 'manifest.json';
+    public const SQL_DUMP_FILENAME = 'database_dump.sql';
+    public const REGEX_BACKUP_ZIP_NAME = '/^\d{4}-\d{2}-\d{2}_\d{6}\.zip$/';
 
     /**
      * @var string
      */
-    protected $kimaiRootPath;
+    private $kimaiRootPath;
 
     /**
      * @var string
      */
-    protected $backupDirectory;
+    private $backupDirectory;
 
     /**
      * @var string
      */
-    protected $dbUrl;
+    private $dbUrl;
 
     /**
      * @var EasyBackupConfiguration
      */
-    protected $configuration;
+    private $configuration;
 
     public function __construct(string $dataDirectory, EasyBackupConfiguration $configuration)
     {
@@ -123,7 +118,8 @@ class EasyBackupController extends AbstractController
         $filesystem->touch($readMeFile);
         $manifest = [
             'git' => 'not available',
-            'version' => Constants::VERSION . ' ' . Constants::STATUS
+            'version' => $this->getKimaiVersion(),
+            'software' => $this->getKimaiVersion(true),
         ];
 
         try {
@@ -235,7 +231,7 @@ class EasyBackupController extends AbstractController
         return $this->redirectToRoute('easy_backup', $request->query->all());
     }
 
-    protected function backupDatabase(string $sqlDumpName)
+    private function backupDatabase(string $sqlDumpName)
     {
         $dbUrlExploded = explode(':', $this->dbUrl);
         $dbUsed = $dbUrlExploded[0];
@@ -256,7 +252,7 @@ class EasyBackupController extends AbstractController
         }
     }
 
-    protected function zipData($source, $destination)
+    private function zipData($source, $destination)
     {
         if (extension_loaded('zip') === true) {
             if (file_exists($source) === true) {
@@ -291,18 +287,15 @@ class EasyBackupController extends AbstractController
         return false;
     }
 
-    protected function checkStatus()
+    private function checkStatus()
     {
         $status = [];
 
-        // Check
         $path = $this->kimaiRootPath . 'var';
-        $status["Path '$path' readable?"] = is_readable($path);
+        $status["Path '$path' readable"] = is_readable($path);
         $status["Path '$path' writable"] = is_writable($path);
-        $status["PHP extionsion 'zip' loaded?"] = extension_loaded('zip');
-
-        $cmd = $this->kimaiRootPath . self::CMD_KIMAI_VERSION;
-        $status[$cmd] = $this->processCmdAndGetResult($cmd);
+        $status["PHP extension 'zip' loaded"] = extension_loaded('zip');
+        $status['Kimai version'] = $this->getKimaiVersion();
 
         $cmd = self::CMD_GIT_HEAD;
         $status[$cmd] = $this->processCmdAndGetResult($cmd);
@@ -313,7 +306,16 @@ class EasyBackupController extends AbstractController
         return $status;
     }
 
-    protected function processCmdAndGetResult($cmd)
+    private function getKimaiVersion(bool $full = false): string
+    {
+        if ($full) {
+            return Constants::SOFTWARE . ' - ' . Constants::VERSION . ' ' . Constants::STATUS;
+        }
+
+        return Constants::VERSION . ' ' . Constants::STATUS;
+    }
+
+    private function processCmdAndGetResult($cmd)
     {
         $process = new Process($cmd);
         $process->run();
