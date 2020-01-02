@@ -53,7 +53,7 @@ var/plugins/
 
 According to the [backup docu](https://www.kimai.org/documentation/backups.html) the Kimai version should be saved to.
 Also the current git head.
-Therefor a Readme.txt file with the mentioned information is written and added to the backup.
+Therefor a `manifest.json` file with the mentioned information is written and added to the backup.
 
 ### What database tables are backuped?
 

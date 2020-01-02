@@ -9,6 +9,7 @@
 
 namespace KimaiPlugin\EasyBackupBundle\Controller;
 
+use App\Constants;
 use App\Controller\AbstractController;
 use KimaiPlugin\EasyBackupBundle\Configuration\EasyBackupConfiguration;
 use PhpOffice\PhpWord\Shared\ZipArchive;
@@ -25,55 +26,49 @@ use Symfony\Component\Routing\Annotation\Route;
  * @Route(path="/admin/easy-backup")
  * @Security("is_granted('easy_backup')")
  */
-class EasyBackupController extends AbstractController
+final class EasyBackupController extends AbstractController
 {
-    public const   CMD_GIT_HEAD = 'git rev-parse HEAD';
-
-    public const   README_FILENAME = 'Readme.txt';
-
-    public const   SQL_DUMP_FILENAME = 'database_dump.sql';
-
-    public const   CMD_KIMAI_VERSION = '/bin/console kimai:version';
-
-    public const   REGEX_BACKUP_ZIP_NAME = '/^\d{4}-\d{2}-\d{2}_\d{6}\.zip$/';
+    public const CMD_GIT_HEAD = 'git rev-parse HEAD';
+    public const README_FILENAME = 'manifest.json';
+    public const SQL_DUMP_FILENAME = 'database_dump.sql';
+    public const REGEX_BACKUP_ZIP_NAME = '/^\d{4}-\d{2}-\d{2}_\d{6}\.zip$/';
 
     /**
      * @var string
      */
-    protected $kimaiRootPath;
+    private $kimaiRootPath;
 
     /**
      * @var string
      */
-    protected $backupDirectory;
+    private $backupDirectory;
 
     /**
      * @var string
      */
-    protected $dbUrl;
+    private $dbUrl;
 
     /**
      * @var EasyBackupConfiguration
      */
-    protected $configuration;
+    private $configuration;
 
     public function __construct(string $dataDirectory, EasyBackupConfiguration $configuration)
     {
         $this->configuration = $configuration;
 
         $this->kimaiRootPath = dirname(dirname($dataDirectory)) . '/';
-        $this->backupDirectory = $this->kimaiRootPath . $this->configuration->getBackupDir(); //'var/easy_backup/';
+        $this->backupDirectory = $this->kimaiRootPath . $this->configuration->getBackupDir();
 
         $this->dbUrl = $_ENV['DATABASE_URL'];
     }
 
     /**
      * @Route(path="", name="easy_backup", methods={"GET", "POST"})
-
-     * @param Request $request
-     * @return \Symfony\Component\HttpFoundation\Response
+     *
+     * @return Response
      */
-    public function indexAction(Request $request)
+    public function indexAction(): Response
     {
         $existingBackups = [];
         $filesystem = new Filesystem();
@@ -102,11 +97,10 @@ class EasyBackupController extends AbstractController
 
     /**
      * @Route(path="/create_backup", name="create_backup", methods={"GET", "POST"})
-
-     * @param Request $request
-     * @return \Symfony\Component\HttpFoundation\Response
+     *
+     * @return Response
      */
-    public function createBackupAction(Request $request)
+    public function createBackupAction(): Response
     {
         // Don't use the /var/data folder, because we want to backup it too!
 
@@ -122,20 +116,20 @@ class EasyBackupController extends AbstractController
 
         $readMeFile = $pluginBackupDir . self::README_FILENAME;
         $filesystem->touch($readMeFile);
+        $manifest = [
+            'git' => 'not available',
+            'version' => $this->getKimaiVersion(),
+            'software' => $this->getKimaiVersion(true),
+        ];
 
-        $process = new Process(self::CMD_GIT_HEAD);
-        $process->run();
-        $filesystem->appendToFile($readMeFile, self::CMD_GIT_HEAD);
-        $filesystem->appendToFile($readMeFile, "\r\n");
-        $filesystem->appendToFile($readMeFile, $process->getOutput());
-        $filesystem->appendToFile($readMeFile, "\r\n");
-
-        $process = new Process($this->kimaiRootPath . self::CMD_KIMAI_VERSION);
-        $process->run();
-        $filesystem->appendToFile($readMeFile, self::CMD_KIMAI_VERSION);
-        $filesystem->appendToFile($readMeFile, "\r\n");
-        $filesystem->appendToFile($readMeFile, $process->getOutput());
-        $filesystem->appendToFile($readMeFile, "\r\n");
+        try {
+            $process = new Process(self::CMD_GIT_HEAD);
+            $process->run();
+            $manifest['git'] = str_replace(PHP_EOL, '', $process->getOutput());
+        } catch (\Exception $ex) {
+            // ignore exception
+        }
+        $filesystem->appendToFile($readMeFile, json_encode($manifest, JSON_PRETTY_PRINT));
 
         // Backing up files and directories
 
@@ -161,26 +155,29 @@ class EasyBackupController extends AbstractController
             }
         }
 
-        $this->backupDatabase();
+        $sqlDumpName = $pluginBackupDir . self::SQL_DUMP_FILENAME;
+
+        $this->backupDatabase($sqlDumpName);
         $backupZipName = $this->backupDirectory . $backupName . '.zip';
 
         $this->zipData($pluginBackupDir, $backupZipName);
 
-        // Now the folder can be deleted
+        // Now the temporary files can be deleted
         $filesystem->remove($pluginBackupDir);
+        $filesystem->remove($sqlDumpName);
 
         $this->addFlash('success', 'Backup created.');
 
-        return $this->redirectToRoute('easy_backup', $request->query->all());
+        return $this->redirectToRoute('easy_backup');
     }
 
     /**
      * @Route(path="/download", name="download", methods={"GET"})
 
      * @param Request $request
-     * @return \Symfony\Component\HttpFoundation\Response
+     * @return Response
      */
-    public function downloadAction(Request $request)
+    public function downloadAction(Request $request): Response
     {
         $filesystem = new Filesystem();
 
@@ -202,7 +199,7 @@ class EasyBackupController extends AbstractController
             $this->addFlash('error', 'Invalid file name given!');
         }
 
-        return $this->redirectToRoute('easy_backup', $request->query->all());
+        return $this->redirectToRoute('easy_backup');
     }
 
     /**
@@ -234,7 +231,7 @@ class EasyBackupController extends AbstractController
         return $this->redirectToRoute('easy_backup', $request->query->all());
     }
 
-    protected function backupDatabase()
+    private function backupDatabase(string $sqlDumpName)
     {
         $dbUrlExploded = explode(':', $this->dbUrl);
         $dbUsed = $dbUrlExploded[0];
@@ -244,8 +241,6 @@ class EasyBackupController extends AbstractController
             $dbUser = str_replace('/', '', $dbUrlExploded[1]);
             $dbPwd = explode('@', $dbUrlExploded[2])[0];
             $dbName = explode('/', $dbUrlExploded[3])[1];
-
-            $sqlDumpName = $this->backupDirectory . self::SQL_DUMP_FILENAME;
 
             $mysqlDumpCmd = $this->configuration->getMysqlDumpPath();
             $process = new Process("($mysqlDumpCmd --user=$dbUser --password=$dbPwd $dbName > $sqlDumpName)");
@@ -257,7 +252,7 @@ class EasyBackupController extends AbstractController
         }
     }
 
-    protected function zipData($source, $destination)
+    private function zipData($source, $destination)
     {
         if (extension_loaded('zip') === true) {
             if (file_exists($source) === true) {
@@ -292,18 +287,15 @@ class EasyBackupController extends AbstractController
         return false;
     }
 
-    protected function checkStatus()
+    private function checkStatus()
     {
         $status = [];
 
-        // Check
         $path = $this->kimaiRootPath . 'var';
-        $status["Path '$path' readable?"] = is_readable($path);
+        $status["Path '$path' readable"] = is_readable($path);
         $status["Path '$path' writable"] = is_writable($path);
-        $status["PHP extionsion 'zip' loaded?"] = extension_loaded('zip');
-
-        $cmd = $this->kimaiRootPath . self::CMD_KIMAI_VERSION;
-        $status[$cmd] = $this->processCmdAndGetResult($cmd);
+        $status["PHP extension 'zip' loaded"] = extension_loaded('zip');
+        $status['Kimai version'] = $this->getKimaiVersion();
 
         $cmd = self::CMD_GIT_HEAD;
         $status[$cmd] = $this->processCmdAndGetResult($cmd);
@@ -314,7 +306,16 @@ class EasyBackupController extends AbstractController
         return $status;
     }
 
-    protected function processCmdAndGetResult($cmd)
+    private function getKimaiVersion(bool $full = false): string
+    {
+        if ($full) {
+            return Constants::SOFTWARE . ' - ' . Constants::VERSION . ' ' . Constants::STATUS;
+        }
+
+        return Constants::VERSION . ' ' . Constants::STATUS;
+    }
+
+    private function processCmdAndGetResult($cmd)
     {
         $process = new Process($cmd);
         $process->run();
