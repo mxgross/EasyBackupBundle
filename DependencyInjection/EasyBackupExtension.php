@@ -14,7 +14,7 @@ class EasyBackupExtension extends AbstractPluginExtension implements PrependExte
     public function load(array $configs, ContainerBuilder $container)
     {
         $loader = new Loader\YamlFileLoader(
-            $container, 
+            $container,
             new FileLocator(__DIR__ . '/../Resources/config')
         );
 
@@ -29,6 +29,14 @@ class EasyBackupExtension extends AbstractPluginExtension implements PrependExte
 
     public function prepend(ContainerBuilder $container)
     {
-
+        $container->prependExtensionConfig('kimai', [
+            'permissions' => [
+                'roles' => [
+                    'ROLE_SUPER_ADMIN' => [
+                        'easy_backup',
+                    ],
+                ],
+            ],
+        ]);
     }
 }
