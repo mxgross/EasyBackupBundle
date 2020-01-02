@@ -31,7 +31,7 @@ class Configuration implements ConfigurationInterface
                     ->defaultValue('/usr/bin/mysqldump')
                 ->end()
                 ->scalarNode('setting_backup_dir')
-                    ->defaultValue('/var/easy_backup/')
+                    ->defaultValue('var/easy_backup/')
                 ->end()
             ->end()
         ->end();

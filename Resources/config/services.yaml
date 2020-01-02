@@ -10,6 +10,10 @@ services:
         resource: '../../*'
         exclude: '../../{Resources}'
 
+    KimaiPlugin\EasyBackupBundle\Controller\:
+        resource: '../../Controller'
+        tags: ['controller.service_arguments']
+
     KimaiPlugin\EasyBackupBundle\Configuration\EasyBackupConfiguration:
         arguments:
             $settings: '%easy_settings%'

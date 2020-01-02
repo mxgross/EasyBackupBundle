@@ -17,6 +17,11 @@ use Symfony\Component\DependencyInjection\Loader;
 
 class EasyBackupExtension extends AbstractPluginExtension implements PrependExtensionInterface
 {
+    /**
+     * @param array $configs
+     * @param ContainerBuilder $container
+     * @throws \Exception
+     */
     public function load(array $configs, ContainerBuilder $container)
     {
         $loader = new Loader\YamlFileLoader(

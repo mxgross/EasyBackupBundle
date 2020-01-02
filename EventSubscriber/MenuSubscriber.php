@@ -57,10 +57,8 @@ class MenuSubscriber implements EventSubscriberInterface
 
         $menu = $event->getSystemMenu();
 
-        //if ($auth->isGranted('demo')) {
         $menu->addChild(
-                new MenuItemModel('easy_backup', 'EasyBackup', 'easy_backup', [], 'fas fa-hdd')
-            );
-        //}
+            new MenuItemModel('easy_backup', 'EasyBackup', 'easy_backup', [], 'fas fa-hdd')
+        );
     }
 }

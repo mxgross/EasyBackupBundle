@@ -57,7 +57,7 @@
 	<div class="box box-secondary data_table">
 		<div class="box-header">
 			<a href="{{ path('create_backup') }}">
-				<button class="btn btn-success">
+				<button class="btn btn-success" {% if '0' in status %}disabled{% endif %}>
 					<i class="fas fa-hdd"></i>
 					{{ 'Create Backup'|trans }}</button>
 			</a>
