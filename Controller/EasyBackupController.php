@@ -17,6 +17,10 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use KimaiPlugin\EasyBackupBundle\Configuration\EasyBackupConfiguration;
 
+/**
+ * @Route(path="/easy-backup")
+ * @Security("is_granted('easy_backup')")
+ */
 class EasyBackupController extends AbstractController
 {
     const   CMD_GIT_HEAD = 'git rev-parse HEAD';
@@ -58,7 +62,7 @@ class EasyBackupController extends AbstractController
     }
 
     /**
-     * @Route(path="/admin/easy-backup", name="easy_backup", methods={"GET", "POST"})
+     * @Route(path="", name="easy_backup", methods={"GET", "POST"})
 
      * @param Request $request
      * @return \Symfony\Component\HttpFoundation\Response
@@ -92,7 +96,7 @@ class EasyBackupController extends AbstractController
     }
 
     /**
-     * @Route(path="/admin/easy-backup/create_backup", name="create_backup", methods={"GET", "POST"})
+     * @Route(path="/create_backup", name="create_backup", methods={"GET", "POST"})
 
      * @param Request $request
      * @return \Symfony\Component\HttpFoundation\Response
@@ -168,7 +172,7 @@ class EasyBackupController extends AbstractController
     }
 
     /**
-     * @Route(path="/admin/easy-backup/download", name="download", methods={"GET"})
+     * @Route(path="/download", name="download", methods={"GET"})
 
      * @param Request $request
      * @return \Symfony\Component\HttpFoundation\Response
@@ -193,7 +197,7 @@ class EasyBackupController extends AbstractController
     }
 
     /**
-     * @Route(path="/admin/easy-backup/delete", name="delete", methods={"GET"})
+     * @Route(path="/delete", name="delete", methods={"GET"})
 
      * @param Request $request
      * @return \Symfony\Component\HttpFoundation\Response
@@ -272,7 +276,7 @@ class EasyBackupController extends AbstractController
     {
         $status = array();
 
-        // Check 
+        // Check
         $path = $this->kimaiRootPath . 'var';
         $status["is_readable $path"] = is_readable($path);
         $status["is_writable $path"] = is_writable($path);
