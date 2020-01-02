@@ -35,6 +35,8 @@ class EasyBackupController extends AbstractController
 
     public const   CMD_KIMAI_VERSION = '/bin/console kimai:version';
 
+    const   REGEX_BACKUP_ZIP_NAME = '/^\d{4}-\d{2}-\d{2}_\d{6}\.zip$/';
+
     /**
      * @var string
      */
@@ -183,14 +185,22 @@ class EasyBackupController extends AbstractController
         $filesystem = new Filesystem();
 
         $backupName = $request->query->get('dirname');
-        $zipNameAbsolute = $this->backupDirectory . $backupName;
 
-        if ($filesystem->exists($zipNameAbsolute)) {
-            $response = new Response(file_get_contents($zipNameAbsolute));
-            $d = $response->headers->makeDisposition(ResponseHeaderBag::DISPOSITION_ATTACHMENT, $backupName);
-            $response->headers->set('Content-Disposition', $d);
+        // Validate the given user input (filename)
 
-            return $response;
+        if (preg_match(self::REGEX_BACKUP_ZIP_NAME, $backupName)) {
+            $zipNameAbsolute = $this->backupDirectory . $backupName;
+
+            if ($filesystem->exists($zipNameAbsolute)) {
+
+                $response = new Response(file_get_contents($zipNameAbsolute));
+                $d = $response->headers->makeDisposition(ResponseHeaderBag::DISPOSITION_ATTACHMENT, $backupName);
+                $response->headers->set('Content-Disposition', $d);
+
+                return $response;
+            }
+        } else {
+            $this->addFlash("error", "Invalid file name given!");
         }
 
         return $this->redirectToRoute('easy_backup', $request->query->all());
@@ -207,13 +217,20 @@ class EasyBackupController extends AbstractController
         $filesystem = new Filesystem();
 
         $dirname = $request->query->get('dirname');
-        $path = $this->backupDirectory . $dirname;
 
-        if ($filesystem->exists($path)) {
-            $filesystem->remove($path);
+        // Validate the given user input (filename)
+
+        if (preg_match(self::REGEX_BACKUP_ZIP_NAME, $dirname)) {
+            $path = $this->backupDirectory . $dirname;
+
+            if ($filesystem->exists($path)) {
+                $filesystem->remove($path);
+            }
+
+            $this->addFlash("success", "Backup deleted.");
+        } else {
+            $this->addFlash("error", "Invalid file name given!");
         }
-
-        $this->addFlash('success', 'Backup deleted.');
 
         return $this->redirectToRoute('easy_backup', $request->query->all());
     }
