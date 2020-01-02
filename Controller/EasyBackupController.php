@@ -32,6 +32,10 @@ final class EasyBackupController extends AbstractController
     public const README_FILENAME = 'manifest.json';
     public const SQL_DUMP_FILENAME = 'database_dump.sql';
     public const REGEX_BACKUP_ZIP_NAME = '/^\d{4}-\d{2}-\d{2}_\d{6}\.zip$/';
+    public const BACKUP_NAME_DATE_FORMAT = 'Y-m-d_His';
+    public const FLASH_SUCCESS = 'success';
+    public const FLASH_WARNING = 'warning';
+    public const FLASH_ERROR = 'error';
 
     /**
      * @var string
@@ -82,8 +86,6 @@ final class EasyBackupController extends AbstractController
             foreach ($filesAndDirs as $fileOrDir) {
                 if (is_file($this->backupDirectory . $fileOrDir)) {
                     $filesizeInMb = round(filesize($this->backupDirectory . $fileOrDir) / 1048576, 2);
-                    //array_push($existingBackups, $fileOrDir . ' ('. $filesizeInMb . 'MB)');
-
                     $existingBackups[$fileOrDir] = $filesizeInMb;
                 }
             }
@@ -104,7 +106,7 @@ final class EasyBackupController extends AbstractController
     {
         // Don't use the /var/data folder, because we want to backup it too!
 
-        $backupName = date('Y-m-d_His');
+        $backupName = date(self::BACKUP_NAME_DATE_FORMAT);
         $pluginBackupDir = $this->backupDirectory . $backupName . '/';
         $filesystem = new Filesystem();
 
@@ -166,7 +168,7 @@ final class EasyBackupController extends AbstractController
         $filesystem->remove($pluginBackupDir);
         $filesystem->remove($sqlDumpName);
 
-        $this->addFlash('success', 'Backup created.');
+        $this->addFlashTranslated(self::FLASH_SUCCESS, 'backup.action.create.success');
 
         return $this->redirectToRoute('easy_backup');
     }
@@ -194,9 +196,11 @@ final class EasyBackupController extends AbstractController
                 $response->headers->set('Content-Disposition', $d);
 
                 return $response;
+            } else {
+                $this->addFlashTranslated(self::FLASH_ERROR, 'backup.action.download.error');
             }
         } else {
-            $this->addFlash('error', 'Invalid file name given!');
+            $this->addFlashTranslated(self::FLASH_ERROR, 'backup.action.download.error');
         }
 
         return $this->redirectToRoute('easy_backup');
@@ -223,9 +227,9 @@ final class EasyBackupController extends AbstractController
                 $filesystem->remove($path);
             }
 
-            $this->addFlash('success', 'Backup deleted.');
+            $this->addFlashTranslated(self::FLASH_SUCCESS, 'backup.action.delete.success');
         } else {
-            $this->addFlash('error', 'Invalid file name given!');
+            $this->addFlashTranslated(self::FLASH_ERROR, 'backup.action.delete.error.filename');
         }
 
         return $this->redirectToRoute('easy_backup', $request->query->all());
@@ -273,15 +277,15 @@ final class EasyBackupController extends AbstractController
                         $zip->addFromString(basename($source), file_get_contents($source));
                     }
                 } else {
-                    $this->addFlash('error', "Error while creating zip file '$destination'.");
+                    $this->addFlashTranslated(self::FLASH_ERROR, 'backup.action.zip.error.destination', $destination);
                 }
 
                 return $zip->close();
             } else {
-                $this->addFlash('error', "Source'source' not existing.");
+                $this->addFlashTranslated(self::FLASH_ERROR, 'backup.action.zip.error.source');
             }
         } else {
-            $this->addFlash('error', "No php extension 'zip' found.");
+            $this->addFlashTranslated(self::FLASH_ERROR, 'backup.action.zip.error.extension');
         }
 
         return false;

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
+    <file source-language="en" target-language="en" datatype="plaintext" original="flashmessages.en.xlf">
+        <body>
+            <trans-unit id="backup.action.create.success">
+                <source>backup.action.create.success</source>
+                <target>Backup created successfully.</target>
+            </trans-unit>
+            <trans-unit id="backup.action.download.error">
+                <source>backup.action.download.error</source>
+                <target>Error downloading backup. The filename seems invalid.</target>
+            </trans-unit>
+            <trans-unit id="backup.action.delete.success">
+                <source>backup.action.delete.success</source>
+                <target>Backup deleted successfully.</target>
+            </trans-unit>
+                <trans-unit id="backup.action.delete.error.filename">
+                <source>backup.action.delete.error.filename</source>
+                <target>Backup could not be deleted. The filename seems invalid.</target>
+            </trans-unit>
+            <trans-unit id="backup.action.zip.error.destination">
+                <source>backup.action.zip.error.destination</source>
+                <target>Error createing the initial zip file.</target>
+            </trans-unit>
+            <trans-unit id="backup.action.zip.error.source">
+                <source>backup.action.zip.error.source</source>
+                <target>Error while creating zip file. The source directory could not be found or read.</target>
+            </trans-unit>
+            <trans-unit id="backup.action.zip.error.extension">
+                <source>backup.action.zip.error.extension</source>
+                <target>Error while creating zip file. The PHP extension 'zip' could not be found. Make sure it is installed.</target>
+            </trans-unit>
+        </body>
+    </file>
+</xliff>

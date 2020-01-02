@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
+    <file source-language="en" target-language="de" datatype="plaintext" original="flashmessages.de.xlf">
+        <body>
+            <trans-unit id="backup.action.create.success">
+                <source>backup.action.create.success</source>
+                <target>Backup erfolgreich erstellt.</target>
+            </trans-unit>
+            <trans-unit id="backup.action.download.error">
+                <source>backup.action.download.error</source>
+                <target>Es wurde kein Backup mit diesem Namen gefunden.</target>
+            </trans-unit>
+            <trans-unit id="backup.action.delete.success">
+                <source>backup.action.delete.success</source>
+                <target>Backup erfolgreich gelöscht.</target>
+            </trans-unit>
+                <trans-unit id="backup.action.delete.error.filename">
+                <source>backup.action.delete.error.filename</source>
+                <target>Backup konnte nicht gelöscht werden. Der Dateiname scheint ungültig zu sein.</target>
+            </trans-unit>
+            <trans-unit id="backup.action.zip.error.destination">
+                <source>backup.action.zip.error.destination</source>
+                <target>Fehler beim Erstellen der initialen Zip Datei.</target>
+            </trans-unit>
+            <trans-unit id="backup.action.zip.error.source">
+                <source>backup.action.zip.error.source</source>
+                <target>Fehler beim komprimieren des Backups. Die Quelldatei wurde nicht gefunden oder kann nicht gelesen werden.</target>
+            </trans-unit>
+            <trans-unit id="backup.action.zip.error.extension">
+                <source>backup.action.zip.error.extension</source>
+                <target>Die PHP Erweiterung 'zip' wurde nicht gefunden. Diese muss zwingend installiert sein.</target>
+            </trans-unit>
+        </body>
+    </file>
+</xliff>
