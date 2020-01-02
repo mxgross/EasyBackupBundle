@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the Kimai EasyBackupBundle.
+ * This file is part of the EasyBackupBundle for Kimai 2.
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -12,8 +12,8 @@ namespace KimaiPlugin\EasyBackupBundle\EventSubscriber;
 use App\Event\SystemConfigurationEvent;
 use App\Form\Model\Configuration;
 use App\Form\Model\SystemConfiguration as SystemConfigurationModel;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 
 class SystemConfigurationSubscriber implements EventSubscriberInterface
 {
@@ -26,7 +26,8 @@ class SystemConfigurationSubscriber implements EventSubscriberInterface
 
     public function onSystemConfiguration(SystemConfigurationEvent $event)
     {
-        $event->addConfiguration((new SystemConfigurationModel())
+        $event->addConfiguration(
+            (new SystemConfigurationModel())
                 ->setSection('easy_backup_config')
                 ->setConfiguration([
                     (new Configuration())

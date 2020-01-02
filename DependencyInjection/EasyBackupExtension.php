@@ -1,13 +1,19 @@
 <?php
 
+/*
+ * This file is part of the EasyBackupBundle for Kimai 2.
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace KimaiPlugin\EasyBackupBundle\DependencyInjection;
 
+use App\Plugin\AbstractPluginExtension;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
-use Symfony\Component\DependencyInjection\Loader;
-use Symfony\Component\HttpKernel\DependencyInjection\Extension;
 use Symfony\Component\DependencyInjection\Extension\PrependExtensionInterface;
-use App\Plugin\AbstractPluginExtension;
+use Symfony\Component\DependencyInjection\Loader;
 
 class EasyBackupExtension extends AbstractPluginExtension implements PrependExtensionInterface
 {
