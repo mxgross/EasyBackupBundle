@@ -35,7 +35,7 @@ class EasyBackupController extends AbstractController
 
     public const   CMD_KIMAI_VERSION = '/bin/console kimai:version';
 
-    const   REGEX_BACKUP_ZIP_NAME = '/^\d{4}-\d{2}-\d{2}_\d{6}\.zip$/';
+    public const   REGEX_BACKUP_ZIP_NAME = '/^\d{4}-\d{2}-\d{2}_\d{6}\.zip$/';
 
     /**
      * @var string
@@ -192,7 +192,6 @@ class EasyBackupController extends AbstractController
             $zipNameAbsolute = $this->backupDirectory . $backupName;
 
             if ($filesystem->exists($zipNameAbsolute)) {
-
                 $response = new Response(file_get_contents($zipNameAbsolute));
                 $d = $response->headers->makeDisposition(ResponseHeaderBag::DISPOSITION_ATTACHMENT, $backupName);
                 $response->headers->set('Content-Disposition', $d);
@@ -200,7 +199,7 @@ class EasyBackupController extends AbstractController
                 return $response;
             }
         } else {
-            $this->addFlash("error", "Invalid file name given!");
+            $this->addFlash('error', 'Invalid file name given!');
         }
 
         return $this->redirectToRoute('easy_backup', $request->query->all());
@@ -227,9 +226,9 @@ class EasyBackupController extends AbstractController
                 $filesystem->remove($path);
             }
 
-            $this->addFlash("success", "Backup deleted.");
+            $this->addFlash('success', 'Backup deleted.');
         } else {
-            $this->addFlash("error", "Invalid file name given!");
+            $this->addFlash('error', 'Invalid file name given!');
         }
 
         return $this->redirectToRoute('easy_backup', $request->query->all());
@@ -279,15 +278,15 @@ class EasyBackupController extends AbstractController
                         $zip->addFromString(basename($source), file_get_contents($source));
                     }
                 } else {
-                    $this->addFlash("error", "Error while creating zip file '$destination'.");
+                    $this->addFlash('error', "Error while creating zip file '$destination'.");
                 }
 
                 return $zip->close();
             } else {
-                $this->addFlash("error", "Source'source' not existing.");
+                $this->addFlash('error', "Source'source' not existing.");
             }
         } else {
-            $this->addFlash("error", "No php extension 'zip' found.");
+            $this->addFlash('error', "No php extension 'zip' found.");
         }
 
         return false;
