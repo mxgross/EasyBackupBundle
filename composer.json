@@ -1,9 +1,9 @@
 {
-    "name": "foo/easy-backup-plugin",
+    "name": "mxgross/easy-backup-bundle",
     "description": "A Kimai 2 plugin, which allows you to backup your environment with a single click.",
     "homepage": "https://github.com/mxgross/EasyBackupBundle",
     "type": "kimai-plugin",
-    "version": "0.1",
+    "version": "0.2",
     "require": {
         "kimai/kimai2-composer": "*"
     },
@@ -22,8 +22,15 @@
     "extra": {
         "kimai": {
             "require": "1.6",
-            "version": "0.1",
+            "version": "0.2",
             "name": "EasyBackup"
         }
+    },
+    "scripts": {
+        "codestyle": "vendor/bin/php-cs-fixer fix --dry-run --verbose --show-progress=none",
+        "codestyle-fix": "vendor/bin/php-cs-fixer fix"
+    },
+    "require-dev": {
+        "friendsofphp/php-cs-fixer": "^2.16"
     }
 }
