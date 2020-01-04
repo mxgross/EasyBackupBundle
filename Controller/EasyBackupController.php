@@ -50,6 +50,11 @@ final class EasyBackupController extends AbstractController
     private $dbUrl;
 
     /**
+     * @var string
+     */
+    private $filesystem;
+
+    /**
      * @var EasyBackupConfiguration
      */
     private $configuration;
@@ -62,6 +67,8 @@ final class EasyBackupController extends AbstractController
         $this->backupDirectory = $this->kimaiRootPath . $this->configuration->getBackupDir();
 
         $this->dbUrl = $_ENV['DATABASE_URL'];
+
+        $this->filesystem = new Filesystem();
     }
 
     /**
@@ -72,13 +79,12 @@ final class EasyBackupController extends AbstractController
     public function indexAction(): Response
     {
         $existingBackups = [];
-        $filesystem = new Filesystem();
 
         $status = $this->checkStatus();
 
-        if ($filesystem->exists($this->backupDirectory)) {
+        if ($this->filesystem->exists($this->backupDirectory)) {
             $files = scandir($this->backupDirectory, SCANDIR_SORT_DESCENDING);
-            $filesAndDirs = array_diff($files, ['.', '..']);
+            $filesAndDirs = array_diff($files, ['.', '..', '.gitignore']);
 
             foreach ($filesAndDirs as $fileOrDir) {
                 if (is_file($this->backupDirectory . $fileOrDir)) {
@@ -105,16 +111,24 @@ final class EasyBackupController extends AbstractController
 
         $backupName = date(self::BACKUP_NAME_DATE_FORMAT);
         $pluginBackupDir = $this->backupDirectory . $backupName . '/';
-        $filesystem = new Filesystem();
 
         // Create the backup folder
 
-        $filesystem->mkdir($pluginBackupDir);
+        $this->filesystem->mkdir($pluginBackupDir);
+
+        // If not yet existing, create a .gitignore to exclude the backup files.
+
+        $gitignoreFullPath = $this->backupDirectory . '.gitignore';
+
+        if (!$this->filesystem->exists($gitignoreFullPath)) {
+            $this->filesystem->touch($gitignoreFullPath);
+            $this->filesystem->appendToFile($gitignoreFullPath, '*');
+        }
 
         // Save the specific kimai version and git head
 
         $readMeFile = $pluginBackupDir . self::README_FILENAME;
-        $filesystem->touch($readMeFile);
+        $this->filesystem->touch($readMeFile);
         $manifest = [
             'git' => 'not available',
             'version' => $this->getKimaiVersion(),
@@ -128,7 +142,7 @@ final class EasyBackupController extends AbstractController
         } catch (\Exception $ex) {
             // ignore exception
         }
-        $filesystem->appendToFile($readMeFile, json_encode($manifest, JSON_PRETTY_PRINT));
+        $this->filesystem->appendToFile($readMeFile, json_encode($manifest, JSON_PRETTY_PRINT));
 
         // Backing up files and directories
 
@@ -143,13 +157,13 @@ final class EasyBackupController extends AbstractController
             $sourceFile = $this->kimaiRootPath . $filename;
             $targetFile = $pluginBackupDir . $filename;
 
-            if ($filesystem->exists($sourceFile)) {
+            if ($this->filesystem->exists($sourceFile)) {
                 if (is_dir($sourceFile)) {
-                    $filesystem->mirror($sourceFile, $targetFile);
+                    $this->filesystem->mirror($sourceFile, $targetFile);
                 }
 
                 if (is_file($sourceFile)) {
-                    $filesystem->copy($sourceFile, $targetFile);
+                    $this->filesystem->copy($sourceFile, $targetFile);
                 }
             }
         }
@@ -162,8 +176,9 @@ final class EasyBackupController extends AbstractController
         $this->zipData($pluginBackupDir, $backupZipName);
 
         // Now the temporary files can be deleted
-        $filesystem->remove($pluginBackupDir);
-        $filesystem->remove($sqlDumpName);
+
+        $this->filesystem->remove($pluginBackupDir);
+        $this->filesystem->remove($sqlDumpName);
 
         $this->flashSuccess('backup.action.create.success');
 
@@ -178,8 +193,6 @@ final class EasyBackupController extends AbstractController
      */
     public function downloadAction(Request $request): Response
     {
-        $filesystem = new Filesystem();
-
         $backupName = $request->query->get('dirname');
 
         // Validate the given user input (filename)
@@ -187,7 +200,7 @@ final class EasyBackupController extends AbstractController
         if (preg_match(self::REGEX_BACKUP_ZIP_NAME, $backupName)) {
             $zipNameAbsolute = $this->backupDirectory . $backupName;
 
-            if ($filesystem->exists($zipNameAbsolute)) {
+            if ($this->filesystem->exists($zipNameAbsolute)) {
                 $response = new Response(file_get_contents($zipNameAbsolute));
                 $d = $response->headers->makeDisposition(ResponseHeaderBag::DISPOSITION_ATTACHMENT, $backupName);
                 $response->headers->set('Content-Disposition', $d);
@@ -211,8 +224,6 @@ final class EasyBackupController extends AbstractController
      */
     public function deleteAction(Request $request)
     {
-        $filesystem = new Filesystem();
-
         $dirname = $request->query->get('dirname');
 
         // Validate the given user input (filename)
@@ -220,8 +231,8 @@ final class EasyBackupController extends AbstractController
         if (preg_match(self::REGEX_BACKUP_ZIP_NAME, $dirname)) {
             $path = $this->backupDirectory . $dirname;
 
-            if ($filesystem->exists($path)) {
-                $filesystem->remove($path);
+            if ($this->filesystem->exists($path)) {
+                $this->filesystem->remove($path);
             }
 
             $this->flashSuccess('backup.action.delete.success');
@@ -238,6 +249,7 @@ final class EasyBackupController extends AbstractController
         $dbUsed = $dbUrlExploded[0];
 
         // This is only for mysql and mariadb. sqlite will be backuped via the file backups
+
         if ($dbUsed === 'mysql') {
             $dbUser = str_replace('/', '', $dbUrlExploded[1]);
             $dbPwd = explode('@', $dbUrlExploded[2])[0];
