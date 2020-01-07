@@ -5,8 +5,7 @@
     "type": "kimai-plugin",
     "version": "0.2",
     "require": {
-        "kimai/kimai2-composer": "*",
-        "symfony/process": "~4.3.9"
+        "kimai/kimai2-composer": "*"
     },
     "keywords": [
         "kimai",
