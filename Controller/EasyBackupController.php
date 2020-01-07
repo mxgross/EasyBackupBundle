@@ -18,8 +18,6 @@ use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
-use Symfony\Component\Process\Exception\ProcessFailedException;
-use Symfony\Component\Process\Process;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
@@ -136,9 +134,7 @@ final class EasyBackupController extends AbstractController
         ];
 
         try {
-            $process = new Process(self::CMD_GIT_HEAD);
-            $process->run();
-            $manifest['git'] = str_replace(PHP_EOL, '', $process->getOutput());
+            $manifest['git'] = str_replace(PHP_EOL, '', exec(self::CMD_GIT_HEAD));
         } catch (\Exception $ex) {
             // ignore exception
         }
@@ -256,12 +252,7 @@ final class EasyBackupController extends AbstractController
             $dbName = explode('/', $dbUrlExploded[3])[1];
 
             $mysqlDumpCmd = $this->configuration->getMysqlDumpPath();
-            $process = new Process("($mysqlDumpCmd --user=$dbUser --password=$dbPwd $dbName > $sqlDumpName)");
-            $process->run();
-
-            if (!$process->isSuccessful()) {
-                throw new ProcessFailedException($process);
-            }
+            exec("($mysqlDumpCmd --user=$dbUser --password=$dbPwd $dbName > $sqlDumpName)");
         }
     }
 
@@ -311,10 +302,10 @@ final class EasyBackupController extends AbstractController
         $status['Kimai version'] = $this->getKimaiVersion();
 
         $cmd = self::CMD_GIT_HEAD;
-        $status[$cmd] = $this->processCmdAndGetResult($cmd);
+        $status[$cmd] = exec($cmd);
 
         $cmd = $this->configuration->getMysqlDumpPath() . ' --version';
-        $status[$cmd] = $this->processCmdAndGetResult($cmd);
+        $status[$cmd] = exec($cmd);
 
         return $status;
     }
@@ -326,17 +317,5 @@ final class EasyBackupController extends AbstractController
         }
 
         return Constants::VERSION . ' ' . Constants::STATUS;
-    }
-
-    private function processCmdAndGetResult($cmd)
-    {
-        $process = new Process($cmd);
-        $process->run();
-
-        if ($process->isSuccessful()) {
-            return $process->getOutput();
-        } else {
-            return $process->isSuccessful();
-        }
     }
 }
