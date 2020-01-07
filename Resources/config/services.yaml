@@ -16,4 +16,4 @@ services:
 
     KimaiPlugin\EasyBackupBundle\Configuration\EasyBackupConfiguration:
         arguments:
-            $settings: '%easy_settings%'
+            $settings: '%easy_backup_settings%'
