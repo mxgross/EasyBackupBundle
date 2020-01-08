@@ -147,6 +147,7 @@ final class EasyBackupController extends AbstractController
             'config/packages/local.yaml',
             'var/data/',
             'var/plugins/',
+            'templates/invoice',
         ];
 
         foreach ($arrayOfPathsToBackup as $filename) {
