@@ -52,17 +52,11 @@ final class EasyBackupController extends AbstractController
      */
     private $filesystem;
 
-    /**
-     * @var EasyBackupConfiguration
-     */
-    private $configuration;
-
     public function __construct(string $dataDirectory, EasyBackupConfiguration $configuration)
     {
-        $this->configuration = $configuration;
 
         $this->kimaiRootPath = dirname(dirname($dataDirectory)) . '/';
-        $this->backupDirectory = $this->kimaiRootPath . $this->configuration->getBackupDir();
+        $this->backupDirectory = $this->kimaiRootPath . $configuration->getBackupDir();
 
         $this->dbUrl = $_ENV['DATABASE_URL'];
 
@@ -74,11 +68,11 @@ final class EasyBackupController extends AbstractController
      *
      * @return Response
      */
-    public function indexAction(): Response
+    public function indexAction(EasyBackupConfiguration $configuration): Response
     {
         $existingBackups = [];
 
-        $status = $this->checkStatus();
+        $status = $this->checkStatus($configuration);
 
         if ($this->filesystem->exists($this->backupDirectory)) {
             $files = scandir($this->backupDirectory, SCANDIR_SORT_DESCENDING);
@@ -240,7 +234,7 @@ final class EasyBackupController extends AbstractController
         return $this->redirectToRoute('easy_backup', $request->query->all());
     }
 
-    private function backupDatabase(string $sqlDumpName)
+    private function backupDatabase(string $sqlDumpName, EasyBackupConfiguration $configuration)
     {
         $dbUrlExploded = explode(':', $this->dbUrl);
         $dbUsed = $dbUrlExploded[0];
@@ -252,7 +246,7 @@ final class EasyBackupController extends AbstractController
             $dbPwd = explode('@', $dbUrlExploded[2])[0];
             $dbName = explode('/', $dbUrlExploded[3])[1];
 
-            $mysqlDumpCmd = $this->configuration->getMysqlDumpPath();
+            $mysqlDumpCmd = $configuration->getMysqlDumpPath();
             exec("($mysqlDumpCmd --user=$dbUser --password=$dbPwd $dbName > $sqlDumpName)");
         }
     }
@@ -292,7 +286,7 @@ final class EasyBackupController extends AbstractController
         return false;
     }
 
-    private function checkStatus()
+    private function checkStatus(EasyBackupConfiguration $configuration)
     {
         $status = [];
 
@@ -305,7 +299,7 @@ final class EasyBackupController extends AbstractController
         $cmd = self::CMD_GIT_HEAD;
         $status[$cmd] = exec($cmd);
 
-        $cmd = $this->configuration->getMysqlDumpPath() . ' --version';
+        $cmd = $configuration->getMysqlDumpPath() . ' --version';
         $status[$cmd] = exec($cmd);
 
         return $status;

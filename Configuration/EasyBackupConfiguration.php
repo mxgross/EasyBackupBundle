@@ -18,7 +18,7 @@ class EasyBackupConfiguration implements SystemBundleConfiguration, \ArrayAccess
 
     public function getPrefix(): string
     {
-        return 'easybackup';
+        return 'easy_backup';
     }
 
     public function getMysqlDumpPath(): string
