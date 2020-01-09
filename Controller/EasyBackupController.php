@@ -70,6 +70,7 @@ final class EasyBackupController extends AbstractController
      */
     public function indexAction(EasyBackupConfiguration $configuration): Response
     {
+
         $existingBackups = [];
 
         $status = $this->checkStatus($configuration);
@@ -97,7 +98,7 @@ final class EasyBackupController extends AbstractController
      *
      * @return Response
      */
-    public function createBackupAction(): Response
+    public function createBackupAction(EasyBackupConfiguration $configuration): Response
     {
         // Don't use the /var/data folder, because we want to backup it too!
 
@@ -161,7 +162,7 @@ final class EasyBackupController extends AbstractController
 
         $sqlDumpName = $pluginBackupDir . self::SQL_DUMP_FILENAME;
 
-        $this->backupDatabase($sqlDumpName);
+        $this->backupDatabase($sqlDumpName, $configuration);
         $backupZipName = $this->backupDirectory . $backupName . '.zip';
 
         $this->zipData($pluginBackupDir, $backupZipName);
@@ -234,7 +235,7 @@ final class EasyBackupController extends AbstractController
         return $this->redirectToRoute('easy_backup', $request->query->all());
     }
 
-    private function backupDatabase(string $sqlDumpName)
+    private function backupDatabase(string $sqlDumpName, EasyBackupConfiguration $configuration)
     {
         $dbUrlExploded = explode(':', $this->dbUrl);
         $dbUsed = $dbUrlExploded[0];
@@ -246,7 +247,7 @@ final class EasyBackupController extends AbstractController
             $dbPwd = explode('@', $dbUrlExploded[2])[0];
             $dbName = explode('/', $dbUrlExploded[3])[1];
 
-            $mysqlDumpCmd = '/usr/bin/mysqldump'; // $configuration->getMysqlDumpPath(); ?? How to get the current configuration Object?
+            $mysqlDumpCmd = $configuration->getMysqlDumpPath();
             exec("($mysqlDumpCmd --user=$dbUser --password=$dbPwd $dbName > $sqlDumpName)");
         }
     }
