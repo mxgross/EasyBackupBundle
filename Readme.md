@@ -49,6 +49,7 @@ Currently backuped directories and files are:
 config/packages/local.yaml
 var/data/
 var/plugins/
+templates/invoice/
 ```
 
 According to the [backup docu](https://www.kimai.org/documentation/backups.html) the Kimai version should be saved to.
