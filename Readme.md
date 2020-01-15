@@ -22,6 +22,14 @@ cd /kimai/
 bin/console cache:clear
 bin/console cache:warmup
 ```
+Sometimes the permissions must be set again
+
+```
+chown -R :www-data .
+chmod -R g+r .
+chmod -R g+rw var/
+chmod -R g+rw public/avatars/
+```
 
 You could also [download it as zip](https://github.com/mxgross/EasyBackupBundle/archive/master.zip) and upload the directory via FTP:
 
