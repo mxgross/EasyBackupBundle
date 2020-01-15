@@ -83,6 +83,3 @@ By default, this are assigned to all users with the role `ROLE_SUPER_ADMIN`.
 
 **Please adjust the permission settings in your user administration.** 
 
-### This Plugin is in an early development phase
-
-If anyone will help me with testing or contributing it would be great.
