@@ -22,6 +22,14 @@ cd /kimai/
 bin/console cache:clear
 bin/console cache:warmup
 ```
+Sometimes the permissions must be set again
+
+```
+chown -R :www-data .
+chmod -R g+r .
+chmod -R g+rw var/
+chmod -R g+rw public/avatars/
+```
 
 You could also [download it as zip](https://github.com/mxgross/EasyBackupBundle/archive/master.zip) and upload the directory via FTP:
 
@@ -75,6 +83,3 @@ By default, this are assigned to all users with the role `ROLE_SUPER_ADMIN`.
 
 **Please adjust the permission settings in your user administration.** 
 
-### This Plugin is in an early development phase
-
-If anyone will help me with testing or contributing it would be great.

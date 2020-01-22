@@ -7,7 +7,6 @@
 	{{ 'easy_backup.subtitle'|trans }}
 {% endblock %}
 
-
 {% block main %}
 
 	<div class="box box-success collapsed-box">
@@ -28,7 +27,7 @@
 				If you see a warning icon
 				<i class="fas fa-exclamation-triangle text-red"></i>
 				in the list below, you should talk to your administrator.
-																																																                The path is either not readable or not writable and EasyBackup might not work as expected.
+				The path is either not readable or not writable and EasyBackup might not work as expected.
 			</p>
 			<table class="table">
 				<tbody>
@@ -83,20 +82,16 @@
 								<td>{{ size }}MB</td>
 
 								<td>
-									<a href="{{ path('delete', {'dirname': item}) }}">
-										<button class="btn btn-danger">
-											<i class="fas fa-trash"></i>
-											{{ 'Delete'|trans }}
-										</button>
+									<a href="{{ path('delete', {'dirname': item}) }}" class="confirmation-link btn btn-danger" data-question="confirm.delete" data-msg-error="action.delete.error" data-msg-success="action.delete.success">
+										<i class="fas fa-trash"></i>
+										{{ 'Delete'|trans }}
 									</a>
 								</td>
 
 								<td>
-									<a href="{{ path('download', {'dirname': item}) }}">
-										<button class="btn btn-info">
-											<i class="fas fa-download"></i>
-											{{ 'Download'|trans }}
-										</button>
+									<a href="{{ path('download', {'dirname': item}) }}" class="btn btn-info">
+										<i class="fas fa-download"></i>
+										{{ 'Download'|trans }}
 									</a>
 								</td>
 							</tr>

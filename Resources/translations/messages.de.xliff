@@ -26,6 +26,10 @@
                 <source>Download</source>
                 <target>Herunterladen</target>
             </trans-unit>
+            <trans-unit id="View status checks">
+                <source>View status checks</source>
+                <target>Status Prüfungen</target>
+            </trans-unit>
         </body>
     </file>
 </xliff>
