@@ -54,7 +54,6 @@ final class EasyBackupController extends AbstractController
 
     public function __construct(string $dataDirectory, EasyBackupConfiguration $configuration)
     {
-
         $this->kimaiRootPath = dirname(dirname($dataDirectory)) . '/';
         $this->backupDirectory = $this->kimaiRootPath . $configuration->getBackupDir();
 
@@ -70,7 +69,6 @@ final class EasyBackupController extends AbstractController
      */
     public function indexAction(EasyBackupConfiguration $configuration): Response
     {
-
         $existingBackups = [];
 
         $status = $this->checkStatus($configuration);
