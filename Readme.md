@@ -73,6 +73,8 @@ Then it will execute a mysqldump command to create a sql dump file, which is add
 
 The mysqldump command path can be configured via the standard Kimai 2 settings page.
 
+![image](https://user-images.githubusercontent.com/3718449/73966449-4e4d0500-4916-11ea-890e-3008bfb87816.png)
+
 ## Permissions
 
 This bundle ships a new permissions, which limit access to the backup screen:
