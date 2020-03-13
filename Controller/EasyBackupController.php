@@ -262,7 +262,16 @@ final class EasyBackupController extends AbstractController
             $mysqlDumpCmd = str_replace('{port}', $dbPort, $mysqlDumpCmd);
             $mysqlDumpCmd = str_replace('{database}', $dbName, $mysqlDumpCmd);
 
-            exec("($mysqlDumpCmd)");
+            // $numErrors is 0 when no error occured, else the number of occured errors
+            // $output is an string array containing success or error messages
+            
+            exec("($mysqlDumpCmd) 2>&1", $output, $numErrors);
+
+            if ($numErrors > 0) {
+                foreach ($output as $error) {
+                    $this->flashError($error);
+                }
+            }
         }
     }
 
