@@ -59,8 +59,8 @@ final class EasyBackupController extends AbstractController
         $this->dbUrl = $_ENV['DATABASE_URL'];
         $this->filesystem = new Filesystem();
     }
-    
-    private function getBackupDirectory(): string 
+
+    private function getBackupDirectory(): string
     {
         return $this->kimaiRootPath . $this->configuration->getBackupDir();
     }
@@ -249,10 +249,20 @@ final class EasyBackupController extends AbstractController
         if ($dbUsed === 'mysql') {
             $dbUser = str_replace('/', '', $dbUrlExploded[1]);
             $dbPwd = explode('@', $dbUrlExploded[2])[0];
+            $dbHost = explode('@', $dbUrlExploded[2])[1];
+            $dbPort = explode('/', explode('@', $dbUrlExploded[3])[0])[0];
             $dbName = explode('?', explode('/', $dbUrlExploded[3])[1])[0];
 
-            $mysqlDumpCmd = $this->configuration->getMysqlDumpPath();
-            exec("($mysqlDumpCmd --user=$dbUser --password=$dbPwd $dbName > $sqlDumpName)");
+            // The MysqlDumpCommand per default looks like this: '/usr/bin/mysqldump -u {user} -p {password} -h {host} -port {port} --single-transaction --force {database}'
+
+            $mysqlDumpCmd = $this->configuration->getMysqlDumpCommand();
+            $mysqlDumpCmd = str_replace('{user}', $dbUser, $mysqlDumpCmd);
+            $mysqlDumpCmd = str_replace('{password}', $dbPwd, $mysqlDumpCmd);
+            $mysqlDumpCmd = str_replace('{host}', $dbHost, $mysqlDumpCmd);
+            $mysqlDumpCmd = str_replace('{port}', $dbPort, $mysqlDumpCmd);
+            $mysqlDumpCmd = str_replace('{database}', $dbName, $mysqlDumpCmd);
+
+            exec("($mysqlDumpCmd)");
         }
     }
 
@@ -304,7 +314,8 @@ final class EasyBackupController extends AbstractController
         $cmd = self::CMD_GIT_HEAD;
         $status[$cmd] = exec($cmd);
 
-        $cmd = $this->configuration->getMysqlDumpPath() . ' --version';
+        $cmd = $this->configuration->getMysqlDumpCommand();
+        $cmd = explode(' ', $cmd)[0] . ' --version';
         $status[$cmd] = exec($cmd);
 
         return $status;
