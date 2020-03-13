@@ -249,7 +249,7 @@ final class EasyBackupController extends AbstractController
         if ($dbUsed === 'mysql') {
             $dbUser = str_replace('/', '', $dbUrlExploded[1]);
             $dbPwd = explode('@', $dbUrlExploded[2])[0];
-            $dbName = explode('/', $dbUrlExploded[3])[1];
+            $dbName = explode('?', explode('/', $dbUrlExploded[3])[1])[0];
 
             $mysqlDumpCmd = $this->configuration->getMysqlDumpPath();
             exec("($mysqlDumpCmd --user=$dbUser --password=$dbPwd $dbName > $sqlDumpName)");
