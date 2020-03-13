@@ -253,7 +253,7 @@ final class EasyBackupController extends AbstractController
             $dbPort = explode('/', explode('@', $dbUrlExploded[3])[0])[0];
             $dbName = explode('?', explode('/', $dbUrlExploded[3])[1])[0];
 
-            // The MysqlDumpCommand per default looks like this: '/usr/bin/mysqldump -u {user} -p {password} -h {host} -port {port} --single-transaction --force {database}'
+            // The MysqlDumpCommand per default looks like this: '/usr/bin/mysqldump --user={user} --password={password} --host={host} --port={port} --single-transaction --force {database}'
 
             $mysqlDumpCmd = $this->configuration->getMysqlDumpCommand();
             $mysqlDumpCmd = str_replace('{user}', $dbUser, $mysqlDumpCmd);
@@ -265,13 +265,13 @@ final class EasyBackupController extends AbstractController
             // $numErrors is 0 when no error occured, else the number of occured errors
             // $output is an string array containing success or error messages
             
-            exec("($mysqlDumpCmd) 2>&1", $output, $numErrors);
+            exec("($mysqlDumpCmd > $sqlDumpName)"); // 2>&1)", $output, $numErrors);
 
-            if ($numErrors > 0) {
+            /*if ($numErrors > 0) {
                 foreach ($output as $error) {
                     $this->flashError($error);
                 }
-            }
+            } */
         }
     }
 
