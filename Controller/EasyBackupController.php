@@ -146,8 +146,17 @@ final class EasyBackupController extends AbstractController
             'var/data/',
             'var/plugins/',
             'templates/invoice',
-            'var/invoices/',
         ];
+        
+        // Per default %kimai.invoice.documents% is:
+        // var/plugins/DemoBundle/Resources/invoices/
+        // var/invoices/
+        // templates/invoice/renderer/
+                
+        $arrayOfPathsToBackup = array_merge(
+                                    $arrayOfPathsToBackup,
+                                    $this->getParameter('kimai.invoice.documents'),
+                                );
 
         foreach ($arrayOfPathsToBackup as $filename) {
             $sourceFile = $this->kimaiRootPath . $filename;
