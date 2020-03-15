@@ -71,9 +71,17 @@ If you use sqlite, the database file is backuped because the `var/data` director
 If you use mysql/mariadb the plugin will recognize it by reading the configured database connection url.
 Then it will execute a mysqldump command to create a sql dump file, which is added to the backup zip.
 
-The mysqldump command path can be configured via the standard Kimai 2 settings page.
-
-![image](https://user-images.githubusercontent.com/3718449/73966449-4e4d0500-4916-11ea-890e-3008bfb87816.png)
+The mysqldump command can be configured via the standard Kimai 2 settings page.
+Per default it is
+```
+/usr/bin/mysqldump --user={user} --password={password} --host={host} --port={port} --single-transaction --force {database}
+```
+You can remove or add parameters here if you need to. The variables in the curly braces will be replaced during the execution of the backup. All information for these variables are gathered from the DATABASE_URL defined in the .env file.
+```
+# DATABASE_URL=mysql://user:password@host:port/database
+# For example:
+DATABASE_URL=mysql://JohnDoe:MySecret1234@127.0.0.1:3306/kimai2
+```
 
 ## Permissions
 
