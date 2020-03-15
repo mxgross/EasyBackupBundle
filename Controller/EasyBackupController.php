@@ -31,6 +31,7 @@ final class EasyBackupController extends AbstractController
     public const SQL_DUMP_FILENAME = 'database_dump.sql';
     public const REGEX_BACKUP_ZIP_NAME = '/^\d{4}-\d{2}-\d{2}_\d{6}\.zip$/';
     public const BACKUP_NAME_DATE_FORMAT = 'Y-m-d_His';
+    public const GITIGNORE_NAME = '.gitignore';
 
     /**
      * @var string
@@ -79,7 +80,7 @@ final class EasyBackupController extends AbstractController
 
         if ($this->filesystem->exists($backupDir)) {
             $files = scandir($backupDir, SCANDIR_SORT_DESCENDING);
-            $filesAndDirs = array_diff($files, ['.', '..', '.gitignore']);
+            $filesAndDirs = array_diff($files, ['.', '..', self::GITIGNORE_NAME]);
 
             foreach ($filesAndDirs as $fileOrDir) {
                 if (is_file($backupDir . $fileOrDir)) {
@@ -114,7 +115,7 @@ final class EasyBackupController extends AbstractController
 
         // If not yet existing, create a .gitignore to exclude the backup files.
 
-        $gitignoreFullPath = $backupDir . '.gitignore';
+        $gitignoreFullPath = $backupDir . self::GITIGNORE_NAME;
 
         if (!$this->filesystem->exists($gitignoreFullPath)) {
             $this->filesystem->touch($gitignoreFullPath);
@@ -299,10 +300,17 @@ final class EasyBackupController extends AbstractController
                     $source = realpath($source);
                     if (is_dir($source) === true) {
                         $files = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($source), \RecursiveIteratorIterator::SELF_FIRST);
+
                         foreach ($files as $file) {
+
+                            // Ignore "." and ".." folders
+                            if( in_array(substr($file, strrpos($file, '/')+1), array('.', '..')) )
+                                continue;
+
                             $file = realpath($file);
                             if (is_dir($file) === true) {
                                 $zip->addEmptyDir(str_replace($source . '/', '', $file . '/'));
+ 
                             } elseif (is_file($file) === true) {
                                 $zip->addFromString(str_replace($source . '/', '', $file), file_get_contents($file));
                             }
