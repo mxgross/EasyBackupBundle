@@ -264,14 +264,20 @@ final class EasyBackupController extends AbstractController
 
             // $numErrors is 0 when no error occured, else the number of occured errors
             // $output is an string array containing success or error messages
-            
-            exec("($mysqlDumpCmd > $sqlDumpName)"); // 2>&1)", $output, $numErrors);
 
-            /*if ($numErrors > 0) {
-                foreach ($output as $error) {
+            exec("($mysqlDumpCmd 2>&1)", $outputArr, $numErrors);
+
+            if ($numErrors > 0) {
+                foreach ($outputArr as $error) {
                     $this->flashError($error);
                 }
-            } */
+            } else {
+                $this->filesystem->touch($sqlDumpName);
+
+                foreach ($outputArr as $line) {
+                    $this->filesystem->appendToFile($sqlDumpName, $line . "\n");
+                }
+            }
         }
     }
 
