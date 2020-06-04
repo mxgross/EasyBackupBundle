@@ -47,7 +47,7 @@ You could also [download it as zip](https://github.com/mxgross/EasyBackupBundle/
 |   └ ... more files and directories follow here ...
 ```
 
-Please contact me via [info@maximiliangross.de](mailto:info@maximiliangross.de) for any inquiry.
+Feel free to participate in existing issues or create a issue for any new inquiry.
 
 ## Storage
 
