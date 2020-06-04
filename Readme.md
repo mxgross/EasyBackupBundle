@@ -22,6 +22,14 @@ cd /kimai/
 bin/console cache:clear
 bin/console cache:warmup
 ```
+Sometimes the permissions must be set again
+
+```
+chown -R :www-data .
+chmod -R g+r .
+chmod -R g+rw var/
+chmod -R g+rw public/avatars/
+```
 
 You could also [download it as zip](https://github.com/mxgross/EasyBackupBundle/archive/master.zip) and upload the directory via FTP:
 
@@ -49,7 +57,7 @@ Currently backuped directories and files are:
 config/packages/local.yaml
 var/data/
 var/plugins/
-templates/invoice/
+%kimai.invoice.documents%
 ```
 
 According to the [backup docu](https://www.kimai.org/documentation/backups.html) the Kimai version should be saved to.
@@ -63,7 +71,17 @@ If you use sqlite, the database file is backuped because the `var/data` director
 If you use mysql/mariadb the plugin will recognize it by reading the configured database connection url.
 Then it will execute a mysqldump command to create a sql dump file, which is added to the backup zip.
 
-The mysqldump command path can be configured via the standard Kimai 2 settings page.
+The mysqldump command can be configured via the standard Kimai 2 settings page.
+Per default it is
+```
+/usr/bin/mysqldump --user={user} --password={password} --host={host} --port={port} --single-transaction --force {database}
+```
+You can remove or add parameters here if you need to. The variables in the curly braces will be replaced during the execution of the backup. All information for these variables are gathered from the DATABASE_URL defined in the .env file.
+```
+# DATABASE_URL=mysql://user:password@host:port/database
+# For example:
+DATABASE_URL=mysql://JohnDoe:MySecret1234@127.0.0.1:3306/kimai2
+```
 
 ## Permissions
 
@@ -75,6 +93,3 @@ By default, this are assigned to all users with the role `ROLE_SUPER_ADMIN`.
 
 **Please adjust the permission settings in your user administration.** 
 
-### This Plugin is in an early development phase
-
-If anyone will help me with testing or contributing it would be great.

@@ -26,6 +26,10 @@
                 <source>Download</source>
                 <target>Download</target>
             </trans-unit>
+            <trans-unit id="View status checks">
+                <source>View status checks</source>
+                <target>View status checks</target>
+            </trans-unit>
         </body>
     </file>
 </xliff>

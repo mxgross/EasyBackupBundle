@@ -27,8 +27,8 @@ class Configuration implements ConfigurationInterface
         $rootNode
             ->addDefaultsIfNotSet()
             ->children()
-                ->scalarNode('setting_mysqldump_path')
-                    ->defaultValue('/usr/bin/mysqldump')
+                ->scalarNode('setting_mysqldump_command')
+                    ->defaultValue('/usr/bin/mysqldump --user={user} --password={password} --host={host} --port={port} --single-transaction --force {database}')
                 ->end()
                 ->scalarNode('setting_backup_dir')
                     ->defaultValue('var/easy_backup/')

@@ -31,6 +31,7 @@ final class EasyBackupController extends AbstractController
     public const SQL_DUMP_FILENAME = 'database_dump.sql';
     public const REGEX_BACKUP_ZIP_NAME = '/^\d{4}-\d{2}-\d{2}_\d{6}\.zip$/';
     public const BACKUP_NAME_DATE_FORMAT = 'Y-m-d_His';
+    public const GITIGNORE_NAME = '.gitignore';
 
     /**
      * @var string
@@ -38,9 +39,9 @@ final class EasyBackupController extends AbstractController
     private $kimaiRootPath;
 
     /**
-     * @var string
+     * @var EasyBackupConfiguration
      */
-    private $backupDirectory;
+    private $configuration;
 
     /**
      * @var string
@@ -54,13 +55,15 @@ final class EasyBackupController extends AbstractController
 
     public function __construct(string $dataDirectory, EasyBackupConfiguration $configuration)
     {
-
         $this->kimaiRootPath = dirname(dirname($dataDirectory)) . '/';
-        $this->backupDirectory = $this->kimaiRootPath . $configuration->getBackupDir();
-
+        $this->configuration = $configuration;
         $this->dbUrl = $_ENV['DATABASE_URL'];
-
         $this->filesystem = new Filesystem();
+    }
+
+    private function getBackupDirectory(): string
+    {
+        return $this->kimaiRootPath . $this->configuration->getBackupDir();
     }
 
     /**
@@ -68,19 +71,20 @@ final class EasyBackupController extends AbstractController
      *
      * @return Response
      */
-    public function indexAction(EasyBackupConfiguration $configuration): Response
+    public function indexAction(): Response
     {
         $existingBackups = [];
 
-        $status = $this->checkStatus($configuration);
+        $status = $this->checkStatus();
+        $backupDir = $this->getBackupDirectory();
 
-        if ($this->filesystem->exists($this->backupDirectory)) {
-            $files = scandir($this->backupDirectory, SCANDIR_SORT_DESCENDING);
-            $filesAndDirs = array_diff($files, ['.', '..', '.gitignore']);
+        if ($this->filesystem->exists($backupDir)) {
+            $files = scandir($backupDir, SCANDIR_SORT_DESCENDING);
+            $filesAndDirs = array_diff($files, ['.', '..', self::GITIGNORE_NAME]);
 
             foreach ($filesAndDirs as $fileOrDir) {
-                if (is_file($this->backupDirectory . $fileOrDir)) {
-                    $filesizeInMb = round(filesize($this->backupDirectory . $fileOrDir) / 1048576, 2);
+                if (is_file($backupDir . $fileOrDir)) {
+                    $filesizeInMb = round(filesize($backupDir . $fileOrDir) / 1048576, 2);
                     $existingBackups[$fileOrDir] = $filesizeInMb;
                 }
             }
@@ -102,7 +106,8 @@ final class EasyBackupController extends AbstractController
         // Don't use the /var/data folder, because we want to backup it too!
 
         $backupName = date(self::BACKUP_NAME_DATE_FORMAT);
-        $pluginBackupDir = $this->backupDirectory . $backupName . '/';
+        $backupDir = $this->getBackupDirectory();
+        $pluginBackupDir = $backupDir . $backupName . '/';
 
         // Create the backup folder
 
@@ -110,7 +115,7 @@ final class EasyBackupController extends AbstractController
 
         // If not yet existing, create a .gitignore to exclude the backup files.
 
-        $gitignoreFullPath = $this->backupDirectory . '.gitignore';
+        $gitignoreFullPath = $backupDir . self::GITIGNORE_NAME;
 
         if (!$this->filesystem->exists($gitignoreFullPath)) {
             $this->filesystem->touch($gitignoreFullPath);
@@ -143,6 +148,16 @@ final class EasyBackupController extends AbstractController
             'var/plugins/',
             'templates/invoice',
         ];
+        
+        // Per default %kimai.invoice.documents% is:
+        // var/plugins/DemoBundle/Resources/invoices/
+        // var/invoices/
+        // templates/invoice/renderer/
+                
+        $arrayOfPathsToBackup = array_merge(
+                                    $arrayOfPathsToBackup,
+                                    $this->getParameter('kimai.invoice.documents'),
+                                );
 
         foreach ($arrayOfPathsToBackup as $filename) {
             $sourceFile = $this->kimaiRootPath . $filename;
@@ -162,7 +177,7 @@ final class EasyBackupController extends AbstractController
         $sqlDumpName = $pluginBackupDir . self::SQL_DUMP_FILENAME;
 
         $this->backupDatabase($sqlDumpName);
-        $backupZipName = $this->backupDirectory . $backupName . '.zip';
+        $backupZipName = $backupDir . $backupName . '.zip';
 
         $this->zipData($pluginBackupDir, $backupZipName);
 
@@ -189,7 +204,7 @@ final class EasyBackupController extends AbstractController
         // Validate the given user input (filename)
 
         if (preg_match(self::REGEX_BACKUP_ZIP_NAME, $backupName)) {
-            $zipNameAbsolute = $this->backupDirectory . $backupName;
+            $zipNameAbsolute = $this->getBackupDirectory() . $backupName;
 
             if ($this->filesystem->exists($zipNameAbsolute)) {
                 $response = new Response(file_get_contents($zipNameAbsolute));
@@ -220,7 +235,7 @@ final class EasyBackupController extends AbstractController
         // Validate the given user input (filename)
 
         if (preg_match(self::REGEX_BACKUP_ZIP_NAME, $dirname)) {
-            $path = $this->backupDirectory . $dirname;
+            $path = $this->getBackupDirectory() . $dirname;
 
             if ($this->filesystem->exists($path)) {
                 $this->filesystem->remove($path);
@@ -234,7 +249,7 @@ final class EasyBackupController extends AbstractController
         return $this->redirectToRoute('easy_backup', $request->query->all());
     }
 
-    private function backupDatabase(string $sqlDumpName, EasyBackupConfiguration $configuration)
+    private function backupDatabase(string $sqlDumpName)
     {
         $dbUrlExploded = explode(':', $this->dbUrl);
         $dbUsed = $dbUrlExploded[0];
@@ -244,10 +259,35 @@ final class EasyBackupController extends AbstractController
         if ($dbUsed === 'mysql') {
             $dbUser = str_replace('/', '', $dbUrlExploded[1]);
             $dbPwd = explode('@', $dbUrlExploded[2])[0];
-            $dbName = explode('/', $dbUrlExploded[3])[1];
+            $dbHost = explode('@', $dbUrlExploded[2])[1];
+            $dbPort = explode('/', explode('@', $dbUrlExploded[3])[0])[0];
+            $dbName = explode('?', explode('/', $dbUrlExploded[3])[1])[0];
 
-            $mysqlDumpCmd = $configuration->getMysqlDumpPath();
-            exec("($mysqlDumpCmd --user=$dbUser --password=$dbPwd $dbName > $sqlDumpName)");
+            // The MysqlDumpCommand per default looks like this: '/usr/bin/mysqldump --user={user} --password={password} --host={host} --port={port} --single-transaction --force {database}'
+
+            $mysqlDumpCmd = $this->configuration->getMysqlDumpCommand();
+            $mysqlDumpCmd = str_replace('{user}', $dbUser, $mysqlDumpCmd);
+            $mysqlDumpCmd = str_replace('{password}', $dbPwd, $mysqlDumpCmd);
+            $mysqlDumpCmd = str_replace('{host}', $dbHost, $mysqlDumpCmd);
+            $mysqlDumpCmd = str_replace('{port}', $dbPort, $mysqlDumpCmd);
+            $mysqlDumpCmd = str_replace('{database}', $dbName, $mysqlDumpCmd);
+
+            // $numErrors is 0 when no error occured, else the number of occured errors
+            // $output is an string array containing success or error messages
+
+            exec("($mysqlDumpCmd 2>&1)", $outputArr, $numErrors);
+
+            if ($numErrors > 0) {
+                foreach ($outputArr as $error) {
+                    $this->flashError($error);
+                }
+            } else {
+                $this->filesystem->touch($sqlDumpName);
+
+                foreach ($outputArr as $line) {
+                    $this->filesystem->appendToFile($sqlDumpName, $line . "\n");
+                }
+            }
         }
     }
 
@@ -260,10 +300,17 @@ final class EasyBackupController extends AbstractController
                     $source = realpath($source);
                     if (is_dir($source) === true) {
                         $files = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($source), \RecursiveIteratorIterator::SELF_FIRST);
+
                         foreach ($files as $file) {
+
+                            // Ignore "." and ".." folders
+                            if( in_array(substr($file, strrpos($file, '/')+1), array('.', '..')) )
+                                continue;
+
                             $file = realpath($file);
                             if (is_dir($file) === true) {
                                 $zip->addEmptyDir(str_replace($source . '/', '', $file . '/'));
+ 
                             } elseif (is_file($file) === true) {
                                 $zip->addFromString(str_replace($source . '/', '', $file), file_get_contents($file));
                             }
@@ -286,7 +333,7 @@ final class EasyBackupController extends AbstractController
         return false;
     }
 
-    private function checkStatus(EasyBackupConfiguration $configuration)
+    private function checkStatus()
     {
         $status = [];
 
@@ -299,7 +346,8 @@ final class EasyBackupController extends AbstractController
         $cmd = self::CMD_GIT_HEAD;
         $status[$cmd] = exec($cmd);
 
-        $cmd = $configuration->getMysqlDumpPath() . ' --version';
+        $cmd = $this->configuration->getMysqlDumpCommand();
+        $cmd = explode(' ', $cmd)[0] . ' --version';
         $status[$cmd] = exec($cmd);
 
         return $status;
