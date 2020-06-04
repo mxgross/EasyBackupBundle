@@ -15,6 +15,13 @@ First clone it to your Kimai installation `plugins` directory:
 cd /kimai/var/plugins/
 git clone https://github.com/mxgross/EasyBackupBundle.git
 ```
+Set the permissions:
+```
+sudo chown -R :www-data .
+sudo chmod -R g+r .
+sudo chmod -R g+rw var/
+sudo chmod -R g+rw public/avatars/
+```
 
 And then rebuild the cache:
 ```
@@ -25,10 +32,10 @@ bin/console cache:warmup
 Sometimes the permissions must be set again
 
 ```
-chown -R :www-data .
-chmod -R g+r .
-chmod -R g+rw var/
-chmod -R g+rw public/avatars/
+sudo chown -R :www-data .
+sudo chmod -R g+r .
+sudo chmod -R g+rw var/
+sudo chmod -R g+rw public/avatars/
 ```
 
 You could also [download it as zip](https://github.com/mxgross/EasyBackupBundle/archive/master.zip) and upload the directory via FTP:
