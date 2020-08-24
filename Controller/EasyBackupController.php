@@ -156,7 +156,7 @@ final class EasyBackupController extends AbstractController
                 
         $arrayOfPathsToBackup = array_merge(
                                     $arrayOfPathsToBackup,
-                                    $this->getParameter('kimai.invoice.documents'),
+                                    $this->getParameter('kimai.invoice.documents')
                                 );
 
         foreach ($arrayOfPathsToBackup as $filename) {
