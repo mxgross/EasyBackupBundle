@@ -15,6 +15,13 @@ First clone it to your Kimai installation `plugins` directory:
 cd /kimai/var/plugins/
 git clone https://github.com/mxgross/EasyBackupBundle.git
 ```
+Set the permissions:
+```
+sudo chown -R :www-data .
+sudo chmod -R g+r .
+sudo chmod -R g+rw var/
+sudo chmod -R g+rw public/avatars/
+```
 
 And then rebuild the cache:
 ```
@@ -25,10 +32,10 @@ bin/console cache:warmup
 Sometimes the permissions must be set again
 
 ```
-chown -R :www-data .
-chmod -R g+r .
-chmod -R g+rw var/
-chmod -R g+rw public/avatars/
+sudo chown -R :www-data .
+sudo chmod -R g+r .
+sudo chmod -R g+rw var/
+sudo chmod -R g+rw public/avatars/
 ```
 
 You could also [download it as zip](https://github.com/mxgross/EasyBackupBundle/archive/master.zip) and upload the directory via FTP:
@@ -40,7 +47,7 @@ You could also [download it as zip](https://github.com/mxgross/EasyBackupBundle/
 |   └ ... more files and directories follow here ...
 ```
 
-Please contact me via [info@maximiliangross.de](mailto:info@maximiliangross.de) for any inquiry.
+Feel free to participate in existing issues or create a issue for any new inquiry.
 
 ## Storage
 
@@ -92,4 +99,7 @@ This bundle ships a new permissions, which limit access to the backup screen:
 By default, this are assigned to all users with the role `ROLE_SUPER_ADMIN`.
 
 **Please adjust the permission settings in your user administration.** 
+
+## Restore
+Currently the plugin has no automation to restore a backup. You have to do it by hand. Just copy the backuped directories and files into your Kimai2 installation. Some hints can be found here: [Official Kimai2 backup and restore docu](https://www.kimai.org/documentation/backups.html)
 
