@@ -100,3 +100,6 @@ By default, this are assigned to all users with the role `ROLE_SUPER_ADMIN`.
 
 **Please adjust the permission settings in your user administration.** 
 
+## Restore
+Currently the plugin has no automation to restore a backup. You have to do it by hand. Just copy the backuped directories and files into your Kimai2 installation. Some hints can be found here: [Official Kimai2 backup and restore docu](https://www.kimai.org/documentation/backups.html)
+
