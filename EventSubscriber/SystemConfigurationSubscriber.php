@@ -13,6 +13,7 @@ use App\Event\SystemConfigurationEvent;
 use App\Form\Model\Configuration;
 use App\Form\Model\SystemConfiguration as SystemConfigurationModel;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 
 class SystemConfigurationSubscriber implements EventSubscriberInterface
@@ -42,6 +43,12 @@ class SystemConfigurationSubscriber implements EventSubscriberInterface
                         ->setTranslationDomain('system-configuration')
                         ->setRequired(false)
                         ->setType(TextType::class),
+                    (new Configuration())
+                        ->setName('easy_backup.setting_paths_to_be_backuped')
+                        ->setLabel('easy_backup.setting_paths_to_be_backuped')
+                        ->setTranslationDomain('system-configuration')
+                        ->setRequired(false)
+                        ->setType(TextareaType::class),
                 ])
         );
     }
