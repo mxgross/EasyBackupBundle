@@ -57,16 +57,17 @@ Make sure its writable by your webserver! We don't use the recommended
 
 ### What files are backed up?
 
-Currently per default backuped directories and files are:
+Currently per default backuped directories (incl. sub directories) and files are:
 
 ```
 .env
 config/packages/local.yaml
 var/data/
 var/plugins/
-templates/invoice
 var/invoices/
-templates/invoice/renderer/
+'templates/invoice
+'var/export/
+'templates/export/
 ```
 You are free to edit this list via the Kimai settings page. Place each filename or paths in a seperate line. Make sure that there are no empty lines. Root path is your kimai installation path.
 

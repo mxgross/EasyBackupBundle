@@ -29,9 +29,10 @@ class Configuration implements ConfigurationInterface
             'config/packages/local.yaml',
             'var/data/',
             'var/plugins/',
-            'templates/invoice',
             'var/invoices/',
-            'templates/invoice/renderer/',
+            'templates/invoice/',
+            'var/export/',
+            'templates/export/',
         ];
 
         $rootNode
