@@ -44,8 +44,8 @@ class SystemConfigurationSubscriber implements EventSubscriberInterface
                         ->setRequired(false)
                         ->setType(TextType::class),
                     (new Configuration())
-                        ->setName('easy_backup.setting_paths_to_be_backuped')
-                        ->setLabel('easy_backup.setting_paths_to_be_backuped')
+                        ->setName('easy_backup.setting_paths_to_backup')
+                        ->setLabel('easy_backup.setting_paths_to_backup')
                         ->setTranslationDomain('system-configuration')
                         ->setRequired(false)
                         ->setType(TextareaType::class),

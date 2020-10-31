@@ -44,7 +44,7 @@ class Configuration implements ConfigurationInterface
                 ->scalarNode('setting_backup_dir')
                     ->defaultValue('var/easy_backup/')
                 ->end()
-                ->scalarNode('setting_paths_to_be_backuped')
+                ->scalarNode('setting_paths_to_backup')
                 ->defaultValue(implode(PHP_EOL, $arrayOfPathsToBackup))
                 ->end()
             ->end()

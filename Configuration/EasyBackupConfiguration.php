@@ -33,6 +33,6 @@ class EasyBackupConfiguration implements SystemBundleConfiguration, \ArrayAccess
 
     public function getPathsToBeBackuped(): string
     {
-        return (string) $this->find('setting_paths_to_be_backuped');
+        return (string) $this->find('setting_paths_to_backup');
     }
 }
