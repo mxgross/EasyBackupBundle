@@ -24,6 +24,16 @@ class Configuration implements ConfigurationInterface
         /** @var ArrayNodeDefinition $rootNode */
         $rootNode = $treeBuilder->getRootNode();
 
+        $arrayOfPathsToBackup = [
+            '.env',
+            'config/packages/local.yaml',
+            'var/data/',
+            'var/plugins/',
+            'templates/invoice',
+            'var/invoices/',
+            'templates/invoice/renderer/',
+        ];
+
         $rootNode
             ->addDefaultsIfNotSet()
             ->children()
@@ -34,20 +44,8 @@ class Configuration implements ConfigurationInterface
                     ->defaultValue('var/easy_backup/')
                 ->end()
                 ->scalarNode('setting_paths_to_be_backuped')
-                ->defaultValue(
-                    '.env'
-                    .PHP_EOL
-                    .'config/packages/local.yaml'
-                    .PHP_EOL
-                    .'var/data/'
-                    .PHP_EOL
-                    .'var/plugins/'
-                    .PHP_EOL
-                    .'templates/invoice'
-                    .PHP_EOL
-                    .'kimai.invoice.documents'
-                    )
-            ->end()
+                ->defaultValue(implode(PHP_EOL, $arrayOfPathsToBackup))
+                ->end()
             ->end()
         ->end();
 

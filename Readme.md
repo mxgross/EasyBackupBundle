@@ -57,15 +57,20 @@ Make sure its writable by your webserver! We don't use the recommended
 
 ### What files are backed up?
 
-Currently backuped directories and files are:
+Currently per default backuped directories and files are:
 
 ```
 .env
 config/packages/local.yaml
 var/data/
 var/plugins/
-%kimai.invoice.documents%
+templates/invoice
+var/invoices/
+templates/invoice/renderer/
 ```
+You are free to edit this list via the Kimai settings page. Place each filename or paths in a seperate line. Make sure that there are no empty lines. Root path is your kimai installation path.
+
+![Update the paths to your needs](https://github.com/mxgross/EasyBackupBundle/blob/master/screenshot_files_and_paths_to_be_backed_up.jpg?raw=true)
 
 According to the [backup docu](https://www.kimai.org/documentation/backups.html) the Kimai version should be saved to.
 Also the current git head.
@@ -83,6 +88,12 @@ Per default it is
 ```
 /usr/bin/mysqldump --user={user} --password={password} --host={host} --port={port} --single-transaction --force {database}
 ```
+
+On a windows system with XAMPP as webserver the command could look like this
+```
+C:\xampp\mysql\bin\mysqldump --user={user} --password={password} --host={host} --port={port} --single-transaction --force {database}
+```
+
 You can remove or add parameters here if you need to. The variables in the curly braces will be replaced during the execution of the backup. All information for these variables are gathered from the DATABASE_URL defined in the .env file.
 ```
 # DATABASE_URL=mysql://user:password@host:port/database
