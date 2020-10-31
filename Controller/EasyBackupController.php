@@ -83,7 +83,10 @@ final class EasyBackupController extends AbstractController
             $filesAndDirs = array_diff($files, ['.', '..', self::GITIGNORE_NAME]);
 
             foreach ($filesAndDirs as $fileOrDir) {
-                if (is_file($backupDir.$fileOrDir)) {
+                /* Make sure that only files are listet which match our wanted regex */
+
+                if (is_file($backupDir.$fileOrDir)
+                && preg_match(self::REGEX_BACKUP_ZIP_NAME, $fileOrDir) == 1) {
                     $filesizeInMb = round(filesize($backupDir.$fileOrDir) / 1048576, 2);
                     $existingBackups[$fileOrDir] = $filesizeInMb;
                 }
