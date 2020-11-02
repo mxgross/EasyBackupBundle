@@ -27,7 +27,7 @@ use Symfony\Component\Routing\Annotation\Route;
 final class EasyBackupController extends AbstractController
 {
     public const CMD_GIT_HEAD = 'git rev-parse HEAD';
-    public const README_FILENAME = 'manifest.json';
+    public const MANIFEST_FILENAME = 'manifest.json';
     public const SQL_DUMP_FILENAME = 'database_dump.sql';
     public const REGEX_BACKUP_ZIP_NAME = '/^\d{4}-\d{2}-\d{2}_\d{6}\.zip$/';
     public const BACKUP_NAME_DATE_FORMAT = 'Y-m-d_His';
@@ -127,7 +127,7 @@ final class EasyBackupController extends AbstractController
 
         // Save the specific kimai version and git head
 
-        $readMeFile = $pluginBackupDir.self::README_FILENAME;
+        $readMeFile = $pluginBackupDir.self::MANIFEST_FILENAME;
         $this->filesystem->touch($readMeFile);
         $manifest = [
             'git' => 'not available',
@@ -188,7 +188,7 @@ final class EasyBackupController extends AbstractController
      */
     public function downloadAction(Request $request): Response
     {
-        $backupName = $request->query->get('dirname');
+        $backupName = $request->query->get('backupFilename');
 
         // Validate the given user input (filename)
 
@@ -202,13 +202,74 @@ final class EasyBackupController extends AbstractController
 
                 return $response;
             } else {
-                $this->flashError('backup.action.download.error');
+                $this->flashError('backup.action.filename.error');
             }
         } else {
-            $this->flashError('backup.action.download.error');
+            $this->flashError('backup.action.filename.error');
         }
 
         return $this->redirectToRoute('easy_backup');
+    }
+
+    /**
+     * @Route(path="/restore", name="restore", methods={"GET"})
+
+     *
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
+    public function restoreAction(Request $request)
+    {
+        $backupName = $request->query->get('backupFilename');
+
+        // Validate the given user input (filename)
+
+        if (preg_match(self::REGEX_BACKUP_ZIP_NAME, $backupName)) {
+            // Prepare paths for windows and unix system as well.
+
+            $zipNameAbsolute = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $this->getBackupDirectory().$backupName);
+            $backupName = basename($zipNameAbsolute, '.zip'); // e.g. 2020-11-02_174452
+            $restoreDir = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $this->getBackupDirectory());
+            $restoreDir = $restoreDir.$backupName.DIRECTORY_SEPARATOR; // e.g. .../kimai2/var/easy_backup/2020-11-02_174452
+
+            $this->unzip($zipNameAbsolute, $restoreDir);
+            $this->restoreMySQLDump($restoreDir);
+            $this->restoreDirsAndFiles($restoreDir);
+
+            // Cleanup the extracted backup folder
+            $this->filesystem->remove($restoreDir);
+        } else {
+            $this->flashError('backup.action.filename.error');
+        }
+
+        return $this->redirectToRoute('easy_backup');
+    }
+
+    private function restoreDirsAndFiles($restoreDir)
+    {
+        // TODO: Kopieren/überschreiben der Dateien, aber nicht solche wie die manifest etc.
+
+        $allFilesInBackup = scandir($restoreDir);
+        $blacklist = ['.', '..', self::SQL_DUMP_FILENAME, self::MANIFEST_FILENAME];
+
+        foreach ($allFilesInBackup as $fileOrDir) {
+            // Ignore some files and directories because they are not relevant
+
+            $filenameOnlyArr = explode(DIRECTORY_SEPARATOR, $fileOrDir);
+            $filenameOnly = end($filenameOnlyArr);
+
+            if (in_array($filenameOnly, $blacklist)) {
+                continue;
+            }
+
+            // Move the relevant files and overwrite already exiting ones.
+
+            $filenameNew = $this->kimaiRootPath.$fileOrDir;
+            $filenameBackup = $restoreDir.$fileOrDir;
+
+            echo '<p>from '.$filenameBackup.' to '.$filenameNew.'</p>';
+
+            //$this->filesystem->rename($filenameNew, $filenameBackup, true);
+        }
     }
 
     /**
@@ -219,7 +280,7 @@ final class EasyBackupController extends AbstractController
      */
     public function deleteAction(Request $request)
     {
-        $dirname = $request->query->get('dirname');
+        $dirname = $request->query->get('backupFilename');
 
         // Validate the given user input (filename)
 
@@ -254,7 +315,7 @@ final class EasyBackupController extends AbstractController
 
             // The MysqlDumpCommand per default looks like this: '/usr/bin/mysqldump --user={user} --password={password} --host={host} --port={port} --single-transaction --force {database}'
 
-            $mysqlDumpCmd = $this->configuration->getMysqlDumpCommand();
+            $mysqlDumpCmd = $this->configuration->getMysqlBinPath().$this->configuration->getMysqlDumpCommand();
             $mysqlDumpCmd = str_replace('{user}', $dbUser, $mysqlDumpCmd);
             $mysqlDumpCmd = str_replace('{password}', $dbPwd, $mysqlDumpCmd);
             $mysqlDumpCmd = str_replace('{host}', $dbHost, $mysqlDumpCmd);
@@ -278,6 +339,28 @@ final class EasyBackupController extends AbstractController
                 }
             }
         }
+    }
+
+    private function unzip($source, $destination)
+    {
+        if (extension_loaded('zip') === true) {
+            $zip = new ZipArchive();
+
+            if (file_exists($source) === true
+            && $zip->open($source) === true) {
+                $this->filesystem->mkdir($destination);
+
+                $zip->extractTo($destination);
+
+                return $zip->close();
+            } else {
+                $this->flashError('backup.action.zip.error.source');
+            }
+        } else {
+            $this->flashError('backup.action.zip.error.extension');
+        }
+
+        return false;
     }
 
     private function zipData($source, $destination)
@@ -335,7 +418,15 @@ final class EasyBackupController extends AbstractController
         $cmd = self::CMD_GIT_HEAD;
         $status[$cmd] = exec($cmd);
 
-        $cmd = $this->configuration->getMysqlDumpCommand();
+        // Check if the mysqldump command is working
+
+        $cmd = $this->configuration->getMysqlBinPath().$this->configuration->getMysqlDumpCommand();
+        $cmd = explode(' ', $cmd)[0].' --version';
+        $status[$cmd] = exec($cmd);
+
+        // Check if the mysql command is working
+
+        $cmd = $this->configuration->getMysqlBinPath().$this->configuration->getMysqlRestoreCommand();
         $cmd = explode(' ', $cmd)[0].' --version';
         $status[$cmd] = exec($cmd);
 
@@ -349,5 +440,37 @@ final class EasyBackupController extends AbstractController
         }
 
         return Constants::VERSION.' '.Constants::STATUS;
+    }
+
+    private function restoreMySQLDump($restoreDir)
+    {
+        // For mysql or mariadb we must execute additinal code. For sqlite it's just a file which will be moved.
+
+        $dbUrlExploded = explode(':', $this->dbUrl);
+        $dbUsed = $dbUrlExploded[0];
+
+        if ($dbUsed === 'mysql') {
+            $dbUser = str_replace('/', '', $dbUrlExploded[1]);
+            $dbPwd = explode('@', $dbUrlExploded[2])[0];
+            $dbHost = explode('@', $dbUrlExploded[2])[1];
+            $dbPort = explode('/', explode('@', $dbUrlExploded[3])[0])[0];
+            $dbName = explode('?', explode('/', $dbUrlExploded[3])[1])[0];
+
+            $mysqlCmd = $this->configuration->getMysqlBinPath().$this->configuration->getMysqlRestoreCommand();
+            $mysqlCmd = str_replace('{user}', $dbUser, $mysqlCmd);
+            $mysqlCmd = str_replace('{password}', $dbPwd, $mysqlCmd);
+            $mysqlCmd = str_replace('{host}', $dbHost, $mysqlCmd);
+            $mysqlCmd = str_replace('{port}', $dbPort, $mysqlCmd);
+            $mysqlCmd = str_replace('{database}', $dbName, $mysqlCmd);
+            $mysqlCmd = str_replace('{sql_file}', $restoreDir.self::SQL_DUMP_FILENAME, $mysqlCmd);
+
+            exec("($mysqlCmd 2>&1)", $outputArr, $numErrors);
+
+            if ($numErrors > 0) {
+                foreach ($outputArr as $error) {
+                    $this->flashError($error);
+                }
+            }
+        }
     }
 }
