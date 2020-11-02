@@ -22,6 +22,10 @@
                 <source>Delete</source>
                 <target>Löschen</target>
             </trans-unit>
+            <trans-unit id="Restore">
+                <source>Restore</source>
+                <target>Wiederherstellen</target>
+            </trans-unit>
             <trans-unit id="Download">
                 <source>Download</source>
                 <target>Herunterladen</target>
