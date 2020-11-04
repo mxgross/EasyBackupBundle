@@ -274,10 +274,19 @@ final class EasyBackupController extends AbstractController
                 $this->filesystem->touch($sqlDumpName);
 
                 foreach ($outputArr as $line) {
-                    $this->filesystem->appendToFile($sqlDumpName, $line."\n");
+                    if (!$this->startsWith('[Warning]', $line)) {
+                        $this->filesystem->appendToFile($sqlDumpName, $line."\n");
+                    }
                 }
             }
         }
+    }
+
+    private function startsWith($needle, $haystack)
+    {
+        $length = strlen($needle);
+
+        return substr($haystack, 0, $length) === $needle;
     }
 
     private function zipData($source, $destination)
