@@ -13,6 +13,7 @@ use App\Constants;
 use App\Controller\AbstractController;
 use KimaiPlugin\EasyBackupBundle\Configuration\EasyBackupConfiguration;
 use PhpOffice\PhpWord\Shared\ZipArchive;
+use Psr\Log\LoggerInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\Request;
@@ -53,12 +54,23 @@ final class EasyBackupController extends AbstractController
      */
     private $filesystem;
 
-    public function __construct(string $dataDirectory, EasyBackupConfiguration $configuration)
+    /**
+     * @var LoggerInterface
+     */
+    private $logger;
+
+    public function __construct(string $dataDirectory, EasyBackupConfiguration $configuration, LoggerInterface $logger = null)
     {
         $this->kimaiRootPath = dirname(dirname($dataDirectory)).DIRECTORY_SEPARATOR;
         $this->configuration = $configuration;
         $this->dbUrl = $_ENV['DATABASE_URL'];
         $this->filesystem = new Filesystem();
+        $this->logger = $logger;
+    }
+
+    private function logDebug($message, $context = [])
+    {
+        $this->logger->debug($message, $context);
     }
 
     private function getBackupDirectory(): string
@@ -83,7 +95,7 @@ final class EasyBackupController extends AbstractController
             $filesAndDirs = array_diff($files, ['.', '..', self::GITIGNORE_NAME]);
 
             foreach ($filesAndDirs as $fileOrDir) {
-                /* Make sure that only files are listet which match our wanted regex */
+                // Make sure that only files are listed which match our wanted regex
 
                 if (is_file($backupDir.$fileOrDir)
                 && preg_match(self::REGEX_BACKUP_ZIP_NAME, $fileOrDir) == 1) {
