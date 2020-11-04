@@ -274,7 +274,7 @@ final class EasyBackupController extends AbstractController
                 $this->filesystem->touch($sqlDumpName);
 
                 foreach ($outputArr as $line) {
-                    if (!$this->startsWith('[Warning]', $line)) {
+                    if (!$this->startsWith('mysqldump: [Warning]', $line)) {
                         $this->filesystem->appendToFile($sqlDumpName, $line."\n");
                     }
                 }
