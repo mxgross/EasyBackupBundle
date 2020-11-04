@@ -15,7 +15,7 @@
                 <target>The mysqldump command (Placeholders will be replaced automatically)</target>
             </trans-unit>
             <trans-unit id="label.easy_backup.setting_mysql_restore_command">
-                <source>label.easy_backup.setting_mysqldump_command</source>
+                <source>label.easy_backup.setting_mysql_restore_command</source>
                 <target>The MySQL command used to import the SQL backup file (Placeholders will be replaced automatically)</target>
             </trans-unit>
             <trans-unit id="label.easy_backup.setting_backup_dir">
