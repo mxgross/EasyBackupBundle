@@ -315,7 +315,7 @@ final class EasyBackupController extends AbstractController
             }
 
             $filenameAbsNew = str_replace($restoreDir, $this->kimaiRootPath, $filenameAbs);
-            $this->filesystem->rename($filenameNew, $filenameBackup, true);
+            $this->filesystem->rename($filenameAbs, $filenameAbsNew, true);
         }
     }
 
