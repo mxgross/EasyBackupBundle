@@ -14,6 +14,10 @@
                 <source>label.easy_backup.setting_backup_dir</source>
                 <target>Backup Verzeichnis</target>
             </trans-unit>
+            <trans-unit id="label.easy_backup.setting_paths_to_backup">
+                <source>label.easy_backup.setting_paths_to_backup</source>
+                <target>Zu sichernde Dateien und Pfade</target>
+            </trans-unit>
         </body>
     </file>
 </xliff>

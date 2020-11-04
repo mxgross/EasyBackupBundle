@@ -24,6 +24,17 @@ class Configuration implements ConfigurationInterface
         /** @var ArrayNodeDefinition $rootNode */
         $rootNode = $treeBuilder->getRootNode();
 
+        $arrayOfPathsToBackup = [
+            '.env',
+            'config/packages/local.yaml',
+            'var/data/',
+            'var/plugins/',
+            'var/invoices/',
+            'templates/invoice/',
+            'var/export/',
+            'templates/export/',
+        ];
+
         $rootNode
             ->addDefaultsIfNotSet()
             ->children()
@@ -32,6 +43,9 @@ class Configuration implements ConfigurationInterface
                 ->end()
                 ->scalarNode('setting_backup_dir')
                     ->defaultValue('var/easy_backup/')
+                ->end()
+                ->scalarNode('setting_paths_to_backup')
+                ->defaultValue(implode(PHP_EOL, $arrayOfPathsToBackup))
                 ->end()
             ->end()
         ->end();
