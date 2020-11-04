@@ -1,0 +1,45 @@
+{% extends 'base.html.twig' %}
+
+{% block page_title %}
+	{{ 'Easy Backup'|trans }}
+{% endblock %}
+{% block page_subtitle %}
+	{{ 'easy_backup.subtitle'|trans }}
+{% endblock %}
+
+{% block main %}
+
+	<div class="box box-secondary data_table">
+		<div class="box-header with-border">
+			<h3 class="box-title">{{ 'File overrides'|trans }}</h3>
+
+			<div class="box-tools pull-right">
+            	<button class="btn btn-box-tool" data-widget="collapse" data-toggle="tooltip" title="" data-original-title="Collapse">
+        			<i class="fas fa-minus"></i>
+    			</button>
+			</div>
+		</div>
+
+		<div class="box-body no-padding">
+			<table class="table dataTable table-striped table-hover">
+				<thead>
+					<tr>
+						<th scope="col">{{ 'Name'|trans }}</th>
+						<th scope="col">{{ 'New'|trans }}</th>
+					</tr>
+				</thead>
+				<tbody>
+					{% if fileOverwrites is defined %}
+						{% for fileNew in fileOverwrites %}
+							<tr>
+								<td>{{ fileNew }}</td>
+								<td>{{ fileNew }}</td>
+							</tr>
+						{% endfor %}
+					{% endif %}
+				</tbody>
+			</table>
+		</div>
+	</div>
+
+{% endblock %}

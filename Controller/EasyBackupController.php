@@ -244,31 +244,78 @@ final class EasyBackupController extends AbstractController
         return $this->redirectToRoute('easy_backup');
     }
 
+    /**
+     * @Route(path="/prepareRecovery", name="prepareRecovery", methods={"GET"})
+
+     *
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
+    public function prepareRecoveryAction(Request $request)
+    {
+        $backupName = $request->query->get('backupFilename');
+
+        // Validate the given user input (filename)
+
+        if (preg_match(self::REGEX_BACKUP_ZIP_NAME, $backupName)) {
+            // Prepare paths for windows and unix system as well.
+
+            $zipNameAbsolute = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $this->getBackupDirectory().$backupName);
+            $backupName = basename($zipNameAbsolute, '.zip'); // e.g. 2020-11-02_174452
+            $restoreDir = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $this->getBackupDirectory());
+            $restoreDir = $restoreDir.$backupName.DIRECTORY_SEPARATOR; // e.g. .../kimai2/var/easy_backup/2020-11-02_174452
+
+            $this->unzip($zipNameAbsolute, $restoreDir);
+        } else {
+            $this->flashError('backup.action.filename.error');
+        }
+
+        $fileOverwrites = $this->getFilesInDirRecursively($restoreDir);
+
+        $fileOverwrites = array_filter(str_replace('C:\\xampp\\htdocs\kimai2\\', '', $fileOverwrites));
+
+        // Cleanup the extracted backup folder
+        $this->filesystem->remove($restoreDir);
+
+        return $this->render('@EasyBackup/prepairRecovery.html.twig', [
+            'fileOverwrites' => $fileOverwrites,
+        ]);
+    }
+
+    private function getFilesInDirRecursively($dir, &$resultFileList = [])
+    {
+        $files = scandir($dir);
+
+        foreach ($files as $fileOrDir) {
+            $path = realpath($dir.DIRECTORY_SEPARATOR.$fileOrDir);
+            if (!is_dir($path)) {
+                $resultFileList[] = $path;
+            } elseif ($fileOrDir != '.' && $fileOrDir != '..') {
+                $this->getFilesInDirRecursively($path, $resultFileList);
+            }
+        }
+
+        return $resultFileList;
+    }
+
     private function restoreDirsAndFiles($restoreDir)
     {
-        // TODO: Kopieren/überschreiben der Dateien, aber nicht solche wie die manifest etc.
+        // Blacklist for files we don't want to move anywere else.
 
-        $allFilesInBackup = scandir($restoreDir);
-        $blacklist = ['.', '..', self::SQL_DUMP_FILENAME, self::MANIFEST_FILENAME];
+        $blacklist = [self::SQL_DUMP_FILENAME, self::MANIFEST_FILENAME];
+        $filePathsToRestore = $this->getFilesInDirRecursively($restoreDir);
 
-        foreach ($allFilesInBackup as $fileOrDir) {
-            // Ignore some files and directories because they are not relevant
-
-            $filenameOnlyArr = explode(DIRECTORY_SEPARATOR, $fileOrDir);
+        foreach ($filePathsToRestore as $filenameAbs) {
+            $filenameOnlyArr = explode(DIRECTORY_SEPARATOR, $filenameAbs);
             $filenameOnly = end($filenameOnlyArr);
+
+            // Some files in the backup dir are for internal usage, we don't want to move them anywere else
 
             if (in_array($filenameOnly, $blacklist)) {
                 continue;
             }
 
-            // Move the relevant files and overwrite already exiting ones.
-
-            $filenameNew = $this->kimaiRootPath.$fileOrDir;
-            $filenameBackup = $restoreDir.$fileOrDir;
-
-            echo '<p>from '.$filenameBackup.' to '.$filenameNew.'</p>';
-
-            //$this->filesystem->rename($filenameNew, $filenameBackup, true);
+            $filenameAbsNew = str_replace($restoreDir, $this->kimaiRootPath, $filenameAbs);
+            $this->filesystem->rename($filenameNew, $filenameBackup, true);
         }
     }
 
