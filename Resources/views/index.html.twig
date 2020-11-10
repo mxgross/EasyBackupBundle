@@ -69,6 +69,7 @@
 						<th scope="col">{{ 'Name'|trans }}</th>
 						<th scope="col">{{ 'Size'|trans }}</th>
 						<th scope="col">{{ 'Delete'|trans }}</th>
+						<th scope="col">{{ 'Restore'|trans }}</th>
 						<th scope="col">{{ 'Download'|trans }}</th>
 					</tr>
 				</thead>
@@ -82,14 +83,21 @@
 								<td>{{ size }}MB</td>
 
 								<td>
-									<a href="{{ path('delete', {'dirname': item}) }}" class="confirmation-link btn btn-danger" data-question="confirm.delete" data-msg-error="action.delete.error" data-msg-success="action.delete.success">
+									<a href="{{ path('delete', {'backupFilename': item}) }}" class="confirmation-link btn btn-danger" data-question="confirm.delete" data-msg-error="action.delete.error" data-msg-success="action.delete.success">
 										<i class="fas fa-trash"></i>
 										{{ 'Delete'|trans }}
 									</a>
 								</td>
 
 								<td>
-									<a href="{{ path('download', {'dirname': item}) }}" class="btn btn-info">
+									<a href="{{ path('restore', {'backupFilename': item}) }}" class="confirmation-link btn btn-caution" data-question="confirm.restore" data-msg-error="action.restore.error" data-msg-success="action.restore.success">
+										<i class="fas fa-undo"></i>
+										{{ 'Restore'|trans }}
+									</a>
+								</td>
+
+								<td>
+									<a href="{{ path('download', {'backupFilename': item}) }}" class="btn btn-info">
 										<i class="fas fa-download"></i>
 										{{ 'Download'|trans }}
 									</a>
