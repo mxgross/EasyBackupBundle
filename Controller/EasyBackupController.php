@@ -57,7 +57,7 @@ final class EasyBackupController extends AbstractController
     {
         $this->kimaiRootPath = dirname(dirname($dataDirectory)).DIRECTORY_SEPARATOR;
         $this->configuration = $configuration;
-        $this->dbUrl = $_ENV['DATABASE_URL'];
+        $this->dbUrl = $_SERVER['DATABASE_URL'];
         $this->filesystem = new Filesystem();
     }
 
@@ -347,6 +347,13 @@ final class EasyBackupController extends AbstractController
         $cmd = $this->configuration->getMysqlDumpCommand();
         $cmd = explode(' ', $cmd)[0].' --version';
         $status[$cmd] = exec($cmd);
+
+        // Check used database
+
+        $dbUrlExploded = explode(':', $this->dbUrl);
+        $dbUsed = $dbUrlExploded[0];
+
+        $status['Database'] = $dbUsed;
 
         return $status;
     }
