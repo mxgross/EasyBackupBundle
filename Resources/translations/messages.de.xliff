@@ -30,6 +30,10 @@
                 <source>Download</source>
                 <target>Herunterladen</target>
             </trans-unit>
+            <trans-unit id="confirm.restore">
+                <source>confirm.restore</source>
+                <target>Wollen Sie das Backup wirklich einspielen?</target>
+            </trans-unit>
             <trans-unit id="View status checks">
                 <source>View status checks</source>
                 <target>Status Prüfungen</target>

@@ -77,7 +77,7 @@
 					{% if existingBackups is defined %}
 						{% for item,size in existingBackups %}
 							<tr>
-								<td>{{ loop.index }}</td>
+								<td>{{ existingBackups|length - loop.index + 1 }}</td>
 								<td>{{ item }}</td>
 
 								<td>{{ size }}MB</td>

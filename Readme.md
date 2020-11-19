@@ -113,10 +113,7 @@ By default, this are assigned to all users with the role `ROLE_SUPER_ADMIN`.
 **Please adjust the permission settings in your user administration.** 
 
 ## Restore
-Currently the plugin has no automation to restore a backup per click. You have to do it by hand. Just copy the backuped directories and files into your Kimai2 installation. Some hints can be found here: [Official Kimai2 backup and restore docu](https://www.kimai.org/documentation/backups.html)
+With one click you can restore your system to the state it had when the backup was created.
+Caution: All database entries created between the backup and now will get lost.
 
-If you are using a mysql/mariadb database you can import the backuped .sql file with tools like phpMyAdmin or by the command
-```
-mysql -u username -p database_name < file.sql
-```
-For additional information please lookup the mysql commands documentation.
+Files contained in the backup may overwrite already existing files.
