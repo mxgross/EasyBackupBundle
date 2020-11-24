@@ -508,10 +508,7 @@ final class EasyBackupController extends AbstractController
         $arrayOfPathsToBackup = explode(PHP_EOL, $this->configuration->getPathsToBeBackuped());
         foreach ($arrayOfPathsToBackup as $filename) {
             $sourceFile = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $this->kimaiRootPath.$filename);
-
-            if (file_exists($sourceFile)) {
-                $status["Path '$sourceFile' readable"] = is_readable($sourceFile);
-            }
+            $status["Path '$sourceFile' readable"] = is_readable($sourceFile);
         }
 
         return $status;
