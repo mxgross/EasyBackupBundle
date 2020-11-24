@@ -170,8 +170,6 @@ final class EasyBackupController extends AbstractController
                 if (is_file($sourceFile)) {
                     $this->filesystem->copy($sourceFile, $targetFile);
                 }
-
-                // Todo: Add error messages
             }
         }
 
@@ -504,6 +502,11 @@ final class EasyBackupController extends AbstractController
         $dbUsed = $dbUrlExploded[0];
 
         $status['Database'] = $dbUsed;
+
+        $arrayOfPathsToBackup = explode(PHP_EOL, $this->configuration->getPathsToBeBackuped());
+        foreach ($arrayOfPathsToBackup as $filename) {
+            $status["Path '$filename' readable"] = is_readable($filename);
+        }
 
         return $status;
     }
