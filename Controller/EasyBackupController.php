@@ -156,7 +156,7 @@ final class EasyBackupController extends AbstractController
 
         // Backing up files and directories
 
-        $arrayOfPathsToBackup = explode(PHP_EOL, $this->configuration->getPathsToBeBackuped());
+        $arrayOfPathsToBackup = preg_split('/\r\n|\r|\n/', $this->configuration->getPathsToBeBackuped());
 
         foreach ($arrayOfPathsToBackup as $filename) {
             $sourceFile = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $this->kimaiRootPath.$filename);
@@ -505,9 +505,10 @@ final class EasyBackupController extends AbstractController
 
         // Check if all dirs to backup are readable. Ignore non existing.
 
-        $arrayOfPathsToBackup = explode(PHP_EOL, $this->configuration->getPathsToBeBackuped());
+        $arrayOfPathsToBackup = preg_split('/\r\n|\r|\n/', $this->configuration->getPathsToBeBackuped());
         foreach ($arrayOfPathsToBackup as $filename) {
             $sourceFile = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $this->kimaiRootPath.$filename);
+            $sourceFile = realpath($sourceFile);
             $status["Path '$sourceFile' readable"] = is_readable($sourceFile);
         }
 
