@@ -99,7 +99,7 @@ final class EasyBackupController extends AbstractController
 
                 if (is_file($backupDir.$fileOrDir)
                 && preg_match(self::REGEX_BACKUP_ZIP_NAME, $fileOrDir) == 1) {
-                    $filesizeInMb = round(filesize($backupDir.$fileOrDir) / 1048576, 2);
+                    $filesizeInMb = round(filesize($backupDir.$fileOrDir) / 1048576, 3);
                     $existingBackups[$fileOrDir] = $filesizeInMb;
                 }
             }
@@ -508,8 +508,7 @@ final class EasyBackupController extends AbstractController
         $arrayOfPathsToBackup = preg_split('/\r\n|\r|\n/', $this->configuration->getPathsToBeBackuped());
         foreach ($arrayOfPathsToBackup as $filename) {
             $sourceFile = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $this->kimaiRootPath.$filename);
-            $sourceFile = realpath($sourceFile);
-            $status["Path '$sourceFile' readable"] = is_readable($sourceFile);
+            $status["Path '$sourceFile' readable/existing"] = is_readable($sourceFile) ? 'yes' : 'no';
         }
 
         return $status;

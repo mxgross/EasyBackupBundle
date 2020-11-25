@@ -80,7 +80,7 @@
 								<td>{{ existingBackups|length - loop.index + 1 }}</td>
 								<td>{{ item }}</td>
 
-								<td>{{ size }}MB</td>
+								<td>{{ size|number_format(3) }}MB</td>
 
 								<td>
 									<a href="{{ path('delete', {'backupFilename': item}) }}" class="confirmation-link btn btn-danger" data-question="confirm.delete" data-msg-error="action.delete.error" data-msg-success="action.delete.success">
