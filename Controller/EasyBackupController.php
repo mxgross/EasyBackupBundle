@@ -34,9 +34,9 @@ final class EasyBackupController extends AbstractController
     public const BACKUP_NAME_DATE_FORMAT = 'Y-m-d_His';
     public const GITIGNORE_NAME = '.gitignore';
     public const LOG_FILE_NAME = 'easybackup.log';
-    public const LOG_ERROR_PREFIX = 'ERROR:';
-    public const LOG_WARN_PREFIX = 'WARNING:';
-    public const LOG_INFO_PREFIX = 'INFO:';
+    public const LOG_ERROR_PREFIX = 'ERROR';
+    public const LOG_WARN_PREFIX = 'WARNING';
+    public const LOG_INFO_PREFIX = 'INFO';
 
     /**
      * @var string
@@ -81,7 +81,7 @@ final class EasyBackupController extends AbstractController
         }
 
         $dateTime = date('Y-m-d H:i:s');
-        $this->filesystem->appendToFile($logFile, "[$dateTime] $logLevel $message".PHP_EOL);
+        $this->filesystem->appendToFile($logFile, "[$dateTime] $logLevel: $message".PHP_EOL);
     }
 
     private function getBackupDirectory(): string
@@ -351,10 +351,9 @@ final class EasyBackupController extends AbstractController
         // Blacklist for files we don't want to move anywere else.
 
         $blacklist = [self::SQL_DUMP_FILENAME, self::MANIFEST_FILENAME];
-        $this->log(self::LOG_INFO_PREFIX, 'Blacklist of files not to move: '.$blacklist.join(', '));
+        $this->log(self::LOG_INFO_PREFIX, 'Blacklist of files not to move: '.join(', ', $blacklist));
 
         $filePathsToRestore = $this->getFilesInDirRecursively($restoreDir);
-        $this->log(self::LOG_INFO_PREFIX, 'Blacklist of files not to move: '.$filePathsToRestore.join(', '));
 
         foreach ($filePathsToRestore as $filenameAbs) {
             $filenameOnlyArr = explode(DIRECTORY_SEPARATOR, $filenameAbs);
@@ -367,8 +366,8 @@ final class EasyBackupController extends AbstractController
             }
 
             $filenameAbsNew = str_replace($restoreDir, $this->kimaiRootPath, $filenameAbs);
+            $this->log(self::LOG_INFO_PREFIX, "Copy '$filenameAbs' to '$filenameAbsNew'.");
             $this->filesystem->rename($filenameAbs, $filenameAbsNew, true);
-            $this->log(self::LOG_INFO_PREFIX, "Copied '$filenameAbs' to '$filenameAbsNew'.");
         }
     }
 

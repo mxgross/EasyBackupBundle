@@ -27,7 +27,7 @@
 				If you see a warning icon
 				<i class="fas fa-exclamation-triangle text-red"></i>
 				in the list below, you should talk to your administrator.
-																The path is either not readable or not writable and EasyBackup might not work as expected.
+																				The path is either not readable or not writable and EasyBackup might not work as expected.
 			</p>
 			<table class="table">
 				<tbody>
@@ -55,7 +55,12 @@
 
 	<div class="box box-secondary collapsed-box">
 		<div class="box-header with-border">
-			<h3 class="box-title">Latest log</h3>
+			<h3 class="box-title">
+				Latest log
+				{% if 'ERROR' in log %}
+					<i class="fas fa-exclamation-triangle text-red"></i>
+				{% endif %}
+			</h3>
 			<div class="box-tools pull-right">
 				<button class="btn btn-box-tool" data-widget="collapse" data-toggle="tooltip" title="" data-original-title="Collapse">
 					<i class="fas fa-plus"></i>
