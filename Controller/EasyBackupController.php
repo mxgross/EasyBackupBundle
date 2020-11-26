@@ -540,24 +540,26 @@ final class EasyBackupController extends AbstractController
         $cmd = self::CMD_GIT_HEAD;
         $status[$cmd] = exec($cmd);
 
-        // Check if the mysqldump command is working
-
-        $cmd = $this->configuration->getMysqlDumpCommand();
-        $cmd = explode(' ', $cmd)[0].' --version';
-        $status[$cmd] = exec($cmd);
-
-        // Check if the mysql command is working
-
-        $cmd = $this->configuration->getMysqlRestoreCommand();
-        $cmd = explode(' ', $cmd)[0].' --version';
-        $status[$cmd] = exec($cmd);
-
         // Check used database
 
         $dbUrlExploded = explode(':', $this->dbUrl);
         $dbUsed = $dbUrlExploded[0];
 
         $status['Database'] = $dbUsed;
+
+        if ($dbUsed == 'mysql') {
+            // Check if the mysqldump command is working
+
+            $cmd = $this->configuration->getMysqlDumpCommand();
+            $cmd = explode(' ', $cmd)[0].' --version';
+            $status[$cmd] = exec($cmd);
+
+            // Check if the mysql command is working
+
+            $cmd = $this->configuration->getMysqlRestoreCommand();
+            $cmd = explode(' ', $cmd)[0].' --version';
+            $status[$cmd] = exec($cmd);
+        }
 
         return $status;
     }
