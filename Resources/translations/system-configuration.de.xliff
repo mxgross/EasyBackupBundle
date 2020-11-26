@@ -6,17 +6,13 @@
                 <source>easy_backup_config</source>
                 <target>EasyBackup Konfigurationen</target>
             </trans-unit>
-            <trans-unit id="label.easy_backup.setting_mysql_bin_path">
-                <source>label.easy_backup.setting_mysql_bin_path</source>
-                <target>Pfad zur MySQL bin (Platzhalter werden automatisch ersetzt)</target>
-            </trans-unit>
             <trans-unit id="label.easy_backup.setting_mysqldump_command">
                 <source>label.easy_backup.setting_mysqldump_command</source>
                 <target>Ihr mysqldump Befehl (Platzhalter werden automatisch ersetzt)</target>
             </trans-unit>
             <trans-unit id="label.easy_backup.setting_mysql_restore_command">
                 <source>label.easy_backup.setting_mysql_restore_command</source>
-                <target>MySQL Befehl für den Import der SQL Backup Datei (Placeholders will be replaced automatically)</target>
+                <target>MySQL Befehl für den Import der SQL Backup Datei (Platzhalter werden automatisch ersetzt)</target>
             </trans-unit>
             <trans-unit id="label.easy_backup.setting_backup_dir">
                 <source>label.easy_backup.setting_backup_dir</source>

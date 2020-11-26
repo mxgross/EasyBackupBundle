@@ -9,7 +9,7 @@
 
 {% block main %}
 
-	<div class="box box-success collapsed-box">
+	<div class="box box-primary collapsed-box">
 		<div class="box-header with-border">
 			<h3 class="box-title">{{ 'View status checks'|trans }}
 				{% if '0' in status or '' in status %}
@@ -26,8 +26,7 @@
 			<p>
 				If you see a warning icon
 				<i class="fas fa-exclamation-triangle text-red"></i>
-				in the list below, you should talk to your administrator.
-																				The path is either not readable or not writable and EasyBackup might not work as expected.
+				in the list below, you should check the settings for this plugin and/or talk to your administrator. EasyBackup might not work as expected!
 			</p>
 			<table class="table">
 				<tbody>

@@ -6,10 +6,6 @@
                 <source>easy_backup_config</source>
                 <target>EasyBackup configurations</target>
             </trans-unit>
-            <trans-unit id="label.easy_backup.setting_mysql_bin_path">
-                <source>label.easy_backup.setting_mysql_bin_path</source>
-                <target>Path to the mysql bin (Placeholders will be replaced automatically)</target>
-            </trans-unit>
             <trans-unit id="label.easy_backup.setting_mysqldump_command">
                 <source>label.easy_backup.setting_mysqldump_command</source>
                 <target>The mysqldump command (Placeholders will be replaced automatically)</target>

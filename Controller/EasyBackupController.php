@@ -416,7 +416,7 @@ final class EasyBackupController extends AbstractController
 
             // The MysqlDumpCommand per default looks like this: '/usr/bin/mysqldump --user={user} --password={password} --host={host} --port={port} --single-transaction --force {database}'
 
-            $mysqlDumpCmd = $this->configuration->getMysqlBinPath().$this->configuration->getMysqlDumpCommand();
+            $mysqlDumpCmd = $this->configuration->getMysqlDumpCommand();
             $mysqlDumpCmd = str_replace('{user}', $dbUser, $mysqlDumpCmd);
             $mysqlDumpCmd = str_replace('{password}', $dbPwd, $mysqlDumpCmd);
             $mysqlDumpCmd = str_replace('{host}', $dbHost, $mysqlDumpCmd);
@@ -542,13 +542,13 @@ final class EasyBackupController extends AbstractController
 
         // Check if the mysqldump command is working
 
-        $cmd = $this->configuration->getMysqlBinPath().$this->configuration->getMysqlDumpCommand();
+        $cmd = $this->configuration->getMysqlDumpCommand();
         $cmd = explode(' ', $cmd)[0].' --version';
         $status[$cmd] = exec($cmd);
 
         // Check if the mysql command is working
 
-        $cmd = $this->configuration->getMysqlBinPath().$this->configuration->getMysqlRestoreCommand();
+        $cmd = $this->configuration->getMysqlRestoreCommand();
         $cmd = explode(' ', $cmd)[0].' --version';
         $status[$cmd] = exec($cmd);
 
@@ -587,7 +587,7 @@ final class EasyBackupController extends AbstractController
             $dbPort = explode('/', explode('@', $dbUrlExploded[3])[0])[0];
             $dbName = explode('?', explode('/', $dbUrlExploded[3])[1])[0];
 
-            $mysqlCmd = $this->configuration->getMysqlBinPath().$this->configuration->getMysqlRestoreCommand();
+            $mysqlCmd = $this->configuration->getMysqlRestoreCommand();
             $mysqlCmd = str_replace('{user}', $dbUser, $mysqlCmd);
             $mysqlCmd = str_replace('{password}', $dbPwd, $mysqlCmd);
             $mysqlCmd = str_replace('{host}', $dbHost, $mysqlCmd);

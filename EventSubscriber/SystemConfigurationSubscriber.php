@@ -32,12 +32,6 @@ class SystemConfigurationSubscriber implements EventSubscriberInterface
                 ->setSection('easy_backup_config')
                 ->setConfiguration([
                     (new Configuration())
-                        ->setName('easy_backup.setting_mysql_bin_path')
-                        ->setLabel('easy_backup.setting_mysql_bin_path')
-                        ->setTranslationDomain('system-configuration')
-                        ->setRequired(false)
-                        ->setType(TextType::class),
-                    (new Configuration())
                         ->setName('easy_backup.setting_mysqldump_command')
                         ->setLabel('easy_backup.setting_mysqldump_command')
                         ->setTranslationDomain('system-configuration')
