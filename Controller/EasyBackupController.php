@@ -547,7 +547,7 @@ final class EasyBackupController extends AbstractController
 
         $status['Database'] = $dbUsed;
 
-        if ($dbUsed == 'mysql') {
+        if ($dbUsed === 'mysql' || $dbUsed === 'mysqli') {
             // Check if the mysqldump command is working
 
             $cmd = $this->configuration->getMysqlDumpCommand();
