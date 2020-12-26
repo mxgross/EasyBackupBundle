@@ -144,7 +144,7 @@ final class EasyBackupController extends AbstractController
 
         // Backing up files and directories
 
-        $arrayOfPathsToBackup = explode(PHP_EOL, $this->configuration->getPathsToBeBackuped());
+        $arrayOfPathsToBackup = preg_split('/\n|\r\n?/', $this->configuration->getPathsToBeBackuped());
 
         foreach ($arrayOfPathsToBackup as $filename) {
             $sourceFile = $this->kimaiRootPath.$filename;
