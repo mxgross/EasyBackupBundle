@@ -359,15 +359,36 @@ final class EasyBackupController extends AbstractController
             $filenameOnlyArr = explode(DIRECTORY_SEPARATOR, $filenameAbs);
             $filenameOnly = end($filenameOnlyArr);
 
-            // Some files in the backup dir are for internal usage, we don't want to move them anywere else
+            // Some files in the backup dir are for internal usage, we don't want to move them anywere else.
 
             if (in_array($filenameOnly, $blacklist)) {
                 continue;
             }
 
             $filenameAbsNew = str_replace($restoreDir, $this->kimaiRootPath, $filenameAbs);
-            $this->log(self::LOG_INFO_PREFIX, "Copy '$filenameAbs' to '$filenameAbsNew'.");
-            $this->filesystem->rename($filenameAbs, $filenameAbsNew, true);
+            $filepermsSource = substr(sprintf('%o', fileperms($filenameAbs)), -4);
+            $filepermsDestination = substr(sprintf('%o', fileperms($filenameAbsNew)), -4);
+            $this->log(self::LOG_INFO_PREFIX, "Copying '$filenameAbs' (Permissions: $filepermsSource) to '$filenameAbsNew' (Permissions: $filepermsDestination).");
+
+            // Try to move the file.
+
+            if (!is_writable($filenameAbsNew)) {
+                $this->log(self::LOG_INFO_PREFIX, "'$filenameAbsNew' is not writable.");
+
+                // If it isn't working try to change the file permissions.
+
+                $newFilePermissions = 0777;
+                $this->log(self::LOG_INFO_PREFIX, "Trying to change the file permissions of '$filenameAbsNew' to '$newFilePermissions' automatically.");
+                if (chmod($filenameAbsNew, $newFilePermissions)) {
+                    if (rename($filenameAbs, $filenameAbsNew)) {
+                        $this->log(self::LOG_INFO_PREFIX, "Successfully copied '$filenameAbsNew' after file permissions were changed.");
+                    } else {
+                        $this->log(self::LOG_ERROR_PREFIX, "Unable to copy to '$filenameAbsNew'. Please check the file permissions and try it again.");
+                    }
+                } else {
+                    $this->log(self::LOG_ERROR_PREFIX, "Failed to change permissions of '$filenameAbsNew' to '$filePermissions'.");
+                }
+            }
         }
     }
 
