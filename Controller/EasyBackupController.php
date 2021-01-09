@@ -13,6 +13,7 @@ use App\Constants;
 use App\Controller\AbstractController;
 use KimaiPlugin\EasyBackupBundle\Configuration\EasyBackupConfiguration;
 use PhpOffice\PhpWord\Shared\ZipArchive;
+use Psr\Log\LoggerInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\Request;
@@ -27,11 +28,15 @@ use Symfony\Component\Routing\Annotation\Route;
 final class EasyBackupController extends AbstractController
 {
     public const CMD_GIT_HEAD = 'git rev-parse HEAD';
-    public const README_FILENAME = 'manifest.json';
+    public const MANIFEST_FILENAME = 'manifest.json';
     public const SQL_DUMP_FILENAME = 'database_dump.sql';
     public const REGEX_BACKUP_ZIP_NAME = '/^\d{4}-\d{2}-\d{2}_\d{6}\.zip$/';
     public const BACKUP_NAME_DATE_FORMAT = 'Y-m-d_His';
     public const GITIGNORE_NAME = '.gitignore';
+    public const LOG_FILE_NAME = 'easybackup.log';
+    public const LOG_ERROR_PREFIX = 'ERROR';
+    public const LOG_WARN_PREFIX = 'WARNING';
+    public const LOG_INFO_PREFIX = 'INFO';
 
     /**
      * @var string
@@ -53,17 +58,35 @@ final class EasyBackupController extends AbstractController
      */
     private $filesystem;
 
-    public function __construct(string $dataDirectory, EasyBackupConfiguration $configuration)
+    /**
+     * @var LoggerInterface
+     */
+    private $logger;
+
+    public function __construct(string $dataDirectory, EasyBackupConfiguration $configuration, LoggerInterface $logger = null)
     {
         $this->kimaiRootPath = dirname(dirname($dataDirectory)).DIRECTORY_SEPARATOR;
         $this->configuration = $configuration;
         $this->dbUrl = $_SERVER['DATABASE_URL'];
         $this->filesystem = new Filesystem();
+        $this->logger = $logger;
+    }
+
+    private function log($logLevel, $message)
+    {
+        $logFile = $this->getBackupDirectory().self::LOG_FILE_NAME;
+
+        if (!file_exists($logFile)) {
+            $this->filesystem->touch($logFile);
+        }
+
+        $dateTime = date('Y-m-d H:i:s');
+        $this->filesystem->appendToFile($logFile, "[$dateTime] $logLevel: $message".PHP_EOL);
     }
 
     private function getBackupDirectory(): string
     {
-        return $this->kimaiRootPath.$this->configuration->getBackupDir();
+        return str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $this->kimaiRootPath.$this->configuration->getBackupDir());
     }
 
     /**
@@ -83,19 +106,23 @@ final class EasyBackupController extends AbstractController
             $filesAndDirs = array_diff($files, ['.', '..', self::GITIGNORE_NAME]);
 
             foreach ($filesAndDirs as $fileOrDir) {
-                /* Make sure that only files are listet which match our wanted regex */
+                // Make sure that only files are listed which match our wanted regex
 
                 if (is_file($backupDir.$fileOrDir)
                 && preg_match(self::REGEX_BACKUP_ZIP_NAME, $fileOrDir) == 1) {
-                    $filesizeInMb = round(filesize($backupDir.$fileOrDir) / 1048576, 2);
+                    $filesizeInMb = round(filesize($backupDir.$fileOrDir) / 1048576, 3);
                     $existingBackups[$fileOrDir] = $filesizeInMb;
                 }
             }
         }
 
+        $logFile = $this->getBackupDirectory().self::LOG_FILE_NAME;
+        $log = file_exists($logFile) ? file_get_contents($logFile) : 'empty';
+
         return $this->render('@EasyBackup/index.html.twig', [
             'existingBackups' => $existingBackups,
             'status' => $status,
+            'log' => $log,
         ]);
     }
 
@@ -106,14 +133,17 @@ final class EasyBackupController extends AbstractController
      */
     public function createBackupAction(): Response
     {
-        // Don't use the /var/data folder, because we want to backup it too!
+        // Clear old log file
+        $logFile = $this->getBackupDirectory().self::LOG_FILE_NAME;
+        $this->filesystem->remove($logFile);
+        $this->log(self::LOG_INFO_PREFIX, '--- S T A R T   C R E A T I N G   B A C K U P ---');
 
         $backupName = date(self::BACKUP_NAME_DATE_FORMAT);
         $backupDir = $this->getBackupDirectory();
         $pluginBackupDir = $backupDir.$backupName.DIRECTORY_SEPARATOR;
 
         // Create the backup folder
-
+        $this->log(self::LOG_INFO_PREFIX, "Creating backup dir '$pluginBackupDir'.");
         $this->filesystem->mkdir($pluginBackupDir);
 
         // If not yet existing, create a .gitignore to exclude the backup files.
@@ -127,8 +157,9 @@ final class EasyBackupController extends AbstractController
 
         // Save the specific kimai version and git head
 
-        $readMeFile = $pluginBackupDir.self::README_FILENAME;
-        $this->filesystem->touch($readMeFile);
+        $manifestFile = $pluginBackupDir.self::MANIFEST_FILENAME;
+        $this->log(self::LOG_INFO_PREFIX, "Creating manifest file '$manifestFile'.");
+        $this->filesystem->touch($manifestFile);
         $manifest = [
             'git' => 'not available',
             'version' => $this->getKimaiVersion(),
@@ -140,26 +171,30 @@ final class EasyBackupController extends AbstractController
         } catch (\Exception $ex) {
             // ignore exception
         }
-        $this->filesystem->appendToFile($readMeFile, json_encode($manifest, JSON_PRETTY_PRINT));
+        $this->filesystem->appendToFile($manifestFile, json_encode($manifest, JSON_PRETTY_PRINT));
 
         // Backing up files and directories
-
-        $arrayOfPathsToBackup = explode(PHP_EOL, $this->configuration->getPathsToBeBackuped());
+        $this->log(self::LOG_INFO_PREFIX, 'Get files and dirs to backup.');
+        $arrayOfPathsToBackup = preg_split('/\r\n|\r|\n/', $this->configuration->getPathsToBeBackuped());
 
         foreach ($arrayOfPathsToBackup as $filename) {
-            $sourceFile = $this->kimaiRootPath.$filename;
-            $targetFile = $pluginBackupDir.$filename;
+            $sourceFile = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $this->kimaiRootPath.$filename);
+            $targetFile = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $pluginBackupDir.$filename);
+
+            $this->log(self::LOG_INFO_PREFIX, "Start to backup '$sourceFile'.");
 
             if ($this->filesystem->exists($sourceFile)) {
                 if (is_dir($sourceFile)) {
+                    $this->log(self::LOG_INFO_PREFIX, "It's a directory. Start to mirror it to '$targetFile'.");
                     $this->filesystem->mirror($sourceFile, $targetFile);
                 }
 
                 if (is_file($sourceFile)) {
+                    $this->log(self::LOG_INFO_PREFIX, "It's a file. Start to copy it to '$targetFile'.");
                     $this->filesystem->copy($sourceFile, $targetFile);
                 }
-
-                // Todo: Add error messages
+            } else {
+                $this->log(self::LOG_WARN_PREFIX, "Path '$sourceFile' is not existing or not accessable.");
             }
         }
 
@@ -172,10 +207,14 @@ final class EasyBackupController extends AbstractController
 
         // Now the temporary files can be deleted
 
+        $this->log(self::LOG_INFO_PREFIX, "Remove temp dir '$pluginBackupDir'.");
         $this->filesystem->remove($pluginBackupDir);
+
+        $this->log(self::LOG_INFO_PREFIX, "Remove temp file '$sqlDumpName'.");
         $this->filesystem->remove($sqlDumpName);
 
         $this->flashSuccess('backup.action.create.success');
+        $this->log(self::LOG_INFO_PREFIX, '--- F I N I S H E D   C R E A T I N G   B A C K U P ---');
 
         return $this->redirectToRoute('easy_backup');
     }
@@ -188,7 +227,7 @@ final class EasyBackupController extends AbstractController
      */
     public function downloadAction(Request $request): Response
     {
-        $backupName = $request->query->get('dirname');
+        $backupName = $request->query->get('backupFilename');
 
         // Validate the given user input (filename)
 
@@ -202,13 +241,155 @@ final class EasyBackupController extends AbstractController
 
                 return $response;
             } else {
-                $this->flashError('backup.action.download.error');
+                $this->flashError('backup.action.filename.error');
             }
         } else {
-            $this->flashError('backup.action.download.error');
+            $this->flashError('backup.action.filename.error');
         }
 
         return $this->redirectToRoute('easy_backup');
+    }
+
+    /**
+     * @Route(path="/restore", name="restore", methods={"GET"})
+
+     *
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
+    public function restoreAction(Request $request)
+    {
+        // Clear old log file
+        $logFile = $this->getBackupDirectory().self::LOG_FILE_NAME;
+        $this->filesystem->remove($logFile);
+
+        $this->log(self::LOG_INFO_PREFIX, '--- S T A R T   R E S T O R E ---');
+
+        $backupName = $request->query->get('backupFilename');
+
+        // Validate the given user input (filename)
+
+        if (preg_match(self::REGEX_BACKUP_ZIP_NAME, $backupName)) {
+            // Prepare paths for windows and unix system as well.
+
+            $zipNameAbsolute = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $this->getBackupDirectory().$backupName);
+            $backupName = basename($zipNameAbsolute, '.zip'); // e.g. 2020-11-02_174452
+            $restoreDir = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $this->getBackupDirectory());
+            $restoreDir = $restoreDir.$backupName.DIRECTORY_SEPARATOR; // e.g. .../kimai2/var/easy_backup/2020-11-02_174452
+
+            $this->unzip($zipNameAbsolute, $restoreDir);
+            $this->restoreMySQLDump($restoreDir);
+            $this->restoreDirsAndFiles($restoreDir);
+
+            // Cleanup the extracted backup folder
+            $this->log(self::LOG_INFO_PREFIX, "Remove temp dir '$restoreDir'.");
+            $this->filesystem->remove($restoreDir);
+        } else {
+            $this->flashError('backup.action.filename.error');
+            $this->log(self::LOG_ERRROR_PREFIX, "Backup '$backupName' not found.");
+        }
+
+        return $this->redirectToRoute('easy_backup');
+    }
+
+    /**
+     * @Route(path="/prepareRecovery", name="prepareRecovery", methods={"GET"})
+
+     *
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
+    public function prepareRecoveryAction(Request $request)
+    {
+        $backupName = $request->query->get('backupFilename');
+
+        // Validate the given user input (filename)
+
+        if (preg_match(self::REGEX_BACKUP_ZIP_NAME, $backupName)) {
+            // Prepare paths for windows and unix system as well.
+
+            $zipNameAbsolute = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $this->getBackupDirectory().$backupName);
+            $backupName = basename($zipNameAbsolute, '.zip'); // e.g. 2020-11-02_174452
+            $restoreDir = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $this->getBackupDirectory());
+            $restoreDir = $restoreDir.$backupName.DIRECTORY_SEPARATOR; // e.g. .../kimai2/var/easy_backup/2020-11-02_174452
+
+            $this->unzip($zipNameAbsolute, $restoreDir);
+        } else {
+            $this->flashError('backup.action.filename.error');
+        }
+
+        $fileOverwrites = $this->getFilesInDirRecursively($restoreDir);
+
+        $fileOverwrites = array_filter(str_replace('C:\\xampp\\htdocs\kimai2\\', '', $fileOverwrites));
+
+        // Cleanup the extracted backup folder
+        $this->filesystem->remove($restoreDir);
+
+        return $this->render('@EasyBackup/prepairRecovery.html.twig', [
+            'fileOverwrites' => $fileOverwrites,
+        ]);
+    }
+
+    private function getFilesInDirRecursively($dir, &$resultFileList = [])
+    {
+        $files = scandir($dir);
+
+        foreach ($files as $fileOrDir) {
+            $path = realpath($dir.DIRECTORY_SEPARATOR.$fileOrDir);
+            if (!is_dir($path)) {
+                $resultFileList[] = $path;
+            } elseif ($fileOrDir != '.' && $fileOrDir != '..') {
+                $this->getFilesInDirRecursively($path, $resultFileList);
+            }
+        }
+
+        return $resultFileList;
+    }
+
+    private function restoreDirsAndFiles($restoreDir)
+    {
+        $this->log(self::LOG_INFO_PREFIX, 'Start restoring files and dirs.');
+
+        // Blacklist for files we don't want to move anywere else.
+
+        $blacklist = [self::SQL_DUMP_FILENAME, self::MANIFEST_FILENAME];
+        $this->log(self::LOG_INFO_PREFIX, 'Blacklist of files not to move: '.join(', ', $blacklist));
+
+        $filePathsToRestore = $this->getFilesInDirRecursively($restoreDir);
+
+        foreach ($filePathsToRestore as $filenameAbs) {
+            $filenameOnlyArr = explode(DIRECTORY_SEPARATOR, $filenameAbs);
+            $filenameOnly = end($filenameOnlyArr);
+
+            // Some files in the backup dir are for internal usage, we don't want to move them anywere else.
+
+            if (in_array($filenameOnly, $blacklist)) {
+                continue;
+            }
+
+            $filenameAbsNew = str_replace($restoreDir, $this->kimaiRootPath, $filenameAbs);
+            $filepermsSource = substr(sprintf('%o', fileperms($filenameAbs)), -4);
+            $filepermsDestination = substr(sprintf('%o', fileperms($filenameAbsNew)), -4);
+            $this->log(self::LOG_INFO_PREFIX, "Copying '$filenameAbs' (Permissions: $filepermsSource) to '$filenameAbsNew' (Permissions: $filepermsDestination).");
+
+            // Try to move the file.
+
+            if (!is_writable($filenameAbsNew)) {
+                $this->log(self::LOG_INFO_PREFIX, "'$filenameAbsNew' is not writable.");
+
+                // If it isn't working try to change the file permissions.
+
+                $newFilePermissions = 0777;
+                $this->log(self::LOG_INFO_PREFIX, "Trying to change the file permissions of '$filenameAbsNew' to '$newFilePermissions' automatically.");
+                if (chmod($filenameAbsNew, $newFilePermissions)) {
+                    if (rename($filenameAbs, $filenameAbsNew)) {
+                        $this->log(self::LOG_INFO_PREFIX, "Successfully copied '$filenameAbsNew' after file permissions were changed.");
+                    } else {
+                        $this->log(self::LOG_ERROR_PREFIX, "Unable to copy to '$filenameAbsNew'. Please check the file permissions and try it again.");
+                    }
+                } else {
+                    $this->log(self::LOG_ERROR_PREFIX, "Failed to change permissions of '$filenameAbsNew' to '$filePermissions'.");
+                }
+            }
+        }
     }
 
     /**
@@ -219,7 +400,7 @@ final class EasyBackupController extends AbstractController
      */
     public function deleteAction(Request $request)
     {
-        $dirname = $request->query->get('dirname');
+        $dirname = $request->query->get('backupFilename');
 
         // Validate the given user input (filename)
 
@@ -240,10 +421,12 @@ final class EasyBackupController extends AbstractController
 
     private function backupDatabase(string $sqlDumpName)
     {
+        $this->log(self::LOG_INFO_PREFIX, 'Start database backup.');
         $dbUrlExploded = explode(':', $this->dbUrl);
         $dbUsed = $dbUrlExploded[0];
 
         // This is only for mysql and mariadb. sqlite will be backuped via the file backups
+        $this->log(self::LOG_INFO_PREFIX, "Used database: '$dbUsed'.");
 
         if ($dbUsed === 'mysql') {
             $dbUser = str_replace('/', '', $dbUrlExploded[1]);
@@ -269,8 +452,10 @@ final class EasyBackupController extends AbstractController
             if ($numErrors > 0) {
                 foreach ($outputArr as $error) {
                     $this->flashError($error);
+                    $this->log(self::LOG_ERROR_PREFIX, "mysqldump: '$error'.");
                 }
             } else {
+                $this->log(self::LOG_INFO_PREFIX, "Creating '$sqlDumpName'.");
                 $this->filesystem->touch($sqlDumpName);
 
                 foreach ($outputArr as $line) {
@@ -289,8 +474,37 @@ final class EasyBackupController extends AbstractController
         return substr($haystack, 0, $length) === $needle;
     }
 
+    private function unzip($source, $destination)
+    {
+        $this->log(self::LOG_INFO_PREFIX, "Start unzipping '$source' to '$destination'.");
+
+        if (extension_loaded('zip') === true) {
+            $zip = new ZipArchive();
+
+            if (file_exists($source) === true
+            && $zip->open($source) === true) {
+                $this->filesystem->mkdir($destination);
+
+                $this->log(self::LOG_INFO_PREFIX, "Extracting to '$destination'.");
+                $zip->extractTo($destination);
+
+                return $zip->close();
+            } else {
+                $this->flashError('backup.action.zip.error.source');
+                $this->log(self::LOG_INFO_PREFIX, "File '$source' not found.");
+            }
+        } else {
+            $this->flashError('backup.action.zip.error.extension');
+            $this->log(self::LOG_ERROR_PREFIX, "Extension '$zip' not found.");
+        }
+
+        return false;
+    }
+
     private function zipData($source, $destination)
     {
+        $this->log(self::LOG_INFO_PREFIX, "Start zipping '$source' to '$destination'.");
+
         if (extension_loaded('zip') === true) {
             if (file_exists($source) === true) {
                 $zip = new ZipArchive();
@@ -318,14 +532,17 @@ final class EasyBackupController extends AbstractController
                     }
                 } else {
                     $this->flashError('backup.action.zip.error.destination');
+                    $this->log(self::LOG_ERROR_PREFIX, "Couldn't open '$destination'.");
                 }
 
                 return $zip->close();
             } else {
                 $this->flashError('backup.action.zip.error.source');
+                $this->log(self::LOG_ERROR_PREFIX, "Source file not found: '$source'.");
             }
         } else {
             $this->flashError('backup.action.zip.error.extension');
+            $this->log(self::LOG_ERROR_PREFIX, "Extension 'zip' not found!");
         }
 
         return false;
@@ -344,9 +561,26 @@ final class EasyBackupController extends AbstractController
         $cmd = self::CMD_GIT_HEAD;
         $status[$cmd] = exec($cmd);
 
-        $cmd = $this->configuration->getMysqlDumpCommand();
-        $cmd = explode(' ', $cmd)[0].' --version';
-        $status[$cmd] = exec($cmd);
+        // Check used database
+
+        $dbUrlExploded = explode(':', $this->dbUrl);
+        $dbUsed = $dbUrlExploded[0];
+
+        $status['Database'] = $dbUsed;
+
+        if ($dbUsed === 'mysql' || $dbUsed === 'mysqli') {
+            // Check if the mysqldump command is working
+
+            $cmd = $this->configuration->getMysqlDumpCommand();
+            $cmd = explode(' ', $cmd)[0].' --version';
+            $status[$cmd] = exec($cmd);
+
+            // Check if the mysql command is working
+
+            $cmd = $this->configuration->getMysqlRestoreCommand();
+            $cmd = explode(' ', $cmd)[0].' --version';
+            $status[$cmd] = exec($cmd);
+        }
 
         // Check used database
 
@@ -365,5 +599,42 @@ final class EasyBackupController extends AbstractController
         }
 
         return Constants::VERSION.' '.Constants::STATUS;
+    }
+
+    private function restoreMySQLDump($restoreDir)
+    {
+        $this->log(self::LOG_INFO_PREFIX, 'Start restoring MySQL dump.');
+
+        // For mysql or mariadb we must execute additinal code. For sqlite it's just a file which will be moved.
+
+        $dbUrlExploded = explode(':', $this->dbUrl);
+        $dbUsed = $dbUrlExploded[0];
+
+        if ($dbUsed === 'mysql') {
+            $dbUser = str_replace('/', '', $dbUrlExploded[1]);
+            $dbPwd = explode('@', $dbUrlExploded[2])[0];
+            $dbHost = explode('@', $dbUrlExploded[2])[1];
+            $dbPort = explode('/', explode('@', $dbUrlExploded[3])[0])[0];
+            $dbName = explode('?', explode('/', $dbUrlExploded[3])[1])[0];
+
+            $mysqlCmd = $this->configuration->getMysqlRestoreCommand();
+            $mysqlCmd = str_replace('{user}', $dbUser, $mysqlCmd);
+            $mysqlCmd = str_replace('{password}', $dbPwd, $mysqlCmd);
+            $mysqlCmd = str_replace('{host}', $dbHost, $mysqlCmd);
+            $mysqlCmd = str_replace('{port}', $dbPort, $mysqlCmd);
+            $mysqlCmd = str_replace('{database}', $dbName, $mysqlCmd);
+            $mysqlCmd = str_replace('{sql_file}', $restoreDir.self::SQL_DUMP_FILENAME, $mysqlCmd);
+
+            exec("($mysqlCmd 2>&1)", $outputArr, $numErrors);
+
+            if ($numErrors > 0) {
+                foreach ($outputArr as $error) {
+                    $this->flashError($error);
+                    $this->log(self::LOG_ERROR_PREFIX, $error);
+                }
+            }
+        }
+
+        $this->log(self::LOG_INFO_PREFIX, 'Restored MySQL database.');
     }
 }

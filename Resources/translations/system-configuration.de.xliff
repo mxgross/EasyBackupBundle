@@ -10,6 +10,10 @@
                 <source>label.easy_backup.setting_mysqldump_command</source>
                 <target>Ihr mysqldump Befehl (Platzhalter werden automatisch ersetzt)</target>
             </trans-unit>
+            <trans-unit id="label.easy_backup.setting_mysql_restore_command">
+                <source>label.easy_backup.setting_mysql_restore_command</source>
+                <target>MySQL Befehl für den Import der SQL Backup Datei (Platzhalter werden automatisch ersetzt)</target>
+            </trans-unit>
             <trans-unit id="label.easy_backup.setting_backup_dir">
                 <source>label.easy_backup.setting_backup_dir</source>
                 <target>Backup Verzeichnis</target>

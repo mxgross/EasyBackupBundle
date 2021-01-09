@@ -38,6 +38,12 @@ class SystemConfigurationSubscriber implements EventSubscriberInterface
                         ->setRequired(false)
                         ->setType(TextType::class),
                     (new Configuration())
+                        ->setName('easy_backup.setting_mysql_restore_command')
+                        ->setLabel('easy_backup.setting_mysql_restore_command')
+                        ->setTranslationDomain('system-configuration')
+                        ->setRequired(false)
+                        ->setType(TextType::class),
+                    (new Configuration())
                         ->setName('easy_backup.setting_backup_dir')
                         ->setLabel('easy_backup.setting_backup_dir')
                         ->setTranslationDomain('system-configuration')

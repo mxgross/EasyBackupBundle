@@ -9,7 +9,7 @@
 
 {% block main %}
 
-	<div class="box box-success collapsed-box">
+	<div class="box box-primary collapsed-box">
 		<div class="box-header with-border">
 			<h3 class="box-title">{{ 'View status checks'|trans }}
 				{% if '0' in status or '' in status %}
@@ -26,8 +26,7 @@
 			<p>
 				If you see a warning icon
 				<i class="fas fa-exclamation-triangle text-red"></i>
-				in the list below, you should talk to your administrator.
-				The path is either not readable or not writable and EasyBackup might not work as expected.
+				in the list below, you should check the settings for this plugin and/or talk to your administrator. EasyBackup might not work as expected!
 			</p>
 			<table class="table">
 				<tbody>
@@ -53,10 +52,29 @@
 		</div>
 	</div>
 
+	<div class="box box-secondary collapsed-box">
+		<div class="box-header with-border">
+			<h3 class="box-title">
+				Latest log
+				{% if 'ERROR' in log %}
+					<i class="fas fa-exclamation-triangle text-red"></i>
+				{% endif %}
+			</h3>
+			<div class="box-tools pull-right">
+				<button class="btn btn-box-tool" data-widget="collapse" data-toggle="tooltip" title="" data-original-title="Collapse">
+					<i class="fas fa-plus"></i>
+				</button>
+			</div>
+		</div>
+		<div class="box-body">
+			<pre>{{ log }}</pre>
+		</div>
+	</div>
+
 	<div class="box box-secondary data_table">
 		<div class="box-header">
 			<a href="{{ path('create_backup') }}">
-				<button class="btn btn-success" {% if '0' in status %}disabled{% endif %}>
+				<button class="btn btn-success" {% if '0' in status %} disabled {% endif %}>
 					<i class="fas fa-hdd"></i>
 					{{ 'Create Backup'|trans }}</button>
 			</a>
@@ -69,6 +87,7 @@
 						<th scope="col">{{ 'Name'|trans }}</th>
 						<th scope="col">{{ 'Size'|trans }}</th>
 						<th scope="col">{{ 'Delete'|trans }}</th>
+						<th scope="col">{{ 'Restore'|trans }}</th>
 						<th scope="col">{{ 'Download'|trans }}</th>
 					</tr>
 				</thead>
@@ -76,20 +95,27 @@
 					{% if existingBackups is defined %}
 						{% for item,size in existingBackups %}
 							<tr>
-								<td>{{ loop.index }}</td>
+								<td>{{ existingBackups|length - loop.index + 1 }}</td>
 								<td>{{ item }}</td>
 
-								<td>{{ size }}MB</td>
+								<td>{{ size|number_format(3) }}MB</td>
 
 								<td>
-									<a href="{{ path('delete', {'dirname': item}) }}" class="confirmation-link btn btn-danger" data-question="confirm.delete" data-msg-error="action.delete.error" data-msg-success="action.delete.success">
+									<a href="{{ path('delete', {'backupFilename': item}) }}" class="confirmation-link btn btn-danger" data-question="confirm.delete" data-msg-error="action.delete.error" data-msg-success="action.delete.success">
 										<i class="fas fa-trash"></i>
 										{{ 'Delete'|trans }}
 									</a>
 								</td>
 
 								<td>
-									<a href="{{ path('download', {'dirname': item}) }}" class="btn btn-info">
+									<a href="{{ path('restore', {'backupFilename': item}) }}" class="confirmation-link btn btn-caution" data-question="confirm.restore" data-msg-error="action.restore.error" data-msg-success="action.restore.success">
+										<i class="fas fa-undo"></i>
+										{{ 'Restore'|trans }}
+									</a>
+								</td>
+
+								<td>
+									<a href="{{ path('download', {'backupFilename': item}) }}" class="btn btn-info">
 										<i class="fas fa-download"></i>
 										{{ 'Download'|trans }}
 									</a>

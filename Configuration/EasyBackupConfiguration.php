@@ -26,6 +26,11 @@ class EasyBackupConfiguration implements SystemBundleConfiguration, \ArrayAccess
         return (string) $this->find('setting_mysqldump_command');
     }
 
+    public function getMysqlRestoreCommand(): string
+    {
+        return (string) $this->find('setting_mysql_restore_command');
+    }
+
     public function getBackupDir(): string
     {
         return (string) $this->find('setting_backup_dir');

@@ -22,9 +22,17 @@
                 <source>Delete</source>
                 <target>Delete</target>
             </trans-unit>
+            <trans-unit id="Restore">
+                <source>Restore</source>
+                <target>Restore</target>
+            </trans-unit>
             <trans-unit id="Download">
                 <source>Download</source>
                 <target>Download</target>
+            </trans-unit>
+             <trans-unit id="confirm.restore">
+                <source>confirm.restore</source>
+                <target>Do you really want to restore this backup?</target>
             </trans-unit>
             <trans-unit id="View status checks">
                 <source>View status checks</source>
