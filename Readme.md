@@ -2,6 +2,10 @@
 
 A Kimai 2 plugin, which allows you to backup your environment with a single click.
 
+If you like the plugin, please feel free to donate me a coffee ;)
+
+[![paypal](https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif)](https://www.paypal.com/donate?hosted_button_id=XQD3PMPANZNG4)
+
 After the installation a new menu entry `EasyBackup` is created. There you can create a new backup
 by clicking the `Create Backup` button. Afterwards all created backups will be listed at the page
 and you can delete or download the createt backup as zip file.
