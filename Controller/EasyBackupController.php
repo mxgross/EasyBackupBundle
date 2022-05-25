@@ -439,7 +439,7 @@ final class EasyBackupController extends AbstractController
 
             $mysqlDumpCmd = $this->configuration->getMysqlDumpCommand();
             $mysqlDumpCmd = str_replace('{user}', $dbUser, $mysqlDumpCmd);
-            $mysqlDumpCmd = str_replace('{password}', $dbPwd, $mysqlDumpCmd);
+            $mysqlDumpCmd = str_replace('{password}', urldecode($dbPwd), $mysqlDumpCmd);
             $mysqlDumpCmd = str_replace('{host}', $dbHost, $mysqlDumpCmd);
             $mysqlDumpCmd = str_replace('{port}', $dbPort, $mysqlDumpCmd);
             $mysqlDumpCmd = str_replace('{database}', $dbName, $mysqlDumpCmd);
