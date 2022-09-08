@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
+    <file source-language="en" target-language="hr" datatype="plaintext" original="flashmessages.en.xlf">
+        <body>
+            <trans-unit id="backup.action.create.success">
+                <source>backup.action.create.success</source>
+                <target>Sigurnosna kopija je uspješno stvorena.</target>
+            </trans-unit>
+            <trans-unit id="backup.action.download.error">
+                <source>backup.action.download.error</source>
+                <target>Greška pri preuzimanju sigurnosne kopije. Čini se da je ime datoteke neispravno.</target>
+            </trans-unit>
+            <trans-unit id="backup.action.delete.success">
+                <source>backup.action.delete.success</source>
+                <target>Sigurnosna kopija je uspješno izbrisana.</target>
+            </trans-unit>
+                <trans-unit id="backup.action.delete.error.filename">
+                <source>backup.action.delete.error.filename</source>
+                <target>Nije bilo moguće izbrisati sigurnosnu kopiju. Čini se da je ime datoteke neispravno.</target>
+            </trans-unit>
+            <trans-unit id="backup.action.zip.error.destination">
+                <source>backup.action.zip.error.destination</source>
+                <target>Greška pri izradi prve zip datoteke.</target>
+            </trans-unit>
+            <trans-unit id="backup.action.zip.error.source">
+                <source>backup.action.zip.error.source</source>
+                <target>Greška pri izradi zip datoteke. Mapa izvora nije pronađena ili se ne smije čitati.</target>
+            </trans-unit>
+            <trans-unit id="backup.action.zip.error.extension">
+                <source>backup.action.zip.error.extension</source>
+                <target>Greška pri izradi zip datoteke. PHP proširenje 'zip' nije pronađeno. Proširenje mora biti instalirano.</target>
+            </trans-unit>
+        </body>
+    </file>
+</xliff>
