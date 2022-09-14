@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
+    <file date="2019-12-13T20:00:00Z" source-language="en" target-language="hr" datatype="plaintext" original="none">
+        <body>
+            <trans-unit id="Easy Backup">
+                <source>Easy Backup</source>
+                <target>Jednostavna sigurnosna kopija</target>
+            </trans-unit>
+            <trans-unit id="easy_backup.subtitle">
+                <source>easy_backup.subtitle</source>
+                <target>Spremi sigurnosnu kopiju tvog Kimai okruženja jednostavan način</target>
+            </trans-unit>
+            <trans-unit id="Create Backup">
+                <source>Create Backup</source>
+                <target>Stvori sigurnosnu kopiju</target>
+            </trans-unit>
+            <trans-unit id="Name">
+                <source>Name</source>
+                <target>Ime</target>
+            </trans-unit>
+            <trans-unit id="Delete">
+                <source>Delete</source>
+                <target>Izbriši</target>
+            </trans-unit>
+            <trans-unit id="Restore">
+                <source>Restore</source>
+                <target>Obnovi</target>
+            </trans-unit>
+            <trans-unit id="Download">
+                <source>Download</source>
+                <target>Preuzmi</target>
+            </trans-unit>
+             <trans-unit id="confirm.restore">
+                <source>confirm.restore</source>
+                <target>Stvarno želiš obnoviti ovu sigurnosnu kopiju?</target>
+            </trans-unit>
+            <trans-unit id="View status checks">
+                <source>View status checks</source>
+                <target>Pogledaj provjere stanja</target>
+            </trans-unit>
+        </body>
+    </file>
+</xliff>
