@@ -121,3 +121,7 @@ With one click you can restore your system to the state it had when the backup w
 Caution: All database entries created between the backup and now will get lost.
 
 Files contained in the backup may overwrite already existing files.
+
+## Common errors and their solution
+[Wiki page: Common-errors-and-their-solution](https://github.com/mxgross/EasyBackupBundle/wiki/Common-errors-and-their-solution)
+
