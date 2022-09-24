@@ -3,7 +3,7 @@
     "description": "A Kimai 2 plugin, which allows you to backup your environment with a single click.",
     "homepage": "https://github.com/mxgross/EasyBackupBundle",
     "type": "kimai-plugin",
-    "version": "0.2",
+    "version": "1.1",
     "require": {
         "kimai/kimai2-composer": "*"
     },
@@ -22,7 +22,7 @@
     "extra": {
         "kimai": {
             "require": "1.6",
-            "version": "0.2",
+            "version": "1.1",
             "name": "EasyBackup"
         }
     },

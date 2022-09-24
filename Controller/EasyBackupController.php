@@ -74,14 +74,23 @@ final class EasyBackupController extends AbstractController
 
     private function log($logLevel, $message)
     {
-        $logFile = $this->getBackupDirectory().self::LOG_FILE_NAME;
+        $backupDir = $this->getBackupDirectory();
+        $logFile = $backupDir.self::LOG_FILE_NAME;
 
-        if (!file_exists($logFile)) {
-            $this->filesystem->touch($logFile);
+        try {
+            if (!file_exists($logFile)) {
+                $this->filesystem->touch($logFile);
+            }
+    
+            $dateTime = date('Y-m-d H:i:s');
+            $this->filesystem->appendToFile($logFile, "[$dateTime] $logLevel: $message".PHP_EOL);
+
+        }  catch (\Exception $e) {
+           // Todo: log in generall log
+           // Todo: translate error message
+           $this->flashError("Failed to touch $logFile");
         }
 
-        $dateTime = date('Y-m-d H:i:s');
-        $this->filesystem->appendToFile($logFile, "[$dateTime] $logLevel: $message".PHP_EOL);
     }
 
     private function getBackupDirectory(): string
@@ -96,10 +105,14 @@ final class EasyBackupController extends AbstractController
      */
     public function indexAction(): Response
     {
-        $existingBackups = [];
-
-        $status = $this->checkStatus();
         $backupDir = $this->getBackupDirectory();
+
+        if (!file_exists($backupDir)) {
+            $this->filesystem->mkdir($backupDir);
+        }
+
+        $existingBackups = [];
+        $status = $this->checkStatus();
 
         if ($this->filesystem->exists($backupDir)) {
             $files = scandir($backupDir, SCANDIR_SORT_DESCENDING);
@@ -114,9 +127,9 @@ final class EasyBackupController extends AbstractController
                     $existingBackups[$fileOrDir] = $filesizeInMb;
                 }
             }
-        }
+        } 
 
-        $logFile = $this->getBackupDirectory().self::LOG_FILE_NAME;
+        $logFile = $backupDir.self::LOG_FILE_NAME;
         $log = file_exists($logFile) ? file_get_contents($logFile) : 'empty';
 
         return $this->render('@EasyBackup/index.html.twig', [
@@ -592,9 +605,16 @@ final class EasyBackupController extends AbstractController
                 'result' => '',
         ];
 
-        $path = $this->kimaiRootPath.'var/easy_backup';
+        $path = $this->kimaiRootPath.'var';
         $status[] = [
             'desc' => "Path '$path' writable",
+            'status' => is_writable($path),
+            'result' => '',
+        ];
+
+        $path = $this->getBackupDirectory();
+        $status[] = [
+            'desc' => "Backup directory '$path' exists",
             'status' => is_writable($path),
             'result' => '',
         ];
@@ -611,15 +631,22 @@ final class EasyBackupController extends AbstractController
             'result' => $this->getKimaiVersion(),
         ];
 
-        $cmd = self::CMD_GIT_HEAD;
-        $cmdResArr = $this->execute($cmd);
-        $cmdRes = !empty($cmdResArr['err']) ? $cmdResArr['err'] : $cmdResArr['out'];
+        // Todo: build path via config files instead of manually
+        $dotGitPath = $this->kimaiRootPath . 'var' . DIRECTORY_SEPARATOR . 'plugins' . DIRECTORY_SEPARATOR . 'EasyBackupBundle' . DIRECTORY_SEPARATOR .'.git';
 
-        $status[] = [
-            'desc' => 'git',
-            'status' => empty($cmdResArr['err']),
-            'result' => $cmdRes,
-        ];
+        if (!file_exists($dotGitPath)) {
+            $cmd = self::CMD_GIT_HEAD;
+            $cmdResArr = $this->execute($cmd);
+            $cmdRes = !empty($cmdResArr['err']) ? $cmdResArr['err'] : $cmdResArr['out'];
+    
+            $status[] = [
+                'desc' => 'git',
+                'status' => empty($cmdResArr['err']),
+                'result' => $cmdRes,
+            ];
+        } else {
+            $this->log(self::LOG_INFO_PREFIX, 'No git repository recognized. Expected path: ' . $dotGitPath);
+        }
 
         // Check used database
 
