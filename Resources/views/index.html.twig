@@ -12,9 +12,13 @@
 	<div class="box box-primary collapsed-box">
 		<div class="box-header with-border">
 			<h3 class="box-title">{{ 'View status checks'|trans }}
-				{% if '0' in status or '' in status %}
-					<i class="fas fa-exclamation-triangle text-red"></i>
-				{% endif %}
+				{% set break = false %}
+				{% for status_item in status %}
+					{% if status_item.status == false and break == false %}
+						<i class="fas fa-exclamation-triangle text-red"></i>
+						{% set break = true %}
+					{% endif %}
+				{% endfor %}
 			</h3>
 			<div class="box-tools pull-right">
 				<button class="btn btn-box-tool" data-widget="collapse" data-toggle="tooltip" title="" data-original-title="Collapse">
@@ -31,17 +35,19 @@
 			<table class="table">
 				<tbody>
 					{% if status is defined %}
-						{% for status_name,status_value in status %}
+						{% for status_item in status %}
 							<tr>
-								<th style="width:50%">{{ status_name }}</th>
+								<th style="width:50%">{{ status_item.desc }}</th>
 								<td>
-									{% if status_value == '1' %}
+									{% if status_item.status == true %}
 										<i class="fas fa-check text-green"></i>
-									{% elseif status_value == '0' or status_value == '' %}
+										{{ status_item.result }}
+									{% elseif status_item.status == false %}
 										<i class="fas fa-exclamation-triangle text-red"></i>
+										{{ status_item.result }}
 									{% else %}
-										<i class="fas fa-check text-green"></i>
-										{{ status_value }}
+										<i class="fas fa-info"></i>
+										{{ status_item.result }}
 									{% endif %}
 								</td>
 							</tr>

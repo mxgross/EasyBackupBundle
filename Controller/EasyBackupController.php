@@ -548,46 +548,119 @@ final class EasyBackupController extends AbstractController
         return false;
     }
 
+    private function execute($cmd, $workdir = null) {
+
+        if (is_null($workdir)) {
+            $workdir = __DIR__;
+        }
+    
+        $descriptorspec = array(
+           0 => array("pipe", "r"),  // stdin
+           1 => array("pipe", "w"),  // stdout
+           2 => array("pipe", "w"),  // stderr
+        );
+    
+        $process = proc_open($cmd, $descriptorspec, $pipes, $workdir, null);
+    
+        $stdout = stream_get_contents($pipes[1]);
+        fclose($pipes[1]);
+    
+        $stderr = stream_get_contents($pipes[2]);
+        fclose($pipes[2]);
+
+        $stderr = trim($stderr);
+
+        //if (!empty($stderr)) {
+        //    $this->log(self::LOG_ERROR_PREFIX, $stderr);
+        //} 
+    
+        return [
+            'code' => proc_close($process),
+            'out' => trim($stdout),
+            'err' => $stderr,
+        ];
+    }
+
     private function checkStatus()
     {
         $status = [];
 
         $path = $this->kimaiRootPath.'var';
-        $status["Path '$path' readable"] = is_readable($path);
-        $status["Path '$path' writable"] = is_writable($path);
-        $status["PHP extension 'zip' loaded"] = extension_loaded('zip');
-        $status['Kimai version'] = $this->getKimaiVersion();
+        $status[] = [
+                'desc' => "Path '$path' readable",
+                'status' => is_readable($path),
+                'result' => '',
+        ];
+
+        $path = $this->kimaiRootPath.'var/easy_backup';
+        $status[] = [
+            'desc' => "Path '$path' writable",
+            'status' => is_writable($path),
+            'result' => '',
+        ];
+
+        $status[] = [
+            'desc' => "PHP extension 'zip' loaded",
+            'status' => extension_loaded('zip'),
+            'result' => '',
+        ];
+
+        $status[] = [
+            'desc' => 'Kimai version',
+            'status' => true,
+            'result' => $this->getKimaiVersion(),
+        ];
 
         $cmd = self::CMD_GIT_HEAD;
-        $status[$cmd] = exec($cmd);
+        $cmdResArr = $this->execute($cmd);
+        $cmdRes = !empty($cmdResArr['err']) ? $cmdResArr['err'] : $cmdResArr['out'];
+
+        $status[] = [
+            'desc' => 'git',
+            'status' => empty($cmdResArr['err']),
+            'result' => $cmdRes,
+        ];
 
         // Check used database
 
         $dbUrlExploded = explode(':', $this->dbUrl);
         $dbUsed = $dbUrlExploded[0];
+        $dbUsedExpected = ['mysql', 'mysqli', 'sqllite'];
 
-        $status['Database'] = $dbUsed;
+        $status[] = [
+            'desc' => 'Database',
+            'status' => in_array($dbUsed, $dbUsedExpected),
+            'result' => $dbUsed,
+        ];
 
         if ($dbUsed === 'mysql' || $dbUsed === 'mysqli') {
+
             // Check if the mysqldump command is working
 
             $cmd = $this->configuration->getMysqlDumpCommand();
             $cmd = explode(' ', $cmd)[0].' --version';
-            $status[$cmd] = exec($cmd);
+            $cmdResArr = $this->execute($cmd);
+            $cmdRes = !empty($cmdResArr['err']) ? $cmdResArr['err'] : $cmdResArr['out'];
+
+            $status[] = [
+                'desc' => $cmd,
+                'status' => empty($cmdResArr['err']),
+                'result' => $cmdRes,
+            ];
 
             // Check if the mysql command is working
 
             $cmd = $this->configuration->getMysqlRestoreCommand();
             $cmd = explode(' ', $cmd)[0].' --version';
-            $status[$cmd] = exec($cmd);
+            $cmdResArr = $this->execute($cmd);
+            $cmdRes = !empty($cmdResArr['err']) ? $cmdResArr['err'] : $cmdResArr['out'];
+
+            $status[] = [
+                'desc' => $cmd,
+                'status' => empty($cmdResArr['err']),
+                'result' => $cmdRes,
+            ];
         }
-
-        // Check used database
-
-        $dbUrlExploded = explode(':', $this->dbUrl);
-        $dbUsed = $dbUrlExploded[0];
-
-        $status['Database'] = $dbUsed;
 
         return $status;
     }

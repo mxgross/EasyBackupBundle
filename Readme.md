@@ -25,6 +25,7 @@ sudo chown -R :www-data .
 sudo chmod -R g+r .
 sudo chmod -R g+rw var/
 sudo chmod -R g+rw public/avatars/
+sudo chmod -R o+rw var/plugins/EasyBackupBundle
 ```
 
 And then rebuild the cache:
