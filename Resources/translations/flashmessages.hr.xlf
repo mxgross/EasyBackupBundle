@@ -30,6 +30,10 @@
                 <source>backup.action.zip.error.extension</source>
                 <target>Greška pri izradi zip datoteke. PHP proširenje 'zip' nije pronađeno. Proširenje mora biti instalirano.</target>
             </trans-unit>
+            <trans-unit id="filesystem.mkdir.error.backupDir">
+                <source>filesystem.mkdir.backupDir</source>
+                <target>Navedeni rezervni direktorij nije mogao biti kreiran ili mu se nije moglo pristupiti.</target>
+            </trans-unit>
         </body>
     </file>
 </xliff>

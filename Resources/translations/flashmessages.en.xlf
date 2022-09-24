@@ -30,6 +30,10 @@
                 <source>backup.action.zip.error.extension</source>
                 <target>Error while creating zip file. The PHP extension 'zip' could not be found. Make sure it is installed.</target>
             </trans-unit>
+            <trans-unit id="filesystem.mkdir.error.backupDir">
+                <source>filesystem.mkdir.backupDir</source>
+                <target>Specified backup directory could not be created or accessed.</target>
+            </trans-unit>
         </body>
     </file>
 </xliff>

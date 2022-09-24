@@ -30,6 +30,10 @@
                 <source>backup.action.zip.error.extension</source>
                 <target>Die PHP Erweiterung 'zip' wurde nicht gefunden. Diese muss zwingend installiert sein.</target>
             </trans-unit>
+            <trans-unit id="filesystem.mkdir.error.backupDir">
+                <source>filesystem.mkdir.backupDir</source>
+                <target>Das angegebene Backup Verzeichnis konnte nicht erstellt oder nicht geöffnet werden.</target>
+            </trans-unit>
         </body>
     </file>
 </xliff>

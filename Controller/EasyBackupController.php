@@ -86,9 +86,7 @@ final class EasyBackupController extends AbstractController
             $this->filesystem->appendToFile($logFile, "[$dateTime] $logLevel: $message".PHP_EOL);
 
         }  catch (\Exception $e) {
-           // Todo: log in generall log
-           // Todo: translate error message
-           $this->flashError("Failed to touch $logFile");
+           $this->flashError('filesystem.mkdir.error.backupDir');
         }
 
     }
@@ -634,7 +632,7 @@ final class EasyBackupController extends AbstractController
         // Todo: build path via config files instead of manually
         $dotGitPath = $this->kimaiRootPath . 'var' . DIRECTORY_SEPARATOR . 'plugins' . DIRECTORY_SEPARATOR . 'EasyBackupBundle' . DIRECTORY_SEPARATOR .'.git';
 
-        if (!file_exists($dotGitPath)) {
+        if (file_exists($dotGitPath)) {
             $cmd = self::CMD_GIT_HEAD;
             $cmdResArr = $this->execute($cmd);
             $cmdRes = !empty($cmdResArr['err']) ? $cmdResArr['err'] : $cmdResArr['out'];
