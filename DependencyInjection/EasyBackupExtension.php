@@ -28,7 +28,6 @@ class EasyBackupExtension extends AbstractPluginExtension implements PrependExte
         $config = $this->processConfiguration($configuration, $configs);
 
         $this->registerBundleConfiguration($container, $config);
-        $container->setParameter('easy_backup_settings', $config);
 
         $loader = new Loader\YamlFileLoader(
             $container,

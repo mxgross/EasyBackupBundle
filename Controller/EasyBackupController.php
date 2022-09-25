@@ -58,18 +58,12 @@ final class EasyBackupController extends AbstractController
      */
     private $filesystem;
 
-    /**
-     * @var LoggerInterface
-     */
-    private $logger;
-
-    public function __construct(string $dataDirectory, EasyBackupConfiguration $configuration, LoggerInterface $logger = null)
+    public function __construct(string $dataDirectory, EasyBackupConfiguration $configuration)
     {
         $this->kimaiRootPath = dirname(dirname($dataDirectory)).DIRECTORY_SEPARATOR;
         $this->configuration = $configuration;
         $this->dbUrl = $_SERVER['DATABASE_URL'];
         $this->filesystem = new Filesystem();
-        $this->logger = $logger;
     }
 
     private function log($logLevel, $message)
@@ -296,7 +290,7 @@ final class EasyBackupController extends AbstractController
             $this->filesystem->remove($restoreDir);
         } else {
             $this->flashError('backup.action.filename.error');
-            $this->log(self::LOG_ERRROR_PREFIX, "Backup '$backupName' not found.");
+            $this->log(self::LOG_ERROR_PREFIX, "Backup '$backupName' not found.");
         }
 
         return $this->redirectToRoute('easy_backup');
@@ -397,7 +391,7 @@ final class EasyBackupController extends AbstractController
                         $this->log(self::LOG_ERROR_PREFIX, "Unable to copy to '$filenameAbsNew'. Please check the file permissions and try it again.");
                     }
                 } else {
-                    $this->log(self::LOG_ERROR_PREFIX, "Failed to change permissions of '$filenameAbsNew' to '$filePermissions'.");
+                    $this->log(self::LOG_ERROR_PREFIX, "Failed to change permissions of '$filenameAbsNew' to '$newFilePermissions'.");
                 }
             }
         }
@@ -505,7 +499,7 @@ final class EasyBackupController extends AbstractController
             }
         } else {
             $this->flashError('backup.action.zip.error.extension');
-            $this->log(self::LOG_ERROR_PREFIX, "Extension '$zip' not found.");
+            $this->log(self::LOG_ERROR_PREFIX, "Extension ZIP not found.");
         }
 
         return false;
