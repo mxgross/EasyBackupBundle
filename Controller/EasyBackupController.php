@@ -343,7 +343,7 @@ $this->configuration->getMysqlDumpCommand();
             $path = realpath($dir.DIRECTORY_SEPARATOR.$fileOrDir);
             if (!is_dir($path)) {
                 $resultFileList[] = $path;
-            } elseif ($fileOrDir != '.' && $fileOrDir != '..') {
+            } elseif (!in_array($fileOrDir, ['.', '..', '.git'])) {
                 $this->getFilesInDirRecursively($path, $resultFileList);
             }
         }
