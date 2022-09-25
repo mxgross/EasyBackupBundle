@@ -16,6 +16,7 @@ class EasyBackupConfiguration implements SystemBundleConfiguration, \ArrayAccess
 {
     use StringAccessibleConfigTrait;
 
+    
     public function getPrefix(): string
     {
         return 'easy_backup';
@@ -23,21 +24,41 @@ class EasyBackupConfiguration implements SystemBundleConfiguration, \ArrayAccess
 
     public function getMysqlDumpCommand(): string
     {
-        return (string) $this->find('setting_mysqldump_command');
+        $config = $this->find('setting_mysqldump_command');
+        if (!\is_string($config)) {
+            return 'NOT SET';
+        }
+
+        return $config;
     }
 
     public function getMysqlRestoreCommand(): string
     {
-        return (string) $this->find('setting_mysql_restore_command');
+        $config = $this->find('setting_mysql_restore_command');
+        if (!\is_string($config)) {
+            return 'NOT SET';
+        }
+
+        return $config;
     }
 
     public function getBackupDir(): string
-    {
-        return (string) $this->find('setting_backup_dir');
+    {   
+        $config = $this->find('setting_backup_dir');
+        if (!\is_string($config)) {
+            return 'NOT SET';
+        }
+
+        return $config;
     }
 
     public function getPathsToBeBackuped(): string
     {
-        return (string) $this->find('setting_paths_to_backup');
+        $config = $this->find('setting_paths_to_backup');
+        if (!\is_string($config)) {
+            return 'NOT SET';
+        }
+
+        return $config;
     }
 }
