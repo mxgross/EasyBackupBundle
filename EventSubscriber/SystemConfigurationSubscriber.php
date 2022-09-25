@@ -25,7 +25,7 @@ class SystemConfigurationSubscriber implements EventSubscriberInterface
         ];
     }
 
-    public function onSystemConfiguration(SystemConfigurationEvent $event)
+    public function onSystemConfiguration(SystemConfigurationEvent $event): void
     {
         $event->addConfiguration(
             (new SystemConfigurationModel())

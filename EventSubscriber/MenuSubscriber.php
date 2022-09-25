@@ -43,7 +43,7 @@ class MenuSubscriber implements EventSubscriberInterface
     /**
      * @param \App\Event\ConfigureMainMenuEvent $event
      */
-    public function onMenuConfigure(ConfigureMainMenuEvent $event)
+    public function onMenuConfigure(ConfigureMainMenuEvent $event): void
     {
         $auth = $this->security;
 
