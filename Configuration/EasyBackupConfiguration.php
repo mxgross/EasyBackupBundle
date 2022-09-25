@@ -22,8 +22,8 @@ final class EasyBackupConfiguration
 
     public function getMysqlDumpCommand(): string
     {
-        $config = $this->configuration->find('easybackup.setting_mysqldump_command');
-        if (!\is_string($config)) {
+        $config = $this->configuration->find('easy_backup.setting_mysqldump_command');
+        if (!is_string($config)) {
             return 'NOT SET';
         }
 
@@ -32,8 +32,8 @@ final class EasyBackupConfiguration
 
     public function getMysqlRestoreCommand(): string
     {
-        $config = $this->configuration->find('easybackup.setting_mysql_restore_command');
-        if (!\is_string($config)) {
+        $config = $this->configuration->find('easy_backup.setting_mysql_restore_command');
+        if (!is_string($config)) {
             return 'NOT SET';
         }
 
@@ -42,21 +42,17 @@ final class EasyBackupConfiguration
 
     public function getBackupDir(): string
     {
-        $config = $this->configuration->find('easybackup.setting_backup_dir');
-        if (!\is_string($config)) {
+        $config = $this->configuration->find('easy_backup.setting_backup_dir');
+        if (!is_string($config)) {
             return 'NOT SET';
         }
 
         return $config;
     }
 
-    public function getPathsToBeBackuped(): string
+    public function getPathsToBeBackuped(): array
     {
-        $config = $this->configuration->find('easybackup.setting_paths_to_backup');
-        if (!\is_string($config)) {
-            return 'NOT SET';
-        }
-
+        $config = $this->configuration->find('easy_backup.setting_paths_to_backup');
         return $config;
     }
 }
