@@ -458,23 +458,23 @@ final class EasyBackupController extends AbstractController
             // $numErrors is 0 when no error occured, else the number of occured errors
             // $output is an string array containing success or error messages
 
-            exec("($mysqlDumpCmd 2>&1)", $outputArr, $numErrors);
+            $mysqlResArr = $this->execute($mysqlDumpCmd);
 
-            if ($numErrors > 0) {
-                foreach ($outputArr as $error) {
-                    $this->flashError($error);
-                    $this->log(self::LOG_ERROR_PREFIX, "mysqldump: '$error'.");
-                }
-            } else {
+            if(!empty($mysqlResArr['out'])) {
                 $this->log(self::LOG_INFO_PREFIX, "Creating '$sqlDumpName'.");
                 $this->filesystem->touch($sqlDumpName);
-
-                foreach ($outputArr as $line) {
-                    if (!$this->startsWith('mysqldump: [Warning]', $line)) {
-                        $this->filesystem->appendToFile($sqlDumpName, $line."\n");
-                    }
-                }
+                $this->filesystem->appendToFile($sqlDumpName, $mysqlResArr['out']);
             }
+
+            $errorsStr = $mysqlResArr['err'];
+            $errorsStr = str_replace('mysqldump: [Warning] Using a password on the command line interface can be insecure.', '', $errorsStr);
+            $errorsStr = trim($errorsStr, PHP_EOL);
+
+            if (!empty($errorsStr)) {
+                $this->flashError($errorsStr);
+                $this->log(self::LOG_ERROR_PREFIX, $errorsStr);
+            } 
+
         }
     }
 
@@ -578,17 +578,11 @@ final class EasyBackupController extends AbstractController
     
         $stderr = stream_get_contents($pipes[2]);
         fclose($pipes[2]);
-
-        $stderr = trim($stderr);
-
-        //if (!empty($stderr)) {
-        //    $this->log(self::LOG_ERROR_PREFIX, $stderr);
-        //} 
     
         return [
             'code' => proc_close($process),
             'out' => trim($stdout),
-            'err' => $stderr,
+            'err' => trim($stderr),
         ];
     }
 
@@ -723,13 +717,12 @@ final class EasyBackupController extends AbstractController
             $mysqlCmd = str_replace('{database}', $dbName, $mysqlCmd);
             $mysqlCmd = str_replace('{sql_file}', $restoreDir.self::SQL_DUMP_FILENAME, $mysqlCmd);
 
-            exec("($mysqlCmd 2>&1)", $outputArr, $numErrors);
+            $mysqlResArr = $this->execute($mysqlCmd);
+            $error = $mysqlResArr['err'];
 
-            if ($numErrors > 0) {
-                foreach ($outputArr as $error) {
-                    $this->flashError($error);
-                    $this->log(self::LOG_ERROR_PREFIX, $error);
-                }
+            if (!empty($error)) {
+                $this->flashError($error);
+                $this->log(self::LOG_WARN_PREFIX, $error);
             }
         }
 
