@@ -474,7 +474,6 @@ final class EasyBackupController extends AbstractController
                 $this->flashError($errorsStr);
                 $this->log(self::LOG_ERROR_PREFIX, $errorsStr);
             } 
-
         }
     }
 
@@ -711,7 +710,7 @@ final class EasyBackupController extends AbstractController
 
             $mysqlCmd = $this->configuration->getMysqlRestoreCommand();
             $mysqlCmd = str_replace('{user}', $dbUser, $mysqlCmd);
-            $mysqlCmd = str_replace('{password}', $dbPwd, $mysqlCmd);
+            $mysqlCmd = str_replace('{password}', urldecode($dbPwd), $mysqlDumpCmd);
             $mysqlCmd = str_replace('{host}', $dbHost, $mysqlCmd);
             $mysqlCmd = str_replace('{port}', $dbPort, $mysqlCmd);
             $mysqlCmd = str_replace('{database}', $dbName, $mysqlCmd);
@@ -720,10 +719,15 @@ final class EasyBackupController extends AbstractController
             $mysqlResArr = $this->execute($mysqlCmd);
             $error = $mysqlResArr['err'];
 
-            if (!empty($error)) {
-                $this->flashError($error);
-                $this->log(self::LOG_WARN_PREFIX, $error);
-            }
+            $errorsStr = $mysqlResArr['err'];
+            $errorsStr = str_replace('mysql: [Warning] Using a password on the command line interface can be insecure.', '', $errorsStr);
+            $errorsStr = trim($errorsStr, PHP_EOL);
+
+            if (!empty($errorsStr)) {
+                $this->flashError($errorsStr);
+                $this->log(self::LOG_ERROR_PREFIX, $errorsStr);
+            } 
+
         }
 
         $this->log(self::LOG_INFO_PREFIX, 'Restored MySQL database.');
