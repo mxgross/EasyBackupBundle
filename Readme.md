@@ -119,7 +119,7 @@ By default, this are assigned to all users with the role `ROLE_SUPER_ADMIN`.
 
 ## Restore
 With one click you can restore your system to the state it had when the backup was created.
-Caution: All database entries created between the backup and now will get lost.
+Caution: All database entries created between the backup and now will get lost. Your Kimai version is not affected from the restore. If the backup was not created in the same version were it is restored, this may lead to inconsistencies.
 
 Files contained in the backup may overwrite already existing files.
 
