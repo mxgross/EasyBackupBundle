@@ -50,9 +50,14 @@ final class EasyBackupConfiguration
         return $config;
     }
 
-    public function getPathsToBeBackuped(): array
+    public function getPathsToBeBackuped(): string
     {
         $config = $this->configuration->find('easy_backup.setting_paths_to_backup');
+
+        if (!is_string($config)) {
+            return 'NOT SET';
+        }
+
         return $config;
     }
 }
