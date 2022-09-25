@@ -435,7 +435,7 @@ $this->configuration->getMysqlDumpCommand();
         // This is only for mysql and mariadb. sqlite will be backuped via the file backups
         $this->log(self::LOG_INFO_PREFIX, "Used database: '$dbUsed'.");
 
-        if ($dbUsed === 'mysql') {
+        if ($dbUsed === 'mysql' || $dbUsed === 'mysqli') {
             $dbUser = str_replace('/', '', $dbUrlExploded[1]);
             $dbPwd = explode('@', $dbUrlExploded[2])[0];
             $dbHost = explode('@', $dbUrlExploded[2])[1];
@@ -697,7 +697,7 @@ $this->configuration->getMysqlDumpCommand();
         $dbUrlExploded = explode(':', $this->dbUrl);
         $dbUsed = $dbUrlExploded[0];
 
-        if ($dbUsed === 'mysql') {
+        if ($dbUsed === 'mysql' || $dbUsed === 'mysqli') {
             $dbUser = str_replace('/', '', $dbUrlExploded[1]);
             $dbPwd = explode('@', $dbUrlExploded[2])[0];
             $dbHost = explode('@', $dbUrlExploded[2])[1];
