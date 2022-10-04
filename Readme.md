@@ -21,10 +21,10 @@ git clone https://github.com/mxgross/EasyBackupBundle.git
 ```
 Set the permissions:
 ```
-sudo chown -R :www-data .
-sudo chmod -R g+r .
-sudo chmod -R g+rw var/
-sudo chmod -R g+rw public/avatars/
+sudo chown -R :www-data . &&
+sudo chmod -R g+r . &&
+sudo chmod -R g+rw var/ &&
+sudo chmod -R g+rw public/avatars/ &&
 sudo chmod -R o+rw var/plugins/EasyBackupBundle
 ```
 
@@ -37,9 +37,9 @@ bin/console cache:warmup
 Sometimes the permissions must be set again
 
 ```
-sudo chown -R :www-data .
-sudo chmod -R g+r .
-sudo chmod -R g+rw var/
+sudo chown -R :www-data . &&
+sudo chmod -R g+r . &&
+sudo chmod -R g+rw var/ &&
 sudo chmod -R g+rw public/avatars/
 ```
 
