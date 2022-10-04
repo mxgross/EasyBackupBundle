@@ -429,27 +429,41 @@ $this->configuration->getMysqlDumpCommand();
     private function backupDatabase(string $sqlDumpName)
     {
         $this->log(self::LOG_INFO_PREFIX, 'Start database backup.');
-        $dbUrlExploded = explode(':', $this->dbUrl);
-        $dbUsed = $dbUrlExploded[0];
+        
+        $urlParsed = parse_url($this->dbUrl);
+
+        /*  Example:
+
+            array(6) {
+            ["scheme"] => string(5) "mysql"
+            ["host"]   => string(9) "127.0.0.1"
+            ["port"]   => int(3306)
+            ["user"]   => string(8) "myDbUser"
+            ["pass"]   => string(24) "my-super-secret-password"
+            ["path"]   => string(9) "/myDBName"
+            ["query"]  => string(30) "charset=utf8&serverVersion=5.7"
+            }
+        */
 
         // This is only for mysql and mariadb. sqlite will be backuped via the file backups
         $this->log(self::LOG_INFO_PREFIX, "Used database: '$dbUsed'.");
 
-        if ($dbUsed === 'mysql' || $dbUsed === 'mysqli') {
-            $dbUser = str_replace('/', '', $dbUrlExploded[1]);
-            $dbPwd = explode('@', $dbUrlExploded[2])[0];
-            $dbHost = explode('@', $dbUrlExploded[2])[1];
-            $dbPort = explode('/', explode('@', $dbUrlExploded[3])[0])[0];
-            $dbName = explode('?', explode('/', $dbUrlExploded[3])[1])[0];
+        if ($urlParsed['scheme'] === 'mysql' || $urlParsed['scheme'] === 'mysqli') {
 
             // The MysqlDumpCommand per default looks like this: '/usr/bin/mysqldump --user={user} --password={password} --host={host} --port={port} --single-transaction --force {database}'
 
             $mysqlDumpCmd = $this->configuration->getMysqlDumpCommand();
-            $mysqlDumpCmd = str_replace('{user}', $dbUser, $mysqlDumpCmd);
-            $mysqlDumpCmd = str_replace('{password}', urldecode($dbPwd), $mysqlDumpCmd);
-            $mysqlDumpCmd = str_replace('{host}', $dbHost, $mysqlDumpCmd);
-            $mysqlDumpCmd = str_replace('{port}', $dbPort, $mysqlDumpCmd);
-            $mysqlDumpCmd = str_replace('{database}', $dbName, $mysqlDumpCmd);
+            $mysqlDumpCmd = str_replace('{user}', $urlParsed['user'], $mysqlDumpCmd);
+            $mysqlDumpCmd = str_replace('{password}', urldecode($urlParsed['pass']), $mysqlDumpCmd);
+            $mysqlDumpCmd = str_replace('{host}', $urlParsed['host'] , $mysqlDumpCmd);
+            $mysqlDumpCmd = str_replace('{database}', trim($urlParsed['path'], '/'), $mysqlDumpCmd);
+
+            // Port can be default port / empty in database URL
+            if (array_key_exists('port', $urlParsed)) {
+                $mysqlDumpCmd = str_replace('{port}', $urlParsed['port'], $mysqlDumpCmd);
+            } else {
+                $mysqlDumpCmd = str_replace('--port={port}', '', $mysqlDumpCmd);
+            }
 
             // $numErrors is 0 when no error occured, else the number of occured errors
             // $output is an string array containing success or error messages
