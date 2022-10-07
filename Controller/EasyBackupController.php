@@ -356,6 +356,7 @@ final class EasyBackupController extends AbstractController
         $backupAmountMax = $this->configuration->getBackupAmountMax();
         $existingBackupsArr = $this->getExistingBackups();
         $numBackupsExisting = count($existingBackupsArr);
+        $backupsToDeleteArr = [];
 
         // Important to do nothing when backupAmountMax is -1 or 0, because then we want to keep all the backups / no auto deletion
         if ($backupAmountMax > 0 && $numBackupsExisting > $backupAmountMax) {
