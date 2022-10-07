@@ -30,7 +30,7 @@
                 <source>Download</source>
                 <target>Download</target>
             </trans-unit>
-             <trans-unit id="confirm.restore">
+            <trans-unit id="confirm.restore">
                 <source>confirm.restore</source>
                 <target>Do you really want to restore this backup?</target>
             </trans-unit>

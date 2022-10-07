@@ -60,4 +60,15 @@ final class EasyBackupConfiguration
 
         return $config;
     }
+
+    public function getBackupAmountMax(): string
+    {
+        $config = $this->configuration->find('easy_backup.setting_backup_amount_max');
+
+        if (!is_string($config)) {
+            return -1;
+        }
+
+        return $config;
+    }
 }

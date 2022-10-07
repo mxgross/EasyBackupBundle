@@ -15,6 +15,9 @@ use App\Form\Model\SystemConfiguration as SystemConfigurationModel;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\Extension\Core\Type\IntegerType;
+use Symfony\Component\Validator\Constraints\GreaterThanOrEqual;
+use Symfony\Component\Validator\Constraints\NotNull;
 
 class SystemConfigurationSubscriber implements EventSubscriberInterface
 {
@@ -55,6 +58,15 @@ class SystemConfigurationSubscriber implements EventSubscriberInterface
                         ->setTranslationDomain('system-configuration')
                         ->setRequired(false)
                         ->setType(TextareaType::class),
+                    (new Configuration())
+                        ->setName('easy_backup.setting_backup_amount_max')
+                        ->setLabel('easy_backup.setting_backup_amount_max')
+                        ->setTranslationDomain('system-configuration')
+                        ->setRequired(false)
+                        ->setConstraints([new NotNull(), new GreaterThanOrEqual(['value' => -1])])
+                        ->setType(IntegerType::class)
+                        ->setValue(-1)
+                        ->setOptions(['help' => 'help.easy_backup.setting_backup_amount_max']),
                 ])
         );
     }

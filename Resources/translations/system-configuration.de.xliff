@@ -22,6 +22,14 @@
                 <source>label.easy_backup.setting_paths_to_backup</source>
                 <target>Zu sichernde Dateien und Pfade</target>
             </trans-unit>
+            <trans-unit id="label.easy_backup.setting_backup_amount_max">
+                <source>label.easy_backup.setting_backup_amount_max</source>
+                <target>Maximal aufzubewahrende Anzahl an Backups. Ältere werden automatisch gelöscht.</target>
+            </trans-unit>
+            <trans-unit id="help.easy_backup.setting_backup_amount_max">
+                <source>help.easy_backup.setting_backup_amount_max</source>
+                <target>Ein Wert kleiner 1 bedeutet, dass kein Backup automatisch gelöscht wird.</target>
+            </trans-unit>
         </body>
     </file>
 </xliff>

@@ -22,6 +22,14 @@
                 <source>label.easy_backup.setting_paths_to_backup</source>
                 <target>Datoteke i staze za spremanje sigurnosne kopije</target>
             </trans-unit>
+            <trans-unit id="label.easy_backup.setting_backup_amount_max">
+                <source>label.easy_backup.setting_backup_amount_max</source>
+                <target>Maksimalan broj sigurnosnih kopija za čuvanje. Stariji se automatski brišu.</target>
+            </trans-unit>
+            <trans-unit id="help.easy_backup.setting_backup_amount_max">
+                <source>help.easy_backup.setting_backup_amount_max</source>
+                <target>Vrijednost manja od 1 znači da se sigurnosna kopija ne briše automatski.</target>
+            </trans-unit>
         </body>
     </file>
 </xliff>

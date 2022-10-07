@@ -99,29 +99,29 @@
 				</thead>
 				<tbody>
 					{% if existingBackups is defined %}
-						{% for item,size in existingBackups %}
+						{% for item in existingBackups %}
 							<tr>
 								<td>{{ existingBackups|length - loop.index + 1 }}</td>
-								<td>{{ item }}</td>
+								<td>{{ item.name }}</td>
 
-								<td>{{ size|number_format(3) }}MB</td>
+								<td>{{ item.size|number_format(3) }}MB</td>
 
 								<td>
-									<a href="{{ path('delete', {'backupFilename': item}) }}" class="confirmation-link btn btn-danger" data-question="confirm.delete" data-msg-error="action.delete.error" data-msg-success="action.delete.success">
+									<a href="{{ path('delete', {'backupFilename': item.name}) }}" class="confirmation-link btn btn-danger" data-question="confirm.delete" data-msg-error="action.delete.error" data-msg-success="action.delete.success">
 										<i class="fas fa-trash"></i>
 										{{ 'Delete'|trans }}
 									</a>
 								</td>
 
 								<td>
-									<a href="{{ path('restore', {'backupFilename': item}) }}" class="confirmation-link btn btn-caution" data-question="confirm.restore" data-msg-error="action.restore.error" data-msg-success="action.restore.success">
+									<a href="{{ path('restore', {'backupFilename': item.name}) }}" class="confirmation-link btn btn-caution" data-question="confirm.restore" data-msg-error="action.restore.error" data-msg-success="action.restore.success">
 										<i class="fas fa-undo"></i>
 										{{ 'Restore'|trans }}
 									</a>
 								</td>
 
 								<td>
-									<a href="{{ path('download', {'backupFilename': item}) }}" class="btn btn-info">
+									<a href="{{ path('download', {'backupFilename': item.name}) }}" class="btn btn-info">
 										<i class="fas fa-download"></i>
 										{{ 'Download'|trans }}
 									</a>

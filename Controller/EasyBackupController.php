@@ -87,7 +87,7 @@ final class EasyBackupController extends AbstractController
 
     private function getBackupDirectory(): string
     {
-$this->configuration->getMysqlDumpCommand();
+        $this->configuration->getMysqlDumpCommand();
 
         return str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $this->kimaiRootPath.$this->configuration->getBackupDir());
     }
@@ -105,23 +105,8 @@ $this->configuration->getMysqlDumpCommand();
             $this->filesystem->mkdir($backupDir);
         }
 
-        $existingBackups = [];
         $status = $this->checkStatus();
-
-        if ($this->filesystem->exists($backupDir)) {
-            $files = scandir($backupDir, SCANDIR_SORT_DESCENDING);
-            $filesAndDirs = array_diff($files, ['.', '..', self::GITIGNORE_NAME]);
-
-            foreach ($filesAndDirs as $fileOrDir) {
-                // Make sure that only files are listed which match our wanted regex
-
-                if (is_file($backupDir.$fileOrDir)
-                && preg_match(self::REGEX_BACKUP_ZIP_NAME, $fileOrDir) == 1) {
-                    $filesizeInMb = round(filesize($backupDir.$fileOrDir) / 1048576, 3);
-                    $existingBackups[$fileOrDir] = $filesizeInMb;
-                }
-            }
-        } 
+        $existingBackups = $this->getExistingBackups();
 
         $logFile = $backupDir.self::LOG_FILE_NAME;
         $log = file_exists($logFile) ? file_get_contents($logFile) : 'empty';
@@ -219,6 +204,9 @@ $this->configuration->getMysqlDumpCommand();
 
         $this->log(self::LOG_INFO_PREFIX, "Remove temp file '$sqlDumpName'.");
         $this->filesystem->remove($sqlDumpName);
+
+        // Delete old backups if configured so
+        $this->deleteOldBackups();
 
         $this->flashSuccess('backup.action.create.success');
         $this->log(self::LOG_INFO_PREFIX, '--- F I N I S H E D   C R E A T I N G   B A C K U P ---');
@@ -335,6 +323,70 @@ $this->configuration->getMysqlDumpCommand();
         ]);
     }
 
+
+    private function getExistingBackups() 
+    {
+        $backupDir = $this->getBackupDirectory();
+        $existingBackups = [];
+
+        if ($this->filesystem->exists($backupDir)) {
+            $files = scandir($backupDir, SCANDIR_SORT_DESCENDING);
+            $filesAndDirs = array_diff($files, ['.', '..', self::GITIGNORE_NAME]);
+
+            foreach ($filesAndDirs as $fileOrDir) {
+                // Make sure that only files are listed which match our wanted regex
+
+                if (is_file($backupDir.$fileOrDir)
+                && preg_match(self::REGEX_BACKUP_ZIP_NAME, $fileOrDir) == 1) {
+                    $filesizeInMb = round(filesize($backupDir.$fileOrDir) / 1048576, 3);
+                    $filemtime = filemtime($backupDir.$fileOrDir);
+
+                    $existingBackups[] = ['name' => $fileOrDir,
+                                          'size' => $filesizeInMb,
+                                          'filemtime' => $filemtime];
+                }
+            }
+        } 
+
+        return $existingBackups;
+    }
+
+    private function deleteOldBackups() 
+    {
+        $backupAmountMax = $this->configuration->getBackupAmountMax();
+        $existingBackupsArr = $this->getExistingBackups();
+        $numBackupsExisting = count($existingBackupsArr);
+
+        // Important to do nothing when backupAmountMax is -1 or 0, because then we want to keep all the backups / no auto deletion
+        if ($backupAmountMax > 0 && $numBackupsExisting > $backupAmountMax) {
+            $this->log(self::LOG_INFO_PREFIX, "Delete old backups. Max. amount to keep: $backupAmountMax; Existing: $numBackupsExisting");
+
+            // Sort backups by creation date
+            usort($existingBackupsArr, function($a, $b) {
+                return $a['filemtime'] <=> $b['filemtime'];
+            });
+
+            $amountToDelete = $numBackupsExisting - $backupAmountMax;
+
+            // A array with all backups to delete is wanted
+            array_splice($existingBackupsArr, $amountToDelete);
+
+            $backupsToDeleteArr = $existingBackupsArr;
+            $path = $this->getBackupDirectory();
+
+            foreach ($backupsToDeleteArr as $backupToDelete) {
+                $backupFullPath = $path.$backupToDelete['name'];
+
+                if ($this->filesystem->exists($backupFullPath)) {
+                    $this->filesystem->remove($backupFullPath);
+                    $this->log(self::LOG_INFO_PREFIX, "Deleted backup '$backupFullPath'");
+                }
+            }
+        }
+
+        return $backupsToDeleteArr;
+    }
+
     private function getFilesInDirRecursively($dir, &$resultFileList = [])
     {
         $files = scandir($dir);
@@ -446,7 +498,7 @@ $this->configuration->getMysqlDumpCommand();
         */
 
         // This is only for mysql and mariadb. sqlite will be backuped via the file backups
-        $this->log(self::LOG_INFO_PREFIX, "Used database: '$dbUsed'.");
+        $this->log(self::LOG_INFO_PREFIX, "Used database: '{$urlParsed['scheme']}'.");
 
         if ($urlParsed['scheme'] === 'mysql' || $urlParsed['scheme'] === 'mysqli') {
 

@@ -30,7 +30,7 @@
                 <source>Download</source>
                 <target>Preuzmi</target>
             </trans-unit>
-             <trans-unit id="confirm.restore">
+            <trans-unit id="confirm.restore">
                 <source>confirm.restore</source>
                 <target>Stvarno želiš obnoviti ovu sigurnosnu kopiju?</target>
             </trans-unit>
