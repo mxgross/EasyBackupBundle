@@ -446,7 +446,7 @@ $this->configuration->getMysqlDumpCommand();
         */
 
         // This is only for mysql and mariadb. sqlite will be backuped via the file backups
-        $this->log(self::LOG_INFO_PREFIX, "Used database: '$dbUsed'.");
+        $this->log(self::LOG_INFO_PREFIX, "Used database: '{$urlParsed['scheme']}'.");
 
         if ($urlParsed['scheme'] === 'mysql' || $urlParsed['scheme'] === 'mysqli') {
 
