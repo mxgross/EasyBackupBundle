@@ -6,6 +6,10 @@
                 <source>backup.action.create.success</source>
                 <target>Backup created successfully.</target>
             </trans-unit>
+            <trans-unit id="backup.action.create.error">
+                <source>backup.action.create.error</source>
+                <target>Error while creating backup.</target>
+            </trans-unit>
             <trans-unit id="backup.action.download.error">
                 <source>backup.action.download.error</source>
                 <target>Error downloading backup. The filename seems invalid.</target>

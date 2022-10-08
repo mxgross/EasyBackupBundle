@@ -41,13 +41,12 @@
         "friendsofphp/php-cs-fixer": "^3.0",
         "kevinpapst/kimai2": "^1.11",
         "phpstan/phpstan": "^1.0",
-        "phpstan/phpstan-symfony": "^1.0",
-        "symfony/console": "^4.0",
-        "symfony/event-dispatcher": "^4.0"
+        "phpstan/phpstan-symfony": "^1.0"
     },
     "config": {
         "allow-plugins": {
-            "symfony/flex": true
+            "composer/package-versions-deprecated": true,
+            "symfony/flex": false
         }
     }
 }

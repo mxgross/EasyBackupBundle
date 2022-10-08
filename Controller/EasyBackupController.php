@@ -204,9 +204,16 @@ final class EasyBackupController extends AbstractController
 
         // Delete old backups if configured so
         $this->deleteOldBackups();
-
-        $this->flashSuccess('backup.action.create.success');
         $this->log(self::LOG_INFO_PREFIX, '--- F I N I S H E D   C R E A T I N G   B A C K U P ---');
+
+        $logFile = $backupDir . self::LOG_FILE_NAME;
+        $log = file_exists($logFile) ? file_get_contents($logFile) : '';
+
+        if (preg_match('/ERROR/i', $log)) {
+            $this->flashError('backup.action.create.error');
+        } else {
+            $this->flashSuccess('backup.action.create.success');
+        }
 
         return $this->redirectToRoute('easy_backup');
     }
@@ -479,7 +486,7 @@ final class EasyBackupController extends AbstractController
     {
         $this->log(self::LOG_INFO_PREFIX, 'Start database backup.');
 
-        $urlParsed = parse_url($this->dbUrl);
+        $dbUrlArr = parse_url($this->dbUrl);
 
         /*  Example:
 
@@ -494,21 +501,28 @@ final class EasyBackupController extends AbstractController
             }
         */
 
-        // This is only for mysql and mariadb. sqlite will be backuped via the file backups
-        $this->log(self::LOG_INFO_PREFIX, "Used database: '{$urlParsed['scheme']}'.");
+        $scheme = $dbUrlArr['scheme'] ?? null;
+        $host = $dbUrlArr['host'] ?? null;
+        $port = $dbUrlArr['port'] ?? null;
+        $user = $dbUrlArr['user'] ?? null;
+        $pass = $dbUrlArr['pass'] ?? null;
+        $path = $dbUrlArr['path'] ?? null;
 
-        if ($urlParsed['scheme'] === 'mysql' || $urlParsed['scheme'] === 'mysqli') {
+        // This is only for mysql and mariadb. sqlite will be backuped via the file backups
+        $this->log(self::LOG_INFO_PREFIX, "Used database: '$scheme'.");
+
+        if (\in_array($scheme, ['mysql', 'mysqli'])) {
             // The MysqlDumpCommand per default looks like this: '/usr/bin/mysqldump --user={user} --password={password} --host={host} --port={port} --single-transaction --force {database}'
 
             $mysqlDumpCmd = $this->configuration->getMysqlDumpCommand();
-            $mysqlDumpCmd = str_replace('{user}', $urlParsed['user'], $mysqlDumpCmd);
-            $mysqlDumpCmd = str_replace('{password}', urldecode($urlParsed['pass']), $mysqlDumpCmd);
-            $mysqlDumpCmd = str_replace('{host}', $urlParsed['host'], $mysqlDumpCmd);
-            $mysqlDumpCmd = str_replace('{database}', trim($urlParsed['path'], '/'), $mysqlDumpCmd);
+            $mysqlDumpCmd = str_replace('{user}', $user, $mysqlDumpCmd);
+            $mysqlDumpCmd = str_replace('{password}', urldecode($pass), $mysqlDumpCmd);
+            $mysqlDumpCmd = str_replace('{host}', $host, $mysqlDumpCmd);
+            $mysqlDumpCmd = str_replace('{database}', trim($path, '/'), $mysqlDumpCmd);
 
             // Port can be default port / empty in database URL
-            if (\array_key_exists('port', $urlParsed)) {
-                $mysqlDumpCmd = str_replace('{port}', \strval($urlParsed['port']), $mysqlDumpCmd);
+            if (!empty($port)) {
+                $mysqlDumpCmd = str_replace('{port}', \strval($port), $mysqlDumpCmd);
             } else {
                 $mysqlDumpCmd = str_replace('--port={port}', '', $mysqlDumpCmd);
             }
@@ -519,9 +533,18 @@ final class EasyBackupController extends AbstractController
             $mysqlResArr = $this->execute($mysqlDumpCmd);
 
             if (!empty($mysqlResArr['out'])) {
-                $this->log(self::LOG_INFO_PREFIX, "Creating '$sqlDumpName'.");
-                $this->filesystem->touch($sqlDumpName);
-                $this->filesystem->appendToFile($sqlDumpName, $mysqlResArr['out']);
+                // When the mysqldump command cannot be parsed it will not throw an error but something like e.g.
+                // Usage: mysqldump [OPTIONS] database [tables] OR mysqldump [OPTIONS] --databases [OPTIONS] DB1 [DB2 DB3...] OR mysqldump [OPTIONS] --all-databases [OPTIONS] For more options, use mysqldump --help
+                // As this would be written to the mysql dump file we catch this case and write an error into the log.
+                // In the end of the backup process an error message is shown if any error in the log exists.
+
+                if (preg_match('/Usage: mysqldump/i', $mysqlResArr['out'])) {
+                    $this->log(self::LOG_ERROR_PREFIX, $mysqlResArr['out']);
+                } else {
+                    $this->log(self::LOG_INFO_PREFIX, "Creating '$sqlDumpName'.");
+                    $this->filesystem->touch($sqlDumpName);
+                    $this->filesystem->appendToFile($sqlDumpName, $mysqlResArr['out']);
+                }
             }
 
             $errorsStr = $mysqlResArr['err'];

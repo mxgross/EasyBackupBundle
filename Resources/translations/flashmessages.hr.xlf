@@ -6,6 +6,10 @@
                 <source>backup.action.create.success</source>
                 <target>Sigurnosna kopija je uspješno stvorena.</target>
             </trans-unit>
+            <trans-unit id="backup.action.create.error">
+                <source>backup.action.create.error</source>
+                <target>Pogreška prilikom izrade sigurnosne kopije.</target>
+            </trans-unit>
             <trans-unit id="backup.action.download.error">
                 <source>backup.action.download.error</source>
                 <target>Greška pri preuzimanju sigurnosne kopije. Čini se da je ime datoteke neispravno.</target>

@@ -6,6 +6,10 @@
                 <source>backup.action.create.success</source>
                 <target>Backup erfolgreich erstellt.</target>
             </trans-unit>
+            <trans-unit id="backup.action.create.error">
+                <source>backup.action.create.error</source>
+                <target>Fehler beim Erstellen der Sicherung.</target>
+            </trans-unit>
             <trans-unit id="backup.action.download.error">
                 <source>backup.action.download.error</source>
                 <target>Es wurde kein Backup mit diesem Namen gefunden.</target>
