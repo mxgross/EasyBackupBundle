@@ -9,35 +9,50 @@
 
 namespace KimaiPlugin\EasyBackupBundle\DependencyInjection;
 
-use App\Plugin\AbstractPluginExtension;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Extension\PrependExtensionInterface;
 use Symfony\Component\DependencyInjection\Loader;
+use Symfony\Component\HttpKernel\DependencyInjection\Extension;
 
-class EasyBackupExtension extends AbstractPluginExtension implements PrependExtensionInterface
+class EasyBackupExtension extends Extension implements PrependExtensionInterface
 {
+
     /**
      * @param array $configs
      * @param ContainerBuilder $container
      * @throws \Exception
      */
-    public function load(array $configs, ContainerBuilder $container)
+    public function load(array $configs, ContainerBuilder $container): void
     {
-        $configuration = new Configuration();
-        $config = $this->processConfiguration($configuration, $configs);
-
-        $this->registerBundleConfiguration($container, $config);
-
-        $loader = new Loader\YamlFileLoader(
-            $container,
-            new FileLocator(__DIR__ . '/../Resources/config')
-        );
+        $loader = new Loader\YamlFileLoader($container, new FileLocator(__DIR__ . '/../Resources/config'));
         $loader->load('services.yaml');
     }
 
+    // /**
+    //  * @param array $configs
+    //  * @param ContainerBuilder $container
+    //  * @throws \Exception
+    //  */
+    // public function load(array $configs, ContainerBuilder $container)
+    // {
+    //     $configuration = new Configuration();
+    //     $config = $this->processConfiguration($configuration, $configs);
+
+    //     $this->registerBundleConfiguration($container, $config);
+
+    //     $loader = new Loader\YamlFileLoader(
+    //         $container,
+    //         new FileLocator(__DIR__ . '/../Resources/config')
+    //     );
+    //     $loader->load('services.yaml');
+    // }
+
     public function prepend(ContainerBuilder $container): void
     {
+        /*
+         * @CloudRequired adapt if new permissions are added
+         */
         $container->prependExtensionConfig('kimai', [
             'permissions' => [
                 'roles' => [

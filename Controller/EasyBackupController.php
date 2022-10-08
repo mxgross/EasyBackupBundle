@@ -54,7 +54,7 @@ final class EasyBackupController extends AbstractController
     private $dbUrl;
 
     /**
-     * @var string
+     * @var Filesystem
      */
     private $filesystem;
 
@@ -66,7 +66,7 @@ final class EasyBackupController extends AbstractController
         $this->filesystem = new Filesystem();
     }
 
-    private function log($logLevel, $message)
+    private function log(string $logLevel, string $message): void
     {
         $backupDir = $this->getBackupDirectory();
         $logFile = $backupDir.self::LOG_FILE_NAME;
@@ -159,11 +159,11 @@ final class EasyBackupController extends AbstractController
         ];
 
         try {
-            $manifest['git'] = str_replace(PHP_EOL, '', exec(self::CMD_GIT_HEAD));
+            $manifest['git'] = str_replace(PHP_EOL, '', strval(exec(self::CMD_GIT_HEAD)));
         } catch (\Exception $ex) {
             // ignore exception
         }
-        $this->filesystem->appendToFile($manifestFile, json_encode($manifest, JSON_PRETTY_PRINT));
+        $this->filesystem->appendToFile($manifestFile, strval(json_encode($manifest, JSON_PRETTY_PRINT)));
 
         // Backing up files and directories
         $this->log(self::LOG_INFO_PREFIX, 'Get files and dirs to backup.');
@@ -295,6 +295,7 @@ final class EasyBackupController extends AbstractController
     public function prepareRecoveryAction(Request $request)
     {
         $backupName = $request->query->get('backupFilename');
+        $fileOverwrites = [];
 
         // Validate the given user input (filename)
 
@@ -307,16 +308,15 @@ final class EasyBackupController extends AbstractController
             $restoreDir = $restoreDir.$backupName.DIRECTORY_SEPARATOR; // e.g. .../kimai2/var/easy_backup/2020-11-02_174452
 
             $this->unzip($zipNameAbsolute, $restoreDir);
+
+            $fileOverwrites = $this->getFilesInDirRecursively($restoreDir);
+            $fileOverwrites = array_filter(str_replace($restoreDir , '', $fileOverwrites));
+    
+            // Cleanup the extracted backup folder
+            $this->filesystem->remove($restoreDir);
         } else {
             $this->flashError('backup.action.filename.error');
         }
-
-        $fileOverwrites = $this->getFilesInDirRecursively($restoreDir);
-
-        $fileOverwrites = array_filter(str_replace('C:\\xampp\\htdocs\kimai2\\', '', $fileOverwrites));
-
-        // Cleanup the extracted backup folder
-        $this->filesystem->remove($restoreDir);
 
         return $this->render('@EasyBackup/prepairRecovery.html.twig', [
             'fileOverwrites' => $fileOverwrites,
@@ -324,7 +324,7 @@ final class EasyBackupController extends AbstractController
     }
 
 
-    private function getExistingBackups() 
+    private function getExistingBackups(): array
     {
         $backupDir = $this->getBackupDirectory();
         $existingBackups = [];
@@ -351,7 +351,7 @@ final class EasyBackupController extends AbstractController
         return $existingBackups;
     }
 
-    private function deleteOldBackups() 
+    private function deleteOldBackups(): array 
     {
         $backupAmountMax = $this->configuration->getBackupAmountMax();
         $existingBackupsArr = $this->getExistingBackups();
@@ -388,13 +388,13 @@ final class EasyBackupController extends AbstractController
         return $backupsToDeleteArr;
     }
 
-    private function getFilesInDirRecursively($dir, &$resultFileList = [])
+    private function getFilesInDirRecursively(string $dir, array &$resultFileList = []): array
     {
         $files = scandir($dir);
 
         foreach ($files as $fileOrDir) {
             $path = realpath($dir.DIRECTORY_SEPARATOR.$fileOrDir);
-            if (!is_dir($path)) {
+            if (!empty($path) && !is_dir($path)) {
                 $resultFileList[] = $path;
             } elseif (!in_array($fileOrDir, ['.', '..', '.git'])) {
                 $this->getFilesInDirRecursively($path, $resultFileList);
@@ -404,7 +404,7 @@ final class EasyBackupController extends AbstractController
         return $resultFileList;
     }
 
-    private function restoreDirsAndFiles($restoreDir)
+    private function restoreDirsAndFiles(string $restoreDir): void
     {
         $this->log(self::LOG_INFO_PREFIX, 'Start restoring files and dirs.');
 
@@ -458,7 +458,7 @@ final class EasyBackupController extends AbstractController
      *
      * @return \Symfony\Component\HttpFoundation\Response
      */
-    public function deleteAction(Request $request)
+    public function deleteAction(Request $request): Response
     {
         $dirname = $request->query->get('backupFilename');
 
@@ -479,7 +479,7 @@ final class EasyBackupController extends AbstractController
         return $this->redirectToRoute('easy_backup', $request->query->all());
     }
 
-    private function backupDatabase(string $sqlDumpName)
+    private function backupDatabase(string $sqlDumpName): void
     {
         $this->log(self::LOG_INFO_PREFIX, 'Start database backup.');
         
@@ -513,7 +513,7 @@ final class EasyBackupController extends AbstractController
 
             // Port can be default port / empty in database URL
             if (array_key_exists('port', $urlParsed)) {
-                $mysqlDumpCmd = str_replace('{port}', $urlParsed['port'], $mysqlDumpCmd);
+                $mysqlDumpCmd = str_replace('{port}', strval($urlParsed['port']), $mysqlDumpCmd);
             } else {
                 $mysqlDumpCmd = str_replace('--port={port}', '', $mysqlDumpCmd);
             }
@@ -540,14 +540,7 @@ final class EasyBackupController extends AbstractController
         }
     }
 
-    private function startsWith($needle, $haystack)
-    {
-        $length = strlen($needle);
-
-        return substr($haystack, 0, $length) === $needle;
-    }
-
-    private function unzip($source, $destination)
+    private function unzip(string $source, string $destination): bool
     {
         $this->log(self::LOG_INFO_PREFIX, "Start unzipping '$source' to '$destination'.");
 
@@ -574,7 +567,7 @@ final class EasyBackupController extends AbstractController
         return false;
     }
 
-    private function zipData($source, $destination)
+    private function zipData(string $source, string $destination): bool
     {
         $this->log(self::LOG_INFO_PREFIX, "Start zipping '$source' to '$destination'.");
 
@@ -601,7 +594,7 @@ final class EasyBackupController extends AbstractController
                             }
                         }
                     } elseif (is_file($source) === true) {
-                        $zip->addFromString(basename($source), file_get_contents($source));
+                        $zip->addFromString(basename($source), file_get_contents($source) ?: '');
                     }
                 } else {
                     $this->flashError('backup.action.zip.error.destination');
@@ -621,7 +614,8 @@ final class EasyBackupController extends AbstractController
         return false;
     }
 
-    private function execute($cmd, $workdir = null) {
+    private function execute(string $cmd, string $workdir = null): array
+    {
 
         if (is_null($workdir)) {
             $workdir = __DIR__;
@@ -643,12 +637,12 @@ final class EasyBackupController extends AbstractController
     
         return [
             'code' => proc_close($process),
-            'out' => trim($stdout),
-            'err' => trim($stderr),
+            'out' => trim(strval($stdout)),
+            'err' => trim(strval($stderr)),
         ];
     }
 
-    private function checkStatus()
+    private function checkStatus(): array
     {
         $status = [];
 
@@ -755,7 +749,7 @@ final class EasyBackupController extends AbstractController
         return Constants::VERSION.' '.Constants::STATUS;
     }
 
-    private function restoreMySQLDump($restoreDir)
+    private function restoreMySQLDump(string $restoreDir): void
     {
         $this->log(self::LOG_INFO_PREFIX, 'Start restoring MySQL dump.');
 
