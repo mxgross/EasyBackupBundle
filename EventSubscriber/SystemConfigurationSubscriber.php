@@ -1,8 +1,8 @@
 <?php
 
 /*
- * This file is part of the EasyBackupBundle for Kimai 2.
- *
+ * This file is part of the EasyBackupBundle.
+ * All rights reserved by Maximilian Groß (www.maximiliangross.de).
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
@@ -13,9 +13,9 @@ use App\Event\SystemConfigurationEvent;
 use App\Form\Model\Configuration;
 use App\Form\Model\SystemConfiguration as SystemConfigurationModel;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
-use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Validator\Constraints\GreaterThanOrEqual;
 use Symfony\Component\Validator\Constraints\NotNull;
 
