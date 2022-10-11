@@ -84,8 +84,6 @@ final class EasyBackupController extends AbstractController
 
     private function getBackupDirectory(): string
     {
-        $this->configuration->getMysqlDumpCommand();
-
         return str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $this->kimaiRootPath . $this->configuration->getBackupDir());
     }
 
