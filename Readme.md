@@ -76,7 +76,7 @@ templates/export/
 ```
 You are free to edit this list via the Kimai settings page. Place each filename or paths in a seperate line. Make sure that there are no empty lines. Root path is your kimai installation path.
 
-![Update the paths to your needs](https://github.com/mxgross/EasyBackupBundle/blob/dev/screenshot_files_and_paths_to_be_backed_up.JPG?raw=true)
+![Update the paths to your needs](https://github.com/mxgross/EasyBackupBundle/blob/dev/screenshot_files_and_paths_to_be_backed_up.jpg?raw=true)
 
 According to the [backup docu](https://www.kimai.org/documentation/backups.html) the Kimai version should be saved to.
 Also the current git head.
