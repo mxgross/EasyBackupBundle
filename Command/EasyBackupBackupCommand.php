@@ -6,6 +6,7 @@ use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Routing\RouterInterface;
 
 // the name of the command is what users type after "php bin/console"
 #[AsCommand(name: 'EasyBackup:backup',
