@@ -123,7 +123,11 @@ Caution: All database entries created between the backup and now will get lost. 
 
 Files contained in the backup may overwrite already existing files.
 
+## Scheduled backups via command line or cronjob
+There is a command to also trigger automated backups. For this you have to be in the path
+`/var/www/html/kimai2` to execute the command `php bin/console EasyBackup:backup`
+
 ## Common errors and their solution
-Because I have recently received several issues and mails about environment-specific problems, I have recorded some possible solutions on a new wiki page.
+Fore some issues in older versions, I have recorded some possible solutions on a new wiki page.
 [Wiki page: Common-errors-and-their-solution](https://github.com/mxgross/EasyBackupBundle/wiki/Common-errors-and-their-solution)
 
