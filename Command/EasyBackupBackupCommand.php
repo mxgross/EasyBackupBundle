@@ -6,7 +6,6 @@ use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Routing\RouterInterface;
 
 // the name of the command is what users type after "php bin/console"
 #[AsCommand(name: 'EasyBackup:backup',
@@ -21,10 +20,8 @@ class EasyBackupBackupCommand extends ContainerAwareCommand
 
     private $router;
 
-    public function __construct(RouterInterface $router)
+    public function __construct()
     {
-        $this->router = $router;
-
         parent::__construct();
     }
 
@@ -42,8 +39,9 @@ class EasyBackupBackupCommand extends ContainerAwareCommand
         $controller = $container->get('KimaiPlugin\EasyBackupBundle\Controller\EasyBackupController');
         $result = $controller->createBackupAction();
 
-        $output->writeln($result);
-        //$output->writeln($response->getContent());
+        //$output->writeln($result);
+        $output->writeln($result->getStatusCode());
+
 
         // this method must return an integer number with the "exit status code"
         // of the command. You can also use these constants to make code more readable
