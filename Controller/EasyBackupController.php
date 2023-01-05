@@ -114,7 +114,7 @@ final class EasyBackupController extends AbstractController
     }
 
     /**
-     * @Route(path="/create_backup", name="create_backup", methods={"GET", "POST"}, schemes={"http"})
+     * @Route(path="/create_backup", name="create_backup", methods={"GET", "POST"})
      *
      * @return Response
      */
