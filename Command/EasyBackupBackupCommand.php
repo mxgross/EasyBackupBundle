@@ -18,10 +18,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 use KimaiPlugin\EasyBackupBundle\Service\EasyBackupService;
 
 // the name of the command is what users type after "php bin/console"
-#[AsCommand(name: 'EasyBackup:backup',
-            description: 'Creates a new backup.',
-            hidden: false,
-            )]
+
 class EasyBackupBackupCommand extends ContainerAwareCommand
 {
     protected static $defaultName = 'EasyBackup:backup';
