@@ -48,7 +48,7 @@ class EasyBackupBackupCommand extends ContainerAwareCommand
 
         // return this if there was no problem running the command
         // (it's equivalent to returning int(0))
-        return 0;
+        return Command::SUCCESS;
 
         // or return this if some error happened during the execution
         // (it's equivalent to returning int(1))
