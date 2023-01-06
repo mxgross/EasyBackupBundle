@@ -1,11 +1,21 @@
 <?php 
 
+/*
+ * This file is part of the EasyBackupBundle.
+ * All rights reserved by Maximilian Groß (www.maximiliangross.de).
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace KimaiPlugin\EasyBackupBundle\Command;
 
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+
+use KimaiPlugin\EasyBackupBundle\Service\EasyBackupService;
 
 // the name of the command is what users type after "php bin/console"
 #[AsCommand(name: 'EasyBackup:backup',
@@ -19,35 +29,30 @@ class EasyBackupBackupCommand extends ContainerAwareCommand
     protected static $defaultDescription = 'Creates a new backup.';
 
     private $router;
+    private $easyBackupService;
 
-    public function __construct()
+    public function __construct(EasyBackupService $easyBackupService)
     {
+        $this->easyBackupService = $easyBackupService;
+
         parent::__construct();
     }
 
     protected function configure(): void
     {
         $this
-            // the command help shown when running the command with the "--help" option
-            ->setHelp('This command allows you to create a new backup e.g. via cronjob.')
-        ;
+            ->setName('EasyBackup:backup')
+            ->setDescription('Creates a new backup.')
+            ->setHelp('This command allows you to create a new backup e.g. via cronjob.');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $container = $this->getContainer();
-        $controller = $container->get('KimaiPlugin\EasyBackupBundle\Controller\EasyBackupController');
-        $result = $controller->createBackupAction();
+        $log = $this->easyBackupService->createBackup();
 
         //$output->writeln($result);
-        $output->writeln($result->getStatusCode());
+        $output->writeln($log);
 
-
-        // this method must return an integer number with the "exit status code"
-        // of the command. You can also use these constants to make code more readable
-
-        // return this if there was no problem running the command
-        // (it's equivalent to returning int(0))
         return 0;
 
         // or return this if some error happened during the execution
