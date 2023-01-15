@@ -20,7 +20,7 @@
     ],
     "extra": {
         "kimai": {
-            "require": "20000",
+            "require": 20000,
             "name": "EasyBackup"
         }
     },
