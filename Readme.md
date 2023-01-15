@@ -1,6 +1,6 @@
 ### EasyBackup
 
-A Kimai 2 plugin, which allows you to backup your environment with a single click.
+A Kimai 2 plugin, which allows you to backup your environment with a single click or via cronjob / command line.
 
 If you like the plugin, please feel free to donate me a coffee ;)
 
@@ -8,7 +8,7 @@ If you like the plugin, please feel free to donate me a coffee ;)
 
 After the installation a new menu entry `EasyBackup` is created. There you can create a new backup
 by clicking the `Create Backup` button. Afterwards all created backups will be listed at the page
-and you can delete or download the createt backup as zip file.
+and you can delete or download the created backup as zip file.
 
 ![Kimai2 Easy Backup Plugin Bundle](https://github.com/mxgross/EasyBackupBundle/blob/master/screenshot.jpg?raw=true)
 
@@ -56,7 +56,7 @@ Feel free to participate in existing issues or create a issue for any new inquir
 
 ## Storage
 
-This bundle stores the backups zipped in the directory `var/easy_backup`.
+This bundle stores the backups by default zipped inside the Kimai directory in `var/easy_backup`.
 Make sure its writable by your webserver! We don't use the recommended 
 `var/data/` directory, because it will be part of the backuped files!
 
@@ -74,7 +74,7 @@ templates/invoice
 var/export/
 templates/export/
 ```
-You are free to edit this list via the Kimai settings page. Place each filename or paths in a seperate line. Make sure that there are no empty lines. Root path is your kimai installation path.
+You are free to edit this list via the Kimai settings page. Place each filename or paths in a seperate line. Make sure that there are no empty lines. Root path is your Kimai installation path.
 
 ![Update the paths to your needs](https://github.com/mxgross/EasyBackupBundle/blob/dev/screenshot_files_and_paths_to_be_backed_up.jpg?raw=true)
 
@@ -89,7 +89,7 @@ If you use sqlite, the database file is backuped because the `var/data` director
 If you use mysql/mariadb the plugin will recognize it by reading the configured database connection url.
 Then it will execute a mysqldump command to create a sql dump file, which is added to the backup zip.
 
-The mysqldump command can be configured via the standard Kimai 2 settings page.
+The mysqldump command can be configured via the standard Kimai settings page.
 Per default it is
 ```
 /usr/bin/mysqldump --user={user} --password={password} --host={host} --port={port} --single-transaction --force {database}
@@ -123,7 +123,17 @@ Caution: All database entries created between the backup and now will get lost. 
 
 Files contained in the backup may overwrite already existing files.
 
+## Scheduled backups via command line or cronjob
+There is a command to also trigger automated backups. 
+Example for a backup every Sunday at 4am could be:
+```0 4 * * SUN php /var/www/kimai2/bin/console EasyBackup:backup > /home/YourUsername/Documents/EasyBackupCron.log```
+Maybe you need to specify a absolute path to php on your environment, e.g. `/usr/bin/php`.
+Make sure to also set the right path to your kimai2 location and your .log file.
+If you don't need a log after successfully setting up your cronjob, you can use `> /dev/null` as output.
+Give [https://crontab.guru/](https://crontab.guru/) a try if you struggle how to define the right time syntax for your cronjob.
+Some also need to specify the user before the php command.
+
 ## Common errors and their solution
-Because I have recently received several issues and mails about environment-specific problems, I have recorded some possible solutions on a new wiki page.
+Fore some issues in older versions, I have recorded some possible solutions on a new wiki page.
 [Wiki page: Common-errors-and-their-solution](https://github.com/mxgross/EasyBackupBundle/wiki/Common-errors-and-their-solution)
 
