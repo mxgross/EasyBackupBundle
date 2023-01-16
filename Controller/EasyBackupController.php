@@ -22,10 +22,8 @@ use Symfony\Component\Routing\Annotation\Route;
 
 use KimaiPlugin\EasyBackupBundle\Service\EasyBackupService;
 
-/**
- * @Route(path="/admin/easy-backup")
- * @Security("is_granted('easy_backup')")
- */
+#[IsGranted('easy_backup')]
+#[Route('/admin/easy-backup')]
 final class EasyBackupController extends AbstractController
 {
     public const CMD_GIT_HEAD = 'git rev-parse HEAD';
@@ -96,10 +94,9 @@ final class EasyBackupController extends AbstractController
     }
 
     /**
-     * @Route(path="", name="easy_backup", methods={"GET", "POST"})
-     *
      * @return Response
      */
+    #[Route('/', name: 'easy_backup', methods: ['GET', 'POST'])]
     public function indexAction(): Response
     {
         $backupDir = $this->getBackupDirectory();
@@ -122,10 +119,9 @@ final class EasyBackupController extends AbstractController
     }
 
     /**
-     * @Route(path="/create_backup", name="create_backup", methods={"GET", "POST"})
-     *
      * @return Response
      */
+    #[Route('/create_backup', name: 'create_backup', methods: ['GET', 'POST'])]
     public function createBackupAction(): Response
     {
         $log = $this->easyBackupService->createBackup();
@@ -140,11 +136,9 @@ final class EasyBackupController extends AbstractController
     }
 
     /**
-     * @Route(path="/download", name="download", methods={"GET"})
-
-     *
      * @return Response
      */
+    #[Route('/download', name: 'download', methods: ['GET'])]
     public function downloadAction(Request $request): Response
     {
         $backupName = $request->query->get('backupFilename');
@@ -171,11 +165,9 @@ final class EasyBackupController extends AbstractController
     }
 
     /**
-     * @Route(path="/restore", name="restore", methods={"GET"})
-
-     *
      * @return \Symfony\Component\HttpFoundation\Response
      */
+    #[Route('/restore', name: 'restore', methods: ['GET'])]
     public function restoreAction(Request $request)
     {
         // Clear old log file
@@ -212,11 +204,9 @@ final class EasyBackupController extends AbstractController
     }
 
     /**
-     * @Route(path="/prepareRecovery", name="prepareRecovery", methods={"GET"})
-
-     *
      * @return \Symfony\Component\HttpFoundation\Response
      */
+    #[Route('/prepareRecovery', name: 'prepareRecovery', methods: 'GET')]
     public function prepareRecoveryAction(Request $request)
     {
         $backupName = $request->query->get('backupFilename');
@@ -313,11 +303,9 @@ final class EasyBackupController extends AbstractController
     }
 
     /**
-     * @Route(path="/delete", name="delete", methods={"GET"})
-
-     *
      * @return \Symfony\Component\HttpFoundation\Response
      */
+    #[Route(path: '/delete', name: 'delete', methods: ['GET'])]
     public function deleteAction(Request $request): Response
     {
         $dirname = $request->query->get('backupFilename');
@@ -496,7 +484,7 @@ final class EasyBackupController extends AbstractController
             return Constants::SOFTWARE . ' - ' . Constants::VERSION . ' ' . Constants::STATUS;
         }
 
-        return Constants::VERSION . ' ' . Constants::STATUS;
+        return Constants::VERSION; // . ' ' . Constants::STATUS;
     }
 
     private function restoreMySQLDump(string $restoreDir): void
