@@ -113,7 +113,7 @@ final class EasyBackupController extends AbstractController
 
         return $this->render('@EasyBackup/index.html.twig', [
             'existingBackups' => $existingBackups,
-            'status' => $status,
+            '_status' => $status,
             'log' => $log,
         ]);
     }
@@ -415,7 +415,7 @@ final class EasyBackupController extends AbstractController
         $status[] = [
             'desc' => 'Kimai version',
             'status' => true,
-            'result' => $this->getKimaiVersion(),
+            'result' => $this->easyBackupService->getKimaiVersion(),
         ];
 
         // Todo: build path via config files instead of manually
@@ -476,15 +476,6 @@ final class EasyBackupController extends AbstractController
         }
 
         return $status;
-    }
-
-    private function getKimaiVersion(bool $full = false): string
-    {
-        if ($full) {
-            return Constants::SOFTWARE . ' - ' . Constants::VERSION . ' ' . Constants::STATUS;
-        }
-
-        return Constants::VERSION; // . ' ' . Constants::STATUS;
     }
 
     private function restoreMySQLDump(string $restoreDir): void

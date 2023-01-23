@@ -345,10 +345,10 @@ class EasyBackupService
     public function getKimaiVersion(bool $full = false): string
     {
         if ($full) {
-            return Constants::SOFTWARE . ' - ' . Constants::VERSION . ' ' . Constants::STATUS;
+            return Constants::SOFTWARE . ' - ' . Constants::VERSION; // . ' ' . Constants::STATUS;
         }
 
-        return Constants::VERSION . ' ' . Constants::STATUS;
+        return Constants::VERSION; // . ' ' . Constants::STATUS;
     }
 
     public function getExistingBackups(): array

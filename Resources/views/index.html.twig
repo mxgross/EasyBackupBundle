@@ -13,7 +13,7 @@
 		<div class="box-header with-border">
 			<h3 class="box-title">{{ 'View status checks'|trans }}
 				{% set break = false %}
-				{% for status_item in status %}
+				{% for status_item in _status %}
 					{% if status_item.status == false and break == false %}
 						<i class="fas fa-exclamation-triangle text-red"></i>
 						{% set break = true %}
@@ -34,8 +34,8 @@
 			</p>
 			<table class="table">
 				<tbody>
-					{% if status is defined %}
-						{% for status_item in status %}
+					{% if _status is defined %}
+						{% for status_item in _status %}
 							<tr>
 								<th style="width:50%">{{ status_item.desc }}</th>
 								<td>
@@ -80,7 +80,7 @@
 	<div class="box box-secondary data_table">
 		<div class="box-header">
 			<a href="{{ path('create_backup') }}">
-				<button class="btn btn-success" {% if '0' in status %} disabled {% endif %}>
+				<button class="btn btn-success" {% if '0' in _status %} disabled {% endif %}>
 					<i class="fas fa-hdd"></i>
 					{{ 'Create Backup'|trans }}</button>
 			</a>
