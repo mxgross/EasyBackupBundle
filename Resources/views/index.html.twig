@@ -9,73 +9,49 @@
 
 {% block main %}
 
-	<div class="box box-primary collapsed-box">
-		<div class="box-header with-border">
-			<h3 class="box-title">{{ 'View status checks'|trans }}
-				{% set break = false %}
-				{% for status_item in _status %}
-					{% if status_item.status == false and break == false %}
-						<i class="fas fa-exclamation-triangle text-red"></i>
-						{% set break = true %}
-					{% endif %}
-				{% endfor %}
-			</h3>
-			<div class="box-tools pull-right">
-				<button class="btn btn-box-tool" data-widget="collapse" data-toggle="tooltip" title="" data-original-title="Collapse">
-					<i class="fas fa-plus"></i>
-				</button>
-			</div>
-		</div>
-		<div class="box-body">
-			<p>
-				If you see a warning icon
-				<i class="fas fa-exclamation-triangle text-red"></i>
-				in the list below, you should check the settings for this plugin and/or talk to your administrator. EasyBackup might not work as expected!
-			</p>
-			<table class="table">
-				<tbody>
-					{% if _status is defined %}
-						{% for status_item in _status %}
-							<tr>
-								<th style="width:50%">{{ status_item.desc }}</th>
-								<td>
-									{% if status_item.status == true %}
-										<i class="fas fa-check text-green"></i>
-										{{ status_item.result }}
-									{% elseif status_item.status == false %}
-										<i class="fas fa-exclamation-triangle text-red"></i>
-										{{ status_item.result }}
-									{% else %}
-										<i class="fas fa-info"></i>
-										{{ status_item.result }}
-									{% endif %}
-								</td>
-							</tr>
-						{% endfor %}
-					{% endif %}
-				</tbody>
-			</table>
-		</div>
-	</div>
+    {% set statusOpts = {collapsed: true, boxtype: 'success'} %}
+    {% for status_item in _status %}
+        {% if status_item.status is same as (false) %}
+            {% set statusOpts = {boxtype: 'danger'} %}
+        {% endif %}
+    {% endfor %}
+    {% embed '@theme/embeds/card.html.twig' with statusOpts %}
+        {% block box_title %}{{ 'View status checks'|trans }}{% endblock %}
+        {% block box_body %}
+            <p>
+                If you see a warning icon <i class="{{ 'warning'|icon(false) }} text-red"></i> in the list below, you should talk to your administrator.
+                The path is either not readable or not writable and Kimai might not work as expected.
+            </p>
+            <table class="table">
+                {% for status_item in _status %}
+                    <tr>
+                        <th style="width:40%">{{ status_item.desc }}</th>
+                        <td>
+                            {% if status_item.status is same as (false) %}
+                                <i class="{{ 'warning'|icon(false) }} text-red"></i>
 
-	<div class="box box-secondary collapsed-box">
-		<div class="box-header with-border">
-			<h3 class="box-title">
-				Latest log
-				{% if 'ERROR' in log %}
-					<i class="fas fa-exclamation-triangle text-red"></i>
-				{% endif %}
-			</h3>
-			<div class="box-tools pull-right">
-				<button class="btn btn-box-tool" data-widget="collapse" data-toggle="tooltip" title="" data-original-title="Collapse">
-					<i class="fas fa-plus"></i>
-				</button>
-			</div>
-		</div>
-		<div class="box-body">
-			<pre>{{ log }}</pre>
-		</div>
-	</div>
+                            {% elseif status_item.status is same as (true) %}
+                                <i class="{{ 'success'|icon(true) }} text-green"></i>
+
+							{% else %}
+								<i class="{{ 'success'|icon(false) }} text-blue"></i>
+                            {% endif %}
+							{{ status_item.result }}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </table>
+        {% endblock %}
+    {% endembed %}
+
+    {% set logOpts = {collapsed: true} %}
+    {% embed '@theme/embeds/card.html.twig' with logOpts %}
+        {% import "macros/widgets.html.twig" as widgets %}
+        {% block box_title %}Latest log{% endblock %}
+        {% block box_body %}
+            <pre>{{- log -}}</pre>
+		{% endblock %}
+    {% endembed %}
 
 	<div class="box box-secondary data_table">
 		<div class="box-header">
