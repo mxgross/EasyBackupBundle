@@ -16,6 +16,7 @@ use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
+use Symfony\Component\Security\Core\Exception\RuntimeException;
 
 /**
  * @Service
@@ -75,7 +76,7 @@ class EasyBackupService
             $dateTime = date('Y-m-d H:i:s');
             $this->filesystem->appendToFile($logFile, "[$dateTime] $logLevel: $message" . PHP_EOL);
         } catch (\Exception $e) {
-            $this->flashError('filesystem.mkdir.error.backupDir');
+            throw new RuntimeException('filesystem.mkdir.error.backupDir');
         }
     }
 
@@ -262,8 +263,8 @@ class EasyBackupService
             $errorsStr = trim($errorsStr, PHP_EOL);
 
             if (!empty($errorsStr)) {
-                $this->flashError($errorsStr);
                 $this->log(self::LOG_ERROR_PREFIX, $errorsStr);
+                throw new RuntimeException($errorsStr);
             }
         }
     }
@@ -298,18 +299,18 @@ class EasyBackupService
                         $zip->addFromString(basename($source), file_get_contents($source) ?: '');
                     }
                 } else {
-                    $this->flashError('backup.action.zip.error.destination');
                     $this->log(self::LOG_ERROR_PREFIX, "Couldn't open '$destination'.");
+                    throw new RuntimeException('backup.action.zip.error.destination');
                 }
 
                 return $zip->close();
             } else {
-                $this->flashError('backup.action.zip.error.source');
                 $this->log(self::LOG_ERROR_PREFIX, "Source file not found: '$source'.");
+                throw new RuntimeException('backup.action.zip.error.source');
             }
         } else {
-            $this->flashError('backup.action.zip.error.extension');
             $this->log(self::LOG_ERROR_PREFIX, "Extension 'zip' not found!");
+            throw new RuntimeException('backup.action.zip.error.extension');
         }
 
         return false;
@@ -345,10 +346,10 @@ class EasyBackupService
     public function getKimaiVersion(bool $full = false): string
     {
         if ($full) {
-            return Constants::SOFTWARE . ' - ' . Constants::VERSION; // . ' ' . Constants::STATUS;
+            return Constants::SOFTWARE . ' - ' . Constants::VERSION; // . ' ' . Constants::STATUS; TODO
         }
 
-        return Constants::VERSION; // . ' ' . Constants::STATUS;
+        return Constants::VERSION; // . ' ' . Constants::STATUS; // TODO
     }
 
     public function getExistingBackups(): array

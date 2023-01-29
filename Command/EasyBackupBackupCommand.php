@@ -10,16 +10,15 @@
 namespace KimaiPlugin\EasyBackupBundle\Command;
 
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Attribute\AsCommand;
-use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Security\Core\Exception\RuntimeException;
 
 use KimaiPlugin\EasyBackupBundle\Service\EasyBackupService;
 
 // the name of the command is what users type after "php bin/console"
 
-class EasyBackupBackupCommand extends ContainerAwareCommand
+class EasyBackupBackupCommand extends Command
 {
     protected static $defaultName = 'EasyBackup:backup';
     // the command description shown when running "php bin/console list"

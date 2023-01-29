@@ -21,6 +21,7 @@ use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\Routing\Annotation\Route;
 
 use KimaiPlugin\EasyBackupBundle\Service\EasyBackupService;
+use Symfony\Component\Security\Core\Exception\RuntimeException;
 
 #[IsGranted('easy_backup')]
 #[Route('/admin/easy-backup')]
@@ -124,15 +125,15 @@ final class EasyBackupController extends AbstractController
     #[Route('/create_backup', name: 'create_backup', methods: ['GET', 'POST'])]
     public function createBackupAction(): Response
     {
-        $log = $this->easyBackupService->createBackup();
+        try {
+            $this->easyBackupService->createBackup();
+        } catch (RuntimeException $e) {
+            $this->flashError($e->getMessage());
 
-        if (preg_match('/ERROR/i', $log)) {
-            $this->flashError('backup.action.create.error');
-        } else {
+        } finally {
             $this->flashSuccess('backup.action.create.success');
+            return $this->redirectToRoute('easy_backup'); 
         }
-
-        return $this->redirectToRoute('easy_backup');
     }
 
     /**
