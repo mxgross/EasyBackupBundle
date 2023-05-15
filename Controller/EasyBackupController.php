@@ -485,22 +485,21 @@ final class EasyBackupController extends AbstractController
 
         // For mysql or mariadb we must execute additinal code. For sqlite it's just a file which will be moved.
 
-        $dbUrlExploded = explode(':', $this->dbUrl);
-        $dbUsed = $dbUrlExploded[0];
+        $dbUrlArr = parse_url($this->dbUrl);
+        $scheme = $dbUrlArr['scheme'] ?? null;
+        $host = $dbUrlArr['host'] ?? null;
+        $port = $dbUrlArr['port'] ?? null;
+        $user = $dbUrlArr['user'] ?? null;
+        $pass = $dbUrlArr['pass'] ?? null;
+        $path = $dbUrlArr['path'] ?? null;
 
-        if ($dbUsed === 'mysql' || $dbUsed === 'mysqli') {
-            $dbUser = str_replace('/', '', $dbUrlExploded[1]);
-            $dbPwd = explode('@', $dbUrlExploded[2])[0];
-            $dbHost = explode('@', $dbUrlExploded[2])[1];
-            $dbPort = explode('/', explode('@', $dbUrlExploded[3])[0])[0];
-            $dbName = explode('?', explode('/', $dbUrlExploded[3])[1])[0];
-
+        if (\in_array($scheme, ['mysql', 'mysqli'])) {
             $mysqlCmd = $this->configuration->getMysqlRestoreCommand();
-            $mysqlCmd = str_replace('{user}', $dbUser, $mysqlCmd);
-            $mysqlCmd = str_replace('{password}', urldecode($dbPwd), $mysqlCmd);
-            $mysqlCmd = str_replace('{host}', $dbHost, $mysqlCmd);
-            $mysqlCmd = str_replace('{port}', $dbPort, $mysqlCmd);
-            $mysqlCmd = str_replace('{database}', $dbName, $mysqlCmd);
+            $mysqlCmd = str_replace('{user}', $user, $mysqlCmd);
+            $mysqlCmd = str_replace('{password}', urldecode($pass), $mysqlCmd);
+            $mysqlCmd = str_replace('{host}', $host, $mysqlCmd);
+            $mysqlCmd = str_replace('{port}', $port, $mysqlCmd);
+            $mysqlCmd = str_replace('{database}', trim($path, '/'), $mysqlCmd);
             $mysqlCmd = str_replace('{sql_file}', $restoreDir . self::SQL_DUMP_FILENAME, $mysqlCmd);
 
             $mysqlResArr = $this->execute($mysqlCmd);
