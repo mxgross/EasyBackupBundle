@@ -10,7 +10,7 @@ After the installation a new menu entry `EasyBackup` is created. There you can c
 by clicking the `Create Backup` button. Afterwards all created backups will be listed at the page
 and you can delete or download the created backup as zip file.
 
-![Kimai2 Easy Backup Plugin Bundle](https://github.com/mxgross/EasyBackupBundle/blob/master/screenshot.jpg?raw=true)
+![Kimai2 Easy Backup Plugin Bundle](https://github.com/mxgross/EasyBackupBundle/blob/main/screenshot.jpg?raw=true)
 
 ### Installation
 
@@ -47,7 +47,7 @@ sudo chmod -R g+rw var/ &&
 sudo chmod -R g+rw public/avatars/
 ```
 
-You could also [download it as zip](https://github.com/mxgross/EasyBackupBundle/archive/master.zip) and upload the directory via FTP:
+You could also [download it as zip](https://github.com/mxgross/EasyBackupBundle/archive/main.zip) and upload the directory via FTP:
 
 ```
 /kimai/var/plugins/
@@ -80,7 +80,7 @@ templates/export/
 ```
 You are free to edit this list via the Kimai settings page. Place each filename or paths in a seperate line. Make sure that there are no empty lines. Root path is your Kimai installation path.
 
-![Update the paths to your needs](https://github.com/mxgross/EasyBackupBundle/blob/dev/screenshot_files_and_paths_to_be_backed_up.jpg?raw=true)
+![Update the paths to your needs](https://github.com/mxgross/EasyBackupBundle/blob/main/screenshot_files_and_paths_to_be_backed_up.jpg?raw=true)
 
 According to the [backup docu](https://www.kimai.org/documentation/backups.html) the Kimai version should be saved to.
 Also the current git head.
