@@ -15,6 +15,10 @@ and you can delete or download the created backup as zip file.
 ### Installation
 
 First clone it to your Kimai installation `plugins` directory:
+
+For Kimai2 Version < 2.0.0 use branch 'master'.
+For 2.0.0 and later use branch 'main'.
+
 ```
 cd /kimai/var/plugins/
 git clone https://github.com/mxgross/EasyBackupBundle.git
