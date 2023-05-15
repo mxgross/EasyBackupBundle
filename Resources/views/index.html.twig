@@ -57,7 +57,7 @@
 		<div class="box-header">
 			<a href="{{ path('create_backup') }}">
 				<button class="btn btn-success" {% if '0' in _status %} disabled {% endif %}>
-					<i class="fas fa-hdd"></i>
+					<i class="fas fa-hdd"></i> &nbsp;
 					{{ 'Create Backup'|trans }}</button>
 			</a>
 		</div>
@@ -84,21 +84,21 @@
 
 								<td>
 									<a href="{{ path('delete', {'backupFilename': item.name}) }}" class="confirmation-link btn btn-danger" data-question="confirm.delete" data-msg-error="action.delete.error" data-msg-success="action.delete.success">
-										<i class="fas fa-trash"></i>
+										<i class="fas fa-trash"></i> &nbsp;
 										{{ 'Delete'|trans }}
 									</a>
 								</td>
 
 								<td>
 									<a href="{{ path('restore', {'backupFilename': item.name}) }}" class="confirmation-link btn btn-caution" data-question="confirm.restore" data-msg-error="action.restore.error" data-msg-success="action.restore.success">
-										<i class="fas fa-undo"></i>
+										<i class="fas fa-undo"></i> &nbsp;
 										{{ 'Restore'|trans }}
 									</a>
 								</td>
 
 								<td>
 									<a href="{{ path('download', {'backupFilename': item.name}) }}" class="btn btn-info">
-										<i class="fas fa-download"></i>
+										<i class="fas fa-download"></i> &nbsp;
 										{{ 'Download'|trans }}
 									</a>
 								</td>
