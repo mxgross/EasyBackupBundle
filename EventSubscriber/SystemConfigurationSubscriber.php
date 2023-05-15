@@ -34,27 +34,22 @@ class SystemConfigurationSubscriber implements EventSubscriberInterface
             (new SystemConfiguration('easy_backup_config'))
             ->setConfiguration([
                 (new Configuration('easy_backup.setting_mysqldump_command'))
-                    ->setLabel('easy_backup.setting_mysqldump_command')
                     ->setTranslationDomain('system-configuration')
                     ->setRequired(false)
                     ->setType(TextType::class),
                 (new Configuration('easy_backup.setting_mysql_restore_command'))
-                    ->setLabel('easy_backup.setting_mysql_restore_command')
                     ->setTranslationDomain('system-configuration')
                     ->setRequired(false)
                     ->setType(TextType::class),
                 (new Configuration('easy_backup.setting_backup_dir'))
-                    ->setLabel('easy_backup.setting_backup_dir')
                     ->setTranslationDomain('system-configuration')
                     ->setRequired(false)
                     ->setType(TextType::class),
                 (new Configuration('easy_backup.setting_paths_to_backup'))
-                    ->setLabel('easy_backup.setting_paths_to_backup')
                     ->setTranslationDomain('system-configuration')
                     ->setRequired(false)
                     ->setType(TextareaType::class),
                 (new Configuration('easy_backup.setting_backup_amount_max'))
-                    ->setLabel('easy_backup.setting_backup_amount_max')
                     ->setTranslationDomain('system-configuration')
                     ->setRequired(false)
                     ->setConstraints([new NotNull(), new GreaterThanOrEqual(['value' => -1])])

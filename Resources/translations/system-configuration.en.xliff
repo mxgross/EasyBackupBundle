@@ -6,24 +6,24 @@
                 <source>easy_backup_config</source>
                 <target>EasyBackup configurations</target>
             </trans-unit>
-            <trans-unit id="label.easy_backup.setting_mysqldump_command">
-                <source>label.easy_backup.setting_mysqldump_command</source>
+            <trans-unit id="easy_backup.setting_mysqldump_command">
+                <source>easy_backup.setting_mysqldump_command</source>
                 <target>The mysqldump command (Placeholders will be replaced automatically)</target>
             </trans-unit>
-            <trans-unit id="label.easy_backup.setting_mysql_restore_command">
-                <source>label.easy_backup.setting_mysql_restore_command</source>
+            <trans-unit id="easy_backup.setting_mysql_restore_command">
+                <source>easy_backup.setting_mysql_restore_command</source>
                 <target>The MySQL command used to import the SQL backup file (Placeholders will be replaced automatically)</target>
             </trans-unit>
-            <trans-unit id="label.easy_backup.setting_backup_dir">
-                <source>label.easy_backup.setting_backup_dir</source>
+            <trans-unit id="easy_backup.setting_backup_dir">
+                <source>easy_backup.setting_backup_dir</source>
                 <target>Backup directory</target>
             </trans-unit>
-            <trans-unit id="label.easy_backup.setting_paths_to_backup">
-                <source>label.easy_backup.setting_paths_to_backup</source>
+            <trans-unit id="easy_backup.setting_paths_to_backup">
+                <source>easy_backup.setting_paths_to_backup</source>
                 <target>Files and paths to backup</target>
             </trans-unit>
-            <trans-unit id="label.easy_backup.setting_backup_amount_max">
-                <source>label.easy_backup.setting_backup_amount_max</source>
+            <trans-unit id="easy_backup.setting_backup_amount_max">
+                <source>easy_backup.setting_backup_amount_max</source>
                 <target>Maximum number of backups to keep. Older ones are automatically deleted.</target>
             </trans-unit>
             <trans-unit id="help.easy_backup.setting_backup_amount_max">
