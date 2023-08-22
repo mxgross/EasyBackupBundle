@@ -496,7 +496,7 @@ final class EasyBackupController extends AbstractController
         if (\in_array($scheme, ['mysql', 'mysqli'])) {
             $mysqlCmd = $this->configuration->getMysqlRestoreCommand();
             $mysqlCmd = str_replace('{user}', $user, $mysqlCmd);
-            $mysqlCmd = str_replace('{password}', urldecode($pass), $mysqlCmd);
+            $mysqlCmd = str_replace('{password}', escapeshellarg(urldecode($pass)), $mysqlCmd);
             $mysqlCmd = str_replace('{host}', $host, $mysqlCmd);
             $mysqlCmd = str_replace('{port}', $port, $mysqlCmd);
             $mysqlCmd = str_replace('{database}', trim($path, '/'), $mysqlCmd);

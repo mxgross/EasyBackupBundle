@@ -227,7 +227,7 @@ class EasyBackupService
 
             $mysqlDumpCmd = $this->configuration->getMysqlDumpCommand();
             $mysqlDumpCmd = str_replace('{user}', $user, $mysqlDumpCmd);
-            $mysqlDumpCmd = str_replace('{password}', urldecode($pass), $mysqlDumpCmd);
+            $mysqlDumpCmd = str_replace('{password}', escapeshellarg(urldecode($pass)), $mysqlDumpCmd);
             $mysqlDumpCmd = str_replace('{host}', $host, $mysqlDumpCmd);
             $mysqlDumpCmd = str_replace('{database}', trim($path, '/'), $mysqlDumpCmd);
 
