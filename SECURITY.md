@@ -3,4 +3,4 @@
 ## Reporting a Vulnerability
 
 Please report (suspected) security vulnerabilities to
-**[security@ory.sh](mailto:info@maximiliangross.de)**.
+**[info@maximiliangross.de](mailto:info@maximiliangross.de)**.
