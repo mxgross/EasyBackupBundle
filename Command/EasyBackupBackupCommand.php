@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 /*
  * This file is part of the EasyBackupBundle.
@@ -9,12 +9,10 @@
 
 namespace KimaiPlugin\EasyBackupBundle\Command;
 
+use KimaiPlugin\EasyBackupBundle\Service\EasyBackupService;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Security\Core\Exception\RuntimeException;
-
-use KimaiPlugin\EasyBackupBundle\Service\EasyBackupService;
 
 // the name of the command is what users type after "php bin/console"
 

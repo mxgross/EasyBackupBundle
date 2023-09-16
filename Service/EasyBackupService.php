@@ -13,9 +13,6 @@ use App\Constants;
 use KimaiPlugin\EasyBackupBundle\Configuration\EasyBackupConfiguration;
 use PhpOffice\PhpWord\Shared\ZipArchive;
 use Symfony\Component\Filesystem\Filesystem;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\Security\Core\Exception\RuntimeException;
 
 /**
@@ -23,7 +20,6 @@ use Symfony\Component\Security\Core\Exception\RuntimeException;
  */
 class EasyBackupService
 {
-
     public const CMD_GIT_HEAD = 'git rev-parse HEAD';
     public const MANIFEST_FILENAME = 'manifest.json';
     public const SQL_DUMP_FILENAME = 'database_dump.sql';
@@ -123,21 +119,21 @@ class EasyBackupService
         try {
             $output = [];
             $returnValue = null;
-        
+
             $this->log(self::LOG_INFO_PREFIX, "Executing '" . self::CMD_GIT_HEAD . "'.");
             exec(self::CMD_GIT_HEAD, $output, $returnValue);
-        
+
             // Check if the $output array contains at least one element
             if (!empty($output)) {
                 // Extract the first element (Git commit hash) and assign it to $manifest['git']
                 $manifest['git'] = $output[0];
-                
-                $this->log(self::LOG_INFO_PREFIX, "Git commit hash: " . $manifest['git']);
+
+                $this->log(self::LOG_INFO_PREFIX, 'Git commit hash: ' . $manifest['git']);
             } else {
                 // Handle the case where $output is empty (no output received)
-                $this->log(self::LOG_WARN_PREFIX, "No output received from the command.");
+                $this->log(self::LOG_WARN_PREFIX, 'No output received from the command.');
             }
-        
+
             // Check the return value to detect errors
             if ($returnValue !== 0) {
                 $this->log(self::LOG_WARN_PREFIX, "Command failed with exit code: $returnValue");
@@ -245,7 +241,7 @@ class EasyBackupService
 
         if (\in_array($scheme, ['mysql', 'mysqli'])) {
             // The MysqlDumpCommand per default looks like this: '/usr/bin/mysqldump --user={user} --password={password} --host={host} --port={port} --single-transaction --force {database}'
-            
+
             $mysqlDumpCmd = $this->configuration->getMysqlDumpCommand();
             $mysqlDumpCmd = str_replace('{user}', escapeshellarg($user), $mysqlDumpCmd);
             $mysqlDumpCmd = str_replace('{password}', escapeshellarg(urldecode($pass)), $mysqlDumpCmd);
@@ -436,5 +432,4 @@ class EasyBackupService
 
         return $backupsToDeleteArr;
     }
-
 }

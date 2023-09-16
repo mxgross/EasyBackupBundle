@@ -9,18 +9,15 @@
 
 namespace KimaiPlugin\EasyBackupBundle\Controller;
 
-use App\Constants;
 use App\Controller\AbstractController;
 use KimaiPlugin\EasyBackupBundle\Configuration\EasyBackupConfiguration;
+use KimaiPlugin\EasyBackupBundle\Service\EasyBackupService;
 use PhpOffice\PhpWord\Shared\ZipArchive;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\Routing\Annotation\Route;
-
-use KimaiPlugin\EasyBackupBundle\Service\EasyBackupService;
 use Symfony\Component\Security\Core\Exception\RuntimeException;
 
 #[IsGranted('easy_backup')]
@@ -129,10 +126,10 @@ final class EasyBackupController extends AbstractController
             $this->easyBackupService->createBackup();
         } catch (RuntimeException $e) {
             $this->flashError($e->getMessage());
-
         } finally {
             $this->flashSuccess('backup.action.create.success');
-            return $this->redirectToRoute('easy_backup'); 
+
+            return $this->redirectToRoute('easy_backup');
         }
     }
 
