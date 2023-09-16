@@ -2,7 +2,7 @@
 
 A Kimai 2 plugin, which allows you to backup your environment with a single click or via cronjob / command line.
 
-If you like the plugin, please feel free to donate me a coffee ;)
+If you like the plugin, please feel free to donate me a coffee. I use my precious free time to operate and improve the plugin and don't earn any money from it.
 
 [![paypal](https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif)](https://www.paypal.com/donate?hosted_button_id=XQD3PMPANZNG4)
 
