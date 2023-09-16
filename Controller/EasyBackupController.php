@@ -468,7 +468,7 @@ final class EasyBackupController extends AbstractController
             $mysqlCmd = str_replace('{user}', escapeshellarg($user), $mysqlCmd);
             $mysqlCmd = str_replace('{password}', escapeshellarg(urldecode($pass)), $mysqlCmd);
             $mysqlCmd = str_replace('{host}', escapeshellarg($host), $mysqlCmd);
-            $mysqlCmd = str_replace('{database}', escapeshellarg(trim($path), '/'), $mysqlCmd);
+            $mysqlCmd = str_replace('{database}', escapeshellarg(trim($path, '/')), $mysqlCmd);
             $mysqlCmd = str_replace('{sql_file}', $restoreDir . self::SQL_DUMP_FILENAME, $mysqlCmd);
 
             // Port can be default port / empty in database URL
