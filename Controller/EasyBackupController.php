@@ -355,33 +355,6 @@ final class EasyBackupController extends AbstractController
         return false;
     }
 
-    private function execute(string $cmd, string $workdir = null): array
-    {
-        if (\is_null($workdir)) {
-            $workdir = __DIR__;
-        }
-
-        $descriptorspec = [
-           0 => ['pipe', 'r'],  // stdin
-           1 => ['pipe', 'w'],  // stdout
-           2 => ['pipe', 'w'],  // stderr
-        ];
-
-        $process = proc_open($cmd, $descriptorspec, $pipes, $workdir, null);
-
-        $stdout = stream_get_contents($pipes[1]);
-        fclose($pipes[1]);
-
-        $stderr = stream_get_contents($pipes[2]);
-        fclose($pipes[2]);
-
-        return [
-            'code' => proc_close($process),
-            'out' => trim(\strval($stdout)),
-            'err' => trim(\strval($stderr)),
-        ];
-    }
-
     private function checkStatus(): array
     {
         $status = [];
@@ -424,7 +397,7 @@ final class EasyBackupController extends AbstractController
 
         if (file_exists($dotGitPath)) {
             $cmd = self::CMD_GIT_HEAD;
-            $cmdResArr = $this->execute($cmd);
+            $cmdResArr = $this->easyBackupService->execute($cmd);
             $cmdRes = !empty($cmdResArr['err']) ? $cmdResArr['err'] : $cmdResArr['out'];
 
             $status[] = [
@@ -453,7 +426,7 @@ final class EasyBackupController extends AbstractController
 
             $cmd = $this->configuration->getMysqlDumpCommand();
             $cmd = explode(' ', $cmd)[0] . ' --version';
-            $cmdResArr = $this->execute($cmd);
+            $cmdResArr = $this->easyBackupService->execute($cmd);
             $cmdRes = !empty($cmdResArr['err']) ? $cmdResArr['err'] : $cmdResArr['out'];
 
             $status[] = [
@@ -466,7 +439,7 @@ final class EasyBackupController extends AbstractController
 
             $cmd = $this->configuration->getMysqlRestoreCommand();
             $cmd = explode(' ', $cmd)[0] . ' --version';
-            $cmdResArr = $this->execute($cmd);
+            $cmdResArr = $this->easyBackupService->execute($cmd);
             $cmdRes = !empty($cmdResArr['err']) ? $cmdResArr['err'] : $cmdResArr['out'];
 
             $status[] = [
@@ -495,14 +468,20 @@ final class EasyBackupController extends AbstractController
 
         if (\in_array($scheme, ['mysql', 'mysqli'])) {
             $mysqlCmd = $this->configuration->getMysqlRestoreCommand();
-            $mysqlCmd = str_replace('{user}', $user, $mysqlCmd);
+            $mysqlCmd = str_replace('{user}', escapeshellarg($user), $mysqlCmd);
             $mysqlCmd = str_replace('{password}', escapeshellarg(urldecode($pass)), $mysqlCmd);
-            $mysqlCmd = str_replace('{host}', $host, $mysqlCmd);
-            $mysqlCmd = str_replace('{port}', $port, $mysqlCmd);
-            $mysqlCmd = str_replace('{database}', trim($path, '/'), $mysqlCmd);
+            $mysqlCmd = str_replace('{host}', escapeshellarg($host), $mysqlCmd);
+            $mysqlCmd = str_replace('{database}', escapeshellarg(trim($path), '/'), $mysqlCmd);
             $mysqlCmd = str_replace('{sql_file}', $restoreDir . self::SQL_DUMP_FILENAME, $mysqlCmd);
 
-            $mysqlResArr = $this->execute($mysqlCmd);
+            // Port can be default port / empty in database URL
+            if (!empty($port)) {
+                $mysqlCmd = str_replace('{port}', \strval(escapeshellarg($port)), $mysqlCmd);
+            } else {
+                $mysqlCmd = str_replace('--port={port}', '', $mysqlCmd);
+            }
+
+            $mysqlResArr = $this->easyBackupService->execute($mysqlCmd);
             $error = $mysqlResArr['err'];
 
             $errorsStr = $mysqlResArr['err'];

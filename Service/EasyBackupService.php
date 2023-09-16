@@ -224,16 +224,16 @@ class EasyBackupService
 
         if (\in_array($scheme, ['mysql', 'mysqli'])) {
             // The MysqlDumpCommand per default looks like this: '/usr/bin/mysqldump --user={user} --password={password} --host={host} --port={port} --single-transaction --force {database}'
-
+            
             $mysqlDumpCmd = $this->configuration->getMysqlDumpCommand();
-            $mysqlDumpCmd = str_replace('{user}', $user, $mysqlDumpCmd);
+            $mysqlDumpCmd = str_replace('{user}', escapeshellarg($user), $mysqlDumpCmd);
             $mysqlDumpCmd = str_replace('{password}', escapeshellarg(urldecode($pass)), $mysqlDumpCmd);
-            $mysqlDumpCmd = str_replace('{host}', $host, $mysqlDumpCmd);
-            $mysqlDumpCmd = str_replace('{database}', trim($path, '/'), $mysqlDumpCmd);
+            $mysqlDumpCmd = str_replace('{host}', escapeshellarg($host), $mysqlDumpCmd);
+            $mysqlDumpCmd = str_replace('{database}', escapeshellarg(trim($path, '/')), $mysqlDumpCmd);
 
             // Port can be default port / empty in database URL
             if (!empty($port)) {
-                $mysqlDumpCmd = str_replace('{port}', \strval($port), $mysqlDumpCmd);
+                $mysqlDumpCmd = str_replace('{port}', \strval(escapeshellarg($port)), $mysqlDumpCmd);
             } else {
                 $mysqlDumpCmd = str_replace('--port={port}', '', $mysqlDumpCmd);
             }
@@ -328,7 +328,7 @@ class EasyBackupService
            2 => ['pipe', 'w'],  // stderr
         ];
 
-        $process = proc_open($cmd, $descriptorspec, $pipes, $workdir, null);
+        $process = proc_open(escapeshellcmd($cmd), $descriptorspec, $pipes, $workdir, null);
 
         $stdout = stream_get_contents($pipes[1]);
         fclose($pipes[1]);
