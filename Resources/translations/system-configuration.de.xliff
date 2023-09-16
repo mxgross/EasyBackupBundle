@@ -4,7 +4,7 @@
         <body>
             <trans-unit id="easy_backup_config">
                 <source>easy_backup_config</source>
-                <target>EasyBackup Konfigurationen</target>
+                <target>EasyBackup Plugin</target>
             </trans-unit>
             <trans-unit id="easy_backup.setting_mysqldump_command">
                 <source>easy_backup.setting_mysqldump_command</source>
