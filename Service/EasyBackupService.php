@@ -121,10 +121,31 @@ class EasyBackupService
         ];
 
         try {
-            $manifest['git'] = str_replace(PHP_EOL, '', \strval(exec(self::CMD_GIT_HEAD)));
+            $output = [];
+            $returnValue = null;
+        
+            $this->log(self::LOG_INFO_PREFIX, "Executing '" . self::CMD_GIT_HEAD . "'.");
+            exec(self::CMD_GIT_HEAD, $output, $returnValue);
+        
+            // Check if the $output array contains at least one element
+            if (!empty($output)) {
+                // Extract the first element (Git commit hash) and assign it to $manifest['git']
+                $manifest['git'] = $output[0];
+                
+                $this->log(self::LOG_INFO_PREFIX, "Git commit hash: " . $manifest['git']);
+            } else {
+                // Handle the case where $output is empty (no output received)
+                $this->log(self::LOG_WARN_PREFIX, "No output received from the command.");
+            }
+        
+            // Check the return value to detect errors
+            if ($returnValue !== 0) {
+                $this->log(self::LOG_WARN_PREFIX, "Command failed with exit code: $returnValue");
+            }
         } catch (\Exception $ex) {
-            // ignore exception
+            $this->log(self::LOG_WARN_PREFIX, $ex->getMessage());
         }
+
         $this->filesystem->appendToFile($manifestFile, \strval(json_encode($manifest, JSON_PRETTY_PRINT)));
 
         // Backing up files and directories
