@@ -131,9 +131,12 @@ Files contained in the backup may overwrite already existing files.
 There is a command to also trigger automated backups. 
 Example for a backup every Sunday at 4am could be:
 ```0 4 * * SUN php /var/www/kimai2/bin/console EasyBackup:backup > /home/YourUsername/Documents/EasyBackupCron.log```
+
 Maybe you need to specify a absolute path to php on your environment, e.g. `/usr/bin/php`.
 Make sure to also set the right path to your kimai2 location and your .log file.
+
 If you don't need a log after successfully setting up your cronjob, you can use `> /dev/null` as output.
+
 Give [https://crontab.guru/](https://crontab.guru/) a try if you struggle how to define the right time syntax for your cronjob.
 Some also need to specify the user before the php command.
 
