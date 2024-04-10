@@ -140,6 +140,10 @@ If you don't need a log after successfully setting up your cronjob, you can use 
 Give [https://crontab.guru/](https://crontab.guru/) a try if you struggle how to define the right time syntax for your cronjob.
 Some also need to specify the user before the php command.
 
+## If your receive the warning: git 	fatal: detected dubious ownership in repository
+Execute this git command:
+```git config --system --add safe.directory /var/www/kimai/var/plugins/EasyBackupBundle```
+
 ## Common errors and their solution
 Fore some issues in older versions, I have recorded some possible solutions on a new wiki page.
 [Wiki page: Common-errors-and-their-solution](https://github.com/mxgross/EasyBackupBundle/wiki/Common-errors-and-their-solution)
