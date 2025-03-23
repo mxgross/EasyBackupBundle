@@ -1,0 +1,15 @@
+# docker-compose.yml
+version: '3.7'
+
+services:
+  kimai:
+    image: kimai/kimai2:apache
+    container_name: kimai
+
+  db:
+    image: mariadb:10.6
+    container_name: kimai-db
+
+volumes:
+  kimai_var:
+  db_data:

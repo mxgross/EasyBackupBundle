@@ -1,0 +1,36 @@
+# docker-compose.override.yml
+version: '3.7'
+
+services:
+  kimai:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: kimai
+    restart: unless-stopped
+    ports:
+      - "8001:8001"
+    environment:
+      - ADMINMAIL=admin@example.com
+      - ADMINPASS=changeme
+      - DATABASE_URL=mysql://kimai:kimai@db:3306/kimai
+    volumes:
+      - kimai_var:/opt/kimai/var
+    depends_on:
+      - db
+
+  db:
+    image: mariadb:10.6
+    container_name: kimai-db
+    restart: unless-stopped
+    environment:
+      - MYSQL_DATABASE=kimai
+      - MYSQL_USER=kimai
+      - MYSQL_PASSWORD=kimai
+      - MYSQL_ROOT_PASSWORD=changeme
+    volumes:
+      - db_data:/var/lib/mysql
+
+volumes:
+  kimai_var:
+  db_data:
