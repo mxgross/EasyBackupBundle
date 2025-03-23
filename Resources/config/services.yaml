@@ -8,8 +8,12 @@ services:
             
     KimaiPlugin\EasyBackupBundle\:
         resource: '../../*'
-        exclude: '../../{Resources}'
+        exclude:
+            - '../../Resources/'
 
     KimaiPlugin\EasyBackupBundle\Controller\:
         resource: '../../Controller'
         tags: ['controller.service_arguments']
+
+    KimaiPlugin\EasyBackupBundle\Command\EasyBackupBackupCommand:
+        tags: ['console.command']

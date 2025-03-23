@@ -1,15 +1,14 @@
 {
     "name": "mxgross/easy-backup-bundle",
-    "description": "A Kimai 2 plugin, which allows you to backup your environment with a single click.",
+    "description": "A Plugin for Kimai versions >2.0.0, which allows you to backup your environment with a single click.",
     "homepage": "https://github.com/mxgross/EasyBackupBundle",
     "type": "kimai-plugin",
-    "version": "1.4",
-    "require": {
-        "kimai/kimai2-composer": "*"
-    },
+    "version": "2.0.5",
     "keywords": [
         "kimai",
-        "kimai-plugin"
+        "kimai-plugin",
+        "EasyBackup",
+        "Backup"
     ],
     "license": "MIT",
     "authors": [
@@ -21,7 +20,7 @@
     ],
     "extra": {
         "kimai": {
-            "require": "1.9",
+            "require": 20000,
             "name": "EasyBackup"
         }
     },
@@ -29,20 +28,20 @@
         "codestyle": "vendor/bin/php-cs-fixer fix --dry-run --verbose --show-progress=none",
         "codestyle-fix": "vendor/bin/php-cs-fixer fix",
         "codestyle-check": "vendor/bin/php-cs-fixer fix --dry-run --verbose --using-cache=no --show-progress=none --format=checkstyle",
-        "phpstan": "vendor/bin/phpstan analyse . --configuration=phpstan.neon --level=7",
+        "phpstan": "vendor/bin/phpstan analyse . --configuration=phpstan.neon --level=8",
         "linting": [
-            "composer validate",
+            "composer validate --strict --no-check-version",
             "@codestyle-check",
             "@phpstan"
         ]
     },
     "require-dev": {
         "friendsofphp/php-cs-fixer": "^3.0",
-        "kevinpapst/kimai2": "dev-master",
+        "kimai/kimai": "2.0.x-dev",
         "phpstan/phpstan": "^1.0",
         "phpstan/phpstan-symfony": "^1.0",
-        "symfony/console": "^4.0",
-        "symfony/event-dispatcher": "^4.0"
+        "symfony/console": "^6.0",
+        "symfony/event-dispatcher": "^6.0"
     },
     "config": {
         "allow-plugins": {
@@ -50,7 +49,7 @@
             "symfony/flex": false
         },
         "platform": {
-            "php": "7.3"
+            "php": "8.1"
         },
         "preferred-install": {
             "*": "dist"
