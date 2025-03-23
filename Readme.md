@@ -12,6 +12,16 @@ and you can delete or download the created backup as zip file.
 
 ![Kimai2 Easy Backup Plugin Bundle](https://github.com/mxgross/EasyBackupBundle/blob/main/screenshot.jpg?raw=true)
 
+### 🔧 Local Docker Environment (for testing/development)
+
+A ready-to-use Docker setup for Kimai + this plugin is available in the [`docker/`](./docker/) folder.
+
+```bash
+cd docker
+docker-compose build
+docker-compose up -d
+
+
 ### Installation
 
 First clone it to your Kimai installation `plugins` directory:
