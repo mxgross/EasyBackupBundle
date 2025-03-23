@@ -97,6 +97,13 @@ final class EasyBackupController extends AbstractController
     #[Route('/', name: 'easy_backup', methods: ['GET', 'POST'])]
     public function indexAction(): Response
     {
+        if (
+            !$this->isGranted('IS_AUTHENTICATED_REMEMBERED') ||
+            !$this->isGranted('easy_backup')
+        ) {
+            throw $this->createAccessDeniedException();
+        }
+
         $backupDir = $this->getBackupDirectory();
 
         if (!file_exists($backupDir)) {
