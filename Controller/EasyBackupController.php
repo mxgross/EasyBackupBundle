@@ -97,12 +97,7 @@ final class EasyBackupController extends AbstractController
     #[Route('/', name: 'easy_backup', methods: ['GET', 'POST'])]
     public function indexAction(): Response
     {
-        if (
-            !$this->isGranted('IS_AUTHENTICATED_REMEMBERED') ||
-            !$this->isGranted('easy_backup')
-        ) {
-            throw $this->createAccessDeniedException();
-        }
+        $this->denyAccessUnlessGranted('easy_backup');
 
         $backupDir = $this->getBackupDirectory();
 
@@ -129,6 +124,8 @@ final class EasyBackupController extends AbstractController
     #[Route('/create_backup', name: 'create_backup', methods: ['GET', 'POST'])]
     public function createBackupAction(): Response
     {
+        $this->denyAccessUnlessGranted('easy_backup');
+
         try {
             $this->easyBackupService->createBackup();
         } catch (RuntimeException $e) {
@@ -146,6 +143,8 @@ final class EasyBackupController extends AbstractController
     #[Route('/download', name: 'download', methods: ['GET'])]
     public function downloadAction(Request $request): Response
     {
+        $this->denyAccessUnlessGranted('easy_backup');
+
         $backupName = $request->query->get('backupFilename');
 
         // Validate the given user input (filename)
@@ -175,6 +174,8 @@ final class EasyBackupController extends AbstractController
     #[Route('/restore', name: 'restore', methods: ['GET'])]
     public function restoreAction(Request $request)
     {
+        $this->denyAccessUnlessGranted('easy_backup');
+
         // Clear old log file
         $logFile = $this->getBackupDirectory() . self::LOG_FILE_NAME;
         $this->filesystem->remove($logFile);
@@ -214,6 +215,8 @@ final class EasyBackupController extends AbstractController
     #[Route('/prepareRecovery', name: 'prepareRecovery', methods: 'GET')]
     public function prepareRecoveryAction(Request $request)
     {
+        $this->denyAccessUnlessGranted('easy_backup');
+        
         $backupName = $request->query->get('backupFilename');
         $fileOverwrites = [];
 
@@ -313,6 +316,8 @@ final class EasyBackupController extends AbstractController
     #[Route(path: '/delete', name: 'delete', methods: ['GET'])]
     public function deleteAction(Request $request): Response
     {
+        $this->denyAccessUnlessGranted('easy_backup');
+        
         $dirname = $request->query->get('backupFilename');
 
         // Validate the given user input (filename)
