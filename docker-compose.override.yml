@@ -16,6 +16,7 @@ services:
       - DATABASE_URL=mysql://kimai:kimai@db:3306/kimai
     volumes:
       - kimai_var:/opt/kimai/var
+      - ./:/opt/kimai/var/plugins/EasyBackupBundle # For local development
     depends_on:
       - db
 
