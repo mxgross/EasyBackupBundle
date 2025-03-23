@@ -20,7 +20,7 @@ A ready-to-use Docker setup for Kimai + this plugin is available in the [`docker
 cd docker
 docker-compose build
 docker-compose up -d
-
+```
 
 ### Installation
 
