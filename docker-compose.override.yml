@@ -4,8 +4,8 @@ version: '3.7'
 services:
   kimai:
     build:
-      context: .
-      dockerfile: Dockerfile
+      context: ./
+      dockerfile: ./Dockerfile
     container_name: kimai
     restart: unless-stopped
     ports:

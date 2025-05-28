@@ -1,23 +1,16 @@
-ENV APP_ENV=dev
-
-# Dockerfile
 FROM kimai/kimai2:apache
 
-# Install mysqldump via MariaDB client
 RUN apt-get update && \
-    apt-get install -y mariadb-client git unzip && \
+    apt-get install -y mariadb-client git unzip curl && \
     rm -rf /var/lib/apt/lists/*
 
-# Install EasyBackupBundle if not set as live volume in docker-compose.override.yml
-#RUN mkdir -p /opt/kimai/var/plugins && \
-#    rm -rf /opt/kimai/var/plugins/EasyBackupBundle && \
-#    cd /opt/kimai/var/plugins && \
-#    git clone https://github.com/mxgross/EasyBackupBundle.git
+# Composer installieren
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
-# Set permissions
-#RUN chown -R www-data:www-data /opt/kimai/var/plugins/EasyBackupBundle
+# Dev-Abhängigkeiten installieren – ohne Scripts
+WORKDIR /opt/kimai
+RUN composer require --dev doctrine/doctrine-fixtures-bundle --no-scripts
 
-# Install PHPUnit (adjust version to your PHP version if needed)
+# PHPUnit installieren
 RUN curl -Ls https://phar.phpunit.de/phpunit-10.phar -o /usr/local/bin/phpunit && \
     chmod +x /usr/local/bin/phpunit
-

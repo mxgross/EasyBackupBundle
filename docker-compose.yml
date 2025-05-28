@@ -3,7 +3,7 @@ version: '3.7'
 
 services:
   kimai:
-    image: kimai/kimai2:apache
+    #image: kimai/kimai2:apache
     container_name: kimai
 
   db:
