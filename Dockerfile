@@ -1,3 +1,5 @@
+ENV APP_ENV=dev
+
 # Dockerfile
 FROM kimai/kimai2:apache
 

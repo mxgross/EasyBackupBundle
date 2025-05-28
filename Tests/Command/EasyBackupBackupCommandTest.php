@@ -1,35 +1,30 @@
 <?php
 
-/*
- * This file is part of the EasyBackupBundle.
- * All rights reserved by Maximilian Groß (www.maximiliangross.de).
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types=1);
 
 namespace KimaiPlugin\EasyBackupBundle\Tests\Command;
 
-use Symfony\Bundle\FrameworkBundle\Console\Application;
-use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
+use App\Kernel;
+use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Tester\CommandTester;
+use Symfony\Bundle\FrameworkBundle\Console\Application;
 
-class EasyBackupBackupCommandTest extends KernelTestCase
+class EasyBackupBackupCommandTest extends TestCase
 {
-    public function testExecute()
+    public function testExecute(): void
     {
-        $kernel = self::bootKernel();
+        putenv('KIMAI_DATA_DIR=/opt/kimai/var/data');
+        $_ENV['KIMAI_DATA_DIR'] = '/opt/kimai/var/data';
+        $_SERVER['KIMAI_DATA_DIR'] = '/opt/kimai/var/data';
+    
+        $kernel = new Kernel('test', true);
+        $kernel->boot();
+    
         $application = new Application($kernel);
-
-        $command = $application->find('EasyBackup:backup');
-        $commandTester = new CommandTester($command);
-        $commandTester->execute();
-
-        $commandTester->assertCommandIsSuccessful();
-
-        // the output of the command in the console
-        $output = $commandTester->getDisplay();
-        $this->assertStringContainsString('Some output', $output);
-
-        // ...
+        $command = $application->find('easy-backup:create');
+    
+        $tester = new CommandTester($command);
+        $tester->execute([]);
+        $tester->assertCommandIsSuccessful();
     }
 }

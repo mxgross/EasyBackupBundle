@@ -22,6 +22,10 @@ docker-compose build
 docker-compose up -d
 ```
 
+Test execution
+`docker exec -u www-data -w /opt/kimai kimai ./vendor/bin/phpunit --testdox var/plugins/EasyBackupBundle`
+
+
 ### Installation
 
 First clone it to your Kimai installation `plugins` directory:

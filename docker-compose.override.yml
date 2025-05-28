@@ -14,6 +14,8 @@ services:
       - ADMINMAIL=admin@example.com
       - ADMINPASS=changeme
       - DATABASE_URL=mysql://kimai:kimai@db:3306/kimai
+      - APP_ENV=dev
+      - APP_DEBUG=1
     volumes:
       - kimai_var:/opt/kimai/var
       - ./:/opt/kimai/var/plugins/EasyBackupBundle # For local development

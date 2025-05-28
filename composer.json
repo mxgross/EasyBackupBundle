@@ -41,8 +41,7 @@
         "phpstan/phpstan": "^1.0",
         "phpstan/phpstan-symfony": "^1.0",
         "symfony/console": "^6.0",
-        "symfony/event-dispatcher": "^6.0",
-        "phpunit/phpunit": "^10"
+        "symfony/event-dispatcher": "^6.0"
     },
     "autoload-dev": {
         "psr-4": {

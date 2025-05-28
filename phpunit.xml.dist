@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit
+    bootstrap="vendor/autoload.php"
+    colors="true"
+    failOnRisky="true"
+    failOnWarning="true"
+>
+    <php>
+        <env name="APP_ENV" value="test"/>
+        <env name="KIMAI" value="1"/>
+        <env name="KIMAI_DATA_DIR" value="/opt/kimai/var/data"/>
+        <env name="DATABASE_URL" value="mysql://kimai:kimai@localhost:3306/kimai"/>
+        <env name="MAILER_URL" value="null://localhost"/>
+    </php>
+
+    <testsuites>
+        <testsuite name="Plugin tests">
+            <directory>var/plugins/EasyBackupBundle/Tests</directory>
+        </testsuite>
+    </testsuites>
+</phpunit>
