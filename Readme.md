@@ -6,6 +6,8 @@ If you like the plugin, please feel free to donate me a coffee. I use my preciou
 
 [![paypal](https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif)](https://www.paypal.com/donate?hosted_button_id=XQD3PMPANZNG4)
 
+Thanks for one coffee in 4 years now. This plugin is not maintained any longer, feel free to fork and improve it by yourself.
+
 After the installation a new menu entry `EasyBackup` is created. There you can create a new backup
 by clicking the `Create Backup` button. Afterwards all created backups will be listed at the page
 and you can delete or download the created backup as zip file.
