@@ -1,0 +1,54 @@
+name: Integration Tests
+
+on:
+  push:
+    branches: [ dev, main ]
+  pull_request:
+    branches: [ dev, main ]
+
+jobs:
+  integration:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Compose
+        run: |
+          docker compose version || true
+
+      - name: Start services
+        run: |
+          docker compose up -d --build
+
+      - name: Wait for kimai-dev to be ready (retry)
+        run: |
+          set -e
+          tries=0
+          until docker compose exec kimai-dev bash -lc "php -v >/dev/null 2>&1"; do
+            tries=$((tries+1))
+            echo "kimai-dev not ready yet (attempt $tries)";
+            if [ "$tries" -ge 30 ]; then
+              echo "kimai-dev did not become ready in time"; docker compose logs --no-color; exit 1;
+            fi
+            sleep 5
+          done
+
+      - name: Ensure composer dependencies
+        run: |
+          docker compose exec kimai-dev bash -lc "cd /opt/kimai && composer install --no-interaction --no-progress"
+
+      - name: Run plugin tests inside kimai-dev
+        run: |
+          docker compose exec kimai-dev bash -lc "cd /opt/kimai && ./vendor/bin/phpunit --colors=never --bootstrap /opt/kimai/vendor/autoload.php --configuration var/plugins/EasyBackupBundle/phpunit.xml.dist --testdox"
+
+      - name: Collect logs on failure
+        if: failure()
+        run: |
+          docker compose logs --no-color || true
+
+      - name: Tear down
+        if: always()
+        run: |
+          docker compose down --volumes --remove-orphans

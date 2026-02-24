@@ -75,8 +75,8 @@ class EasyBackupControllerUnitTest extends TestCase
 
     public function testCreateBackupActionRedirects()
     {
-        $this->markTestSkipped('createBackupAction uses session/flash behavior that requires a full framework session; covered by service tests.');
-        return;
+        $tmp = sys_get_temp_dir() . '/kimai_unit_' . uniqid();
+        mkdir($tmp . '/var/data', 0777, true);
 
         $stubCfgService = new class {
             public function find(string $key)
@@ -116,25 +116,8 @@ class EasyBackupControllerUnitTest extends TestCase
         $container->set('request_stack', new class {
             public function getCurrentRequest(){ return new \Symfony\Component\HttpFoundation\Request(); }
             public function getSession(){
-                return new class implements \Symfony\Component\HttpFoundation\Session\FlashBagAwareSessionInterface {
-                    public function getFlashBag(): \Symfony\Component\HttpFoundation\Session\Flash\FlashBagInterface {
-                        return new class implements \Symfony\Component\HttpFoundation\Session\Flash\FlashBagInterface {
-                            private $data = [];
-                            public function getName(): string { return 'fl'; }
-                            public function initialize(array & $array) { }
-                            public function getStorageKey(): string { return '_sf_flashes'; }
-                            public function clear(): mixed { $d = $this->data; $this->data = []; return $d; }
-                            public function add(string $type, mixed $message) { $this->data[$type][] = $message; }
-                            public function set(string $type, string|array $messages) { $this->data[$type] = (array)$messages; }
-                            public function peek(string $type, array $default = []): array { return $this->data[$type] ?? $default; }
-                            public function peekAll(): array { return $this->data; }
-                            public function get(string $type, array $default = []): array { $ret = $this->data[$type] ?? $default; unset($this->data[$type]); return $ret; }
-                            public function all(): array { $d = $this->data; $this->data = []; return $d; }
-                            public function setAll(array $messages) { $this->data = $messages; }
-                            public function has(string $type): bool { return isset($this->data[$type]); }
-                            public function keys(): array { return array_keys($this->data); }
-                        };
-                    }
+                return new class {
+                    public function getFlashBag(){ return new class { public function add($t,$m){} }; }
                 };
             }
         });
@@ -146,7 +129,10 @@ class EasyBackupControllerUnitTest extends TestCase
         $this->assertInstanceOf(RedirectResponse::class, $response);
         $this->assertStringContainsString('/admin/easy-backup', $response->getTargetUrl());
 
-        
+        // cleanup
+        @rmdir($tmp . '/var/data');
+        @rmdir($tmp . '/var');
+        @rmdir($tmp);
     }
 
     public function testDownloadActionReturnsFileResponse()
