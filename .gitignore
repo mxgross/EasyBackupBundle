@@ -1,6 +1,5 @@
 .idea
 vendor/
-composer.lock
 .php_cs.cache
 .disabled
 .php-cs-fixer.cache
