@@ -3,3 +3,4 @@ vendor/
 .php_cs.cache
 .disabled
 .php-cs-fixer.cache
+composer.lock
