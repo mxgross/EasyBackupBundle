@@ -21,27 +21,29 @@ jobs:
       - name: Start services
         run: |
           docker compose up -d --build
+          docker compose ps --all
 
-      - name: Wait for kimai-dev to be ready (retry)
+      - name: Wait for kimai to be ready (retry)
         run: |
           set -e
           tries=0
-          until docker compose exec kimai-dev bash -lc "php -v >/dev/null 2>&1"; do
+          # try longer because Kimai setup and migrations can take several minutes
+          until docker compose exec kimai bash -lc "php -v >/dev/null 2>&1"; do
             tries=$((tries+1))
-            echo "kimai-dev not ready yet (attempt $tries)";
-            if [ "$tries" -ge 30 ]; then
-              echo "kimai-dev did not become ready in time"; docker compose logs --no-color; exit 1;
+            echo "kimai not ready yet (attempt $tries)";
+            if [ "$tries" -ge 120 ]; then
+              echo "kimai did not become ready in time"; docker compose logs --no-color; exit 1;
             fi
             sleep 5
           done
 
       - name: Ensure composer dependencies
         run: |
-          docker compose exec kimai-dev bash -lc "cd /opt/kimai && composer install --no-interaction --no-progress"
+          docker compose exec kimai bash -lc "cd /opt/kimai && composer install --no-interaction --no-progress"
 
-      - name: Run plugin tests inside kimai-dev
+      - name: Run plugin tests inside kimai
         run: |
-          docker compose exec kimai-dev bash -lc "cd /opt/kimai && ./vendor/bin/phpunit --colors=never --bootstrap /opt/kimai/vendor/autoload.php --configuration var/plugins/EasyBackupBundle/phpunit.xml.dist --testdox"
+          docker compose exec kimai bash -lc "cd /opt/kimai && ./vendor/bin/phpunit --colors=never --bootstrap /opt/kimai/vendor/autoload.php --configuration var/plugins/EasyBackupBundle/phpunit.xml.dist --testdox"
 
       - name: Collect logs on failure
         if: failure()
