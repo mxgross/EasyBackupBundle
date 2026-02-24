@@ -14,6 +14,20 @@ and you can delete or download the created backup as zip file.
 
 ![Kimai2 Easy Backup Plugin Bundle](https://github.com/mxgross/EasyBackupBundle/blob/main/screenshot.jpg?raw=true)
 
+### 🔧 Local Docker Environment (for testing/development)
+
+A ready-to-use Docker setup for Kimai + this plugin is available in the [`docker/`](./docker/) folder.
+
+```bash
+cd docker
+docker-compose build
+docker-compose up -d
+```
+
+Test execution
+`docker exec -u www-data -w /opt/kimai kimai ./vendor/bin/phpunit --testdox var/plugins/EasyBackupBundle`
+
+
 ### Installation
 
 First clone it to your Kimai installation `plugins` directory:
@@ -150,3 +164,46 @@ Execute this git command:
 Fore some issues in older versions, I have recorded some possible solutions on a new wiki page.
 [Wiki page: Common-errors-and-their-solution](https://github.com/mxgross/EasyBackupBundle/wiki/Common-errors-and-their-solution)
 
+
+### 🐳 Docker Development Environment
+
+If you want to test or further develop the EasyBackupBundle locally, a ready-to-use Docker environment is included.
+
+#### 🧱 Setup
+
+The repository includes a `docker-compose.yml` and `docker-compose.override.yml` that start a full Kimai instance with MariaDB and automatically mount this plugin for local development.
+
+1. Clone the repository (if not already done)
+2. Open a terminal and go to the root folder:
+   ```bash
+   cd /path/to/EasyBackupBundle
+   ```
+3. Build and start the containers:
+   ```bash
+   docker compose build --no-cache
+   docker compose up -d
+   ```
+
+The first run can take several minutes while all dependencies are installed.
+
+> You can access Kimai at: [http://localhost:8001](http://localhost:8001)  
+> Initial login credentials:  
+> • Email: `admin@example.com`  
+> • Password: `changeme`
+
+After logging in, you'll see the `EasyBackup` menu and can use or debug the plugin immediately.
+
+---
+
+#### ⚙️ Development Notes
+
+- The plugin folder is mounted into the container at:  
+  `/opt/kimai/var/plugins/EasyBackupBundle`
+- The environment runs with `APP_ENV=dev` and `APP_DEBUG=1`
+- PHPUnit is already installed globally
+- You can run tests like this:
+  ```bash
+  docker exec -u www-data -w /opt/kimai kimai ./vendor/bin/phpunit --testdox var/plugins/EasyBackupBundle
+  ```
+
+---
