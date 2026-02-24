@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit bootstrap="vendor/autoload.php"
+         colors="true"
+         verbose="true"
+         stopOnFailure="false">
+
+    <testsuites>
+        <testsuite name="EasyBackup Test Suite">
+            <directory>./Tests</directory>
+        </testsuite>
+    </testsuites>
+
+    <coverage processUncoveredFiles="false">
+        <include>
+            <directory>./Service</directory>
+        </include>
+    </coverage>
+</phpunit>

@@ -1,35 +1,26 @@
 <?php
 
-/*
- * This file is part of the EasyBackupBundle.
- * All rights reserved by Maximilian Groß (www.maximiliangross.de).
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
-
 namespace KimaiPlugin\EasyBackupBundle\Tests\Command;
 
-use Symfony\Bundle\FrameworkBundle\Console\Application;
-use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Console\Tester\CommandTester;
 
-class EasyBackupBackupCommandTest extends KernelTestCase
+class EasyBackupBackupCommandTest extends \PHPUnit\Framework\TestCase
 {
     public function testExecute()
     {
-        $kernel = self::bootKernel();
-        $application = new Application($kernel);
+        // simple stub that satisfies the type-hint by extending the real service
+        $serviceStub = new class extends \KimaiPlugin\EasyBackupBundle\Service\EasyBackupService {
+            public function __construct() {}
+            public function createBackup()
+            {
+                return "backup-log";
+            }
+        };
 
-        $command = $application->find('EasyBackup:backup');
+        $command = new \KimaiPlugin\EasyBackupBundle\Command\EasyBackupBackupCommand($serviceStub);
         $commandTester = new CommandTester($command);
-        $commandTester->execute();
+        $commandTester->execute([]);
 
-        $commandTester->assertCommandIsSuccessful();
-
-        // the output of the command in the console
-        $output = $commandTester->getDisplay();
-        $this->assertStringContainsString('Some output', $output);
-
-        // ...
+        $this->assertStringContainsString('backup-log', $commandTester->getDisplay());
     }
 }

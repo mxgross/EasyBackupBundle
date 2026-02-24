@@ -41,7 +41,9 @@
         "phpstan/phpstan": "^1.0",
         "phpstan/phpstan-symfony": "^1.0",
         "symfony/console": "^6.0",
-        "symfony/event-dispatcher": "^6.0"
+        "symfony/event-dispatcher": "^6.0",
+        "phpunit/phpunit": "^9.5",
+        "mikey179/vfsstream": "^1.6"
     },
     "config": {
         "allow-plugins": {
