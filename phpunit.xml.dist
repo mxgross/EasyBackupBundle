@@ -15,7 +15,7 @@
 
     <testsuites>
         <testsuite name="Plugin tests">
-            <directory>var/plugins/EasyBackupBundle/Tests</directory>
+            <directory>/opt/kimai/var/plugins/EasyBackupBundle/Tests</directory>
         </testsuite>
     </testsuites>
 </phpunit>
