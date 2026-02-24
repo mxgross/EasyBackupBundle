@@ -41,6 +41,11 @@ jobs:
         run: |
           docker compose exec kimai bash -lc "cd /opt/kimai && composer install --no-interaction --no-progress"
 
+      - name: Install plugin dev deps into kimai root (vfsStream)
+        run: |
+          # Some plugin tests need vfsStream available in the root autoloader used by the phpunit bootstrap
+          docker compose exec kimai bash -lc "cd /opt/kimai && composer require --dev mikey179/vfsstream --no-interaction --no-progress || true"
+
       - name: Run plugin tests inside kimai
         run: |
           docker compose exec kimai bash -lc "cd /opt/kimai && ./vendor/bin/phpunit --colors=never --bootstrap /opt/kimai/vendor/autoload.php --configuration var/plugins/EasyBackupBundle/phpunit.xml.dist --testdox"
