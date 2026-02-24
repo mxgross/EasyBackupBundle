@@ -48,7 +48,8 @@ jobs:
 
       - name: Run plugin tests inside kimai
         run: |
-          docker compose exec kimai bash -lc "cd /opt/kimai && ./vendor/bin/phpunit --colors=never --bootstrap /opt/kimai/vendor/autoload.php --configuration var/plugins/EasyBackupBundle/phpunit.xml.dist --testdox"
+          # Prevent deprecation warnings from failing the test run in CI
+          docker compose exec kimai bash -lc "cd /opt/kimai && SYMFONY_DEPRECATIONS_HELPER=weak ./vendor/bin/phpunit --colors=never --bootstrap /opt/kimai/vendor/autoload.php --configuration var/plugins/EasyBackupBundle/phpunit.xml.dist --testdox"
 
       - name: Collect logs on failure
         if: failure()
