@@ -10,6 +10,8 @@ services:
         resource: '../../*'
         exclude:
             - '../../Resources/'
+            - '../../Tests'
+            - '../../vendor'
 
     KimaiPlugin\EasyBackupBundle\Controller\:
         resource: '../../Controller'

@@ -200,6 +200,12 @@ class EasyBackupService
 
         foreach ($files as $fileOrDir) {
             $path = realpath($dir . DIRECTORY_SEPARATOR . $fileOrDir);
+
+            if ($path === false) {
+                // realpath may return false for stream wrappers (vfsStream) or broken links
+                continue;
+            }
+
             if (!empty($path) && !is_dir($path)) {
                 $resultFileList[] = $path;
             } elseif (!\in_array($fileOrDir, ['.', '..', '.git'])) {

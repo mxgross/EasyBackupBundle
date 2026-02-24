@@ -3,7 +3,7 @@
     "description": "A Plugin for Kimai versions >2.0.0, which allows you to backup your environment with a single click.",
     "homepage": "https://github.com/mxgross/EasyBackupBundle",
     "type": "kimai-plugin",
-    "version": "2.0.5",
+    "version": "2.0.6",
     "keywords": [
         "kimai",
         "kimai-plugin",
@@ -33,16 +33,23 @@
             "composer validate --strict --no-check-version",
             "@codestyle-check",
             "@phpstan"
-        ]
+        ],
+        "test": "phpunit"
     },
     "require-dev": {
         "friendsofphp/php-cs-fixer": "^3.0",
-        "kimai/kimai": "2.0.x-dev",
         "phpstan/phpstan": "^1.0",
         "phpstan/phpstan-symfony": "^1.0",
         "symfony/console": "^6.0",
-        "symfony/event-dispatcher": "^6.0"
+        "symfony/event-dispatcher": "^6.0",
+        "phpunit/phpunit": "^9.5",
+        "mikey179/vfsstream": "^1.6"
     },
+    "autoload-dev": {
+        "psr-4": {
+          "EasyBackupBundle\\Tests\\": "tests/"
+        }
+      },
     "config": {
         "allow-plugins": {
             "composer/package-versions-deprecated": true,

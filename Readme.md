@@ -14,61 +14,96 @@ and you can delete or download the created backup as zip file.
 
 ![Kimai2 Easy Backup Plugin Bundle](https://github.com/mxgross/EasyBackupBundle/blob/main/screenshot.jpg?raw=true)
 
+### 🔧 Local Docker Environment (for testing/development)
+
+A ready-to-use Docker setup for Kimai + this plugin is available in the [`docker/`](./docker/) folder.
+
+```bash
+cd docker
+docker-compose build
+docker-compose up -d
+```
+
+Test execution
+`docker exec -u www-data -w /opt/kimai kimai ./vendor/bin/phpunit --testdox var/plugins/EasyBackupBundle`
+
+
 ### Installation
 
-First clone it to your Kimai installation `plugins` directory:
+```markdown
+# EasyBackup
 
-For Kimai2 Version < 2.0.0 use branch 'master'.
-For 2.0.0 and later use branch 'main'.
+EasyBackup is a Kimai 2 plugin that lets you back up your Kimai installation with a single click or via cron / the command line.
 
+If you find the plugin useful, feel free to buy me a coffee — I maintain this project in my spare time. Note: this plugin is no longer actively maintained; contributions and forks are welcome.
+
+[![paypal](https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif)](https://www.paypal.com/donate?hosted_button_id=XQD3PMPANZNG4)
+
+After installation a new menu entry `EasyBackup` is added. From there you can create a backup using the `Create Backup` button. All created backups are listed on the page and can be downloaded (ZIP) or removed.
+
+![Kimai2 Easy Backup Plugin Bundle](https://github.com/mxgross/EasyBackupBundle/blob/main/screenshot.jpg?raw=true)
+
+### 🔧 Local Docker Environment (for testing / development)
+
+This repository includes a Docker setup to run Kimai with the plugin mounted for local development.
+
+Build and start the containers from the repository root:
+
+```bash
+docker compose build --no-cache
+docker compose up -d
 ```
-cd /kimai/var/plugins/
+
+Run plugin tests inside the running Kimai container:
+
+```bash
+docker exec -u www-data -w /opt/kimai kimai ./vendor/bin/phpunit --testdox var/plugins/EasyBackupBundle
+```
+
+---
+
+## Installation
+
+Clone the plugin into your Kimai installation's `var/plugins/` directory:
+
+```bash
+cd /path/to/kimai/var/plugins/
 git clone https://github.com/mxgross/EasyBackupBundle.git
 ```
-Set the permissions:
-```
-sudo chown -R :www-data . &&
-sudo chmod -R g+r . &&
-sudo chmod -R g+rw var/ &&
-sudo chmod -R g+rw public/avatars/ &&
+
+Branch selection:
+- For Kimai < 2.0.0 use the `master` branch.
+- For Kimai >= 2.0.0 use the `main` branch.
+
+Set appropriate file permissions for the webserver user (example):
+
+```bash
+sudo chown -R :www-data .
+sudo chmod -R g+r .
+sudo chmod -R g+rw var/
+sudo chmod -R g+rw public/avatars/
 sudo chmod -R o+rw var/plugins/EasyBackupBundle
 ```
 
-And then rebuild the cache:
-```
-cd /kimai/
+Rebuild the application cache:
+
+```bash
+cd /path/to/kimai
 bin/console cache:clear
 bin/console cache:warmup
 ```
-Sometimes the permissions must be set again
 
-```
-sudo chown -R :www-data . &&
-sudo chmod -R g+r . &&
-sudo chmod -R g+rw var/ &&
-sudo chmod -R g+rw public/avatars/
-```
+You can also [download the ZIP archive](https://github.com/mxgross/EasyBackupBundle/archive/main.zip) and upload the plugin folder via FTP.
 
-You could also [download it as zip](https://github.com/mxgross/EasyBackupBundle/archive/main.zip) and upload the directory via FTP:
-
-```
-/kimai/var/plugins/
-├── EasyBackupBundle
-│   ├── EasyBackupBundle.php
-|   └ ... more files and directories follow here ...
-```
-
-Feel free to participate in existing issues or create a issue for any new inquiry.
+If you have questions or find issues, please open an issue or contribute via pull requests.
 
 ## Storage
 
-This bundle stores the backups by default zipped inside the Kimai directory in `var/easy_backup`.
-Make sure its writable by your webserver! We don't use the recommended 
-`var/data/` directory, because it will be part of the backuped files!
+By default backups are created as ZIP files under `var/easy_backup`. Ensure the directory is writable by the webserver. The plugin intentionally does not use `var/data/` because that directory is included in the backups.
 
-### What files are backed up?
+### Files included in the backup
 
-Currently per default backuped directories (incl. sub directories) and files are:
+The default files and directories that are backed up (including subdirectories) are:
 
 ```
 .env
@@ -80,73 +115,101 @@ templates/invoice
 var/export/
 templates/export/
 ```
-You are free to edit this list via the Kimai settings page. Place each filename or paths in a seperate line. Make sure that there are no empty lines. Root path is your Kimai installation path.
+
+You can edit this list in the Kimai settings page. Add one file or path per line and avoid empty lines. Paths are relative to your Kimai installation root.
 
 ![Update the paths to your needs](https://github.com/mxgross/EasyBackupBundle/blob/main/screenshot_files_and_paths_to_be_backed_up.jpg?raw=true)
 
-According to the [backup docu](https://www.kimai.org/documentation/backups.html) the Kimai version should be saved to.
-Also the current git head.
-Therefor a `manifest.json` file with the mentioned information is written and added to the backup.
+The plugin also saves the Kimai version and the current Git HEAD in a `manifest.json` file that is added to the backup.
 
-### What database tables are backuped?
+### Database backups
 
-If you use sqlite, the database file is backuped because the `var/data` directory will be backuped by the plugin.
+- For SQLite the database file is included because `var/data/` is part of the backup.
+- For MySQL / MariaDB the plugin detects the connection from `DATABASE_URL` and runs `mysqldump` to produce a SQL dump that is then added to the ZIP.
 
-If you use mysql/mariadb the plugin will recognize it by reading the configured database connection url.
-Then it will execute a mysqldump command to create a sql dump file, which is added to the backup zip.
+The default `mysqldump` command (configurable in Kimai settings) is:
 
-The mysqldump command can be configured via the standard Kimai settings page.
-Per default it is
 ```
 /usr/bin/mysqldump --user={user} --password={password} --host={host} --port={port} --single-transaction --force {database}
 ```
 
-On a windows system with XAMPP as webserver the command could look like this
+On Windows/XAMPP it might look like:
+
 ```
 C:\xampp\mysql\bin\mysqldump --user={user} --password={password} --host={host} --port={port} --single-transaction --force {database}
 ```
 
-You can remove or add parameters here if you need to. The variables in the curly braces will be replaced during the execution of the backup. All information for these variables are gathered from the DATABASE_URL defined in the .env file.
+The placeholders in curly braces are replaced from your `DATABASE_URL` configuration.
+
+Example `DATABASE_URL`:
+
 ```
 # DATABASE_URL=mysql://user:password@host:port/database
-# For example:
+# Example:
 DATABASE_URL=mysql://JohnDoe:MySecret1234@127.0.0.1:3306/kimai2
 ```
 
 ## Permissions
 
-This bundle ships a new permissions, which limit access to the backup screen:
+The bundle adds a permission to control access to the backup UI:
 
-- `easy_backup` - allows access to the backup screen
+- `easy_backup` — allows access to the backup screen
 
-By default, this are assigned to all users with the role `ROLE_SUPER_ADMIN`.
-
-**Please adjust the permission settings in your user administration.** 
+By default this permission is granted to users with `ROLE_SUPER_ADMIN`. Please adjust the permission settings in your user administration as needed.
 
 ## Restore
-With one click you can restore your system to the state it had when the backup was created.
-Caution: All database entries created between the backup and now will get lost. Your Kimai version is not affected from the restore. If the backup was not created in the same version were it is restored, this may lead to inconsistencies.
 
-Files contained in the backup may overwrite already existing files.
+Restoring a backup will revert your system to the state at the time the backup was created. Warning: any database entries or files created after the backup will be lost. Restoring a backup from a different Kimai version may cause incompatibilities.
 
-## Scheduled backups via command line or cronjob
-There is a command to also trigger automated backups. 
-Example for a backup every Sunday at 4am could be:
-```0 4 * * SUN php /var/www/kimai2/bin/console EasyBackup:backup > /home/YourUsername/Documents/EasyBackupCron.log```
+Files included in the backup may overwrite existing files during restore.
 
-Maybe you need to specify a absolute path to php on your environment, e.g. `/usr/bin/php`.
-Make sure to also set the right path to your kimai2 location and your .log file.
+## Scheduled backups (cron)
 
-If you don't need a log after successfully setting up your cronjob, you can use `> /dev/null` as output.
+You can trigger automated backups via cron. Example — every Sunday at 04:00:
 
-Give [https://crontab.guru/](https://crontab.guru/) a try if you struggle how to define the right time syntax for your cronjob.
-Some also need to specify the user before the php command.
+```cron
+0 4 * * SUN php /var/www/kimai2/bin/console EasyBackup:backup > /home/YourUsername/Documents/EasyBackupCron.log
+```
 
-## If your receive the warning: git 	fatal: detected dubious ownership in repository
-Execute this git command:
-```git config --system --add safe.directory /var/www/kimai/var/plugins/EasyBackupBundle```
+You may need to use the absolute path to `php` (for example `/usr/bin/php`) and set appropriate paths for your Kimai installation and log file. If you don't need a log, redirect output to `/dev/null`.
 
-## Common errors and their solution
-Fore some issues in older versions, I have recorded some possible solutions on a new wiki page.
-[Wiki page: Common-errors-and-their-solution](https://github.com/mxgross/EasyBackupBundle/wiki/Common-errors-and-their-solution)
+If you need help with cron syntax, try: https://crontab.guru/
 
+## Git "dubious ownership" warning
+
+If you see the following Git warning:
+
+```
+fatal: detected dubious ownership in repository
+```
+
+Run:
+
+```bash
+git config --system --add safe.directory /var/www/kimai/var/plugins/EasyBackupBundle
+```
+
+## Common errors and troubleshooting
+
+For some issues in older plugin versions a list of common problems and solutions is available on the project wiki:
+
+[Common errors and their solution](https://github.com/mxgross/EasyBackupBundle/wiki/Common-errors-and-their-solution)
+
+---
+
+### 🐳 Docker Development Notes
+
+The included Docker Compose files start a full Kimai instance with MariaDB and mount the plugin for local development.
+
+- Plugin folder inside container: `/opt/kimai/var/plugins/EasyBackupBundle`
+- Environment: `APP_ENV=dev`, `APP_DEBUG=1`
+- PHPUnit is available in the environment
+
+Run tests like this:
+
+```bash
+docker exec -u www-data -w /opt/kimai kimai ./vendor/bin/phpunit --testdox var/plugins/EasyBackupBundle
+```
+
+---
+```

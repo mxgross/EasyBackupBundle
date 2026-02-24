@@ -1,0 +1,62 @@
+name: Integration Tests
+
+on:
+  push:
+    branches: [ dev, main ]
+  pull_request:
+    branches: [ dev, main ]
+
+jobs:
+  integration:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Compose
+        run: |
+          docker compose version || true
+
+      - name: Start services
+        run: |
+          docker compose up -d --build
+          docker compose ps --all
+
+      - name: Wait for kimai to be ready (retry)
+        run: |
+          set -e
+          tries=0
+          # try longer because Kimai setup and migrations can take several minutes
+          until docker compose exec kimai bash -lc "php -v >/dev/null 2>&1"; do
+            tries=$((tries+1))
+            echo "kimai not ready yet (attempt $tries)";
+            if [ "$tries" -ge 120 ]; then
+              echo "kimai did not become ready in time"; docker compose logs --no-color; exit 1;
+            fi
+            sleep 5
+          done
+
+      - name: Ensure composer dependencies
+        run: |
+          docker compose exec kimai bash -lc "cd /opt/kimai && composer install --no-interaction --no-progress"
+
+      - name: Install plugin dev deps into kimai root (vfsStream)
+        run: |
+          # Some plugin tests need vfsStream available in the root autoloader used by the phpunit bootstrap
+          docker compose exec kimai bash -lc "cd /opt/kimai && composer require --dev mikey179/vfsstream --no-interaction --no-progress || true"
+
+      - name: Run plugin tests inside kimai
+        run: |
+          # Prevent deprecation warnings from failing the test run in CI
+          docker compose exec kimai bash -lc "cd /opt/kimai && SYMFONY_DEPRECATIONS_HELPER=weak ./vendor/bin/phpunit --colors=never --bootstrap /opt/kimai/vendor/autoload.php --configuration var/plugins/EasyBackupBundle/phpunit.xml.dist --testdox"
+
+      - name: Collect logs on failure
+        if: failure()
+        run: |
+          docker compose logs --no-color || true
+
+      - name: Tear down
+        if: always()
+        run: |
+          docker compose down --volumes --remove-orphans

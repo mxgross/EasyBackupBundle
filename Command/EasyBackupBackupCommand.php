@@ -11,11 +11,13 @@ namespace KimaiPlugin\EasyBackupBundle\Command;
 
 use KimaiPlugin\EasyBackupBundle\Service\EasyBackupService;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 // the name of the command is what users type after "php bin/console"
 
+#[AsCommand(name: 'EasyBackup:backup', description: 'Creates a new backup.')]
 class EasyBackupBackupCommand extends Command
 {
     protected static $defaultName = 'EasyBackup:backup';
